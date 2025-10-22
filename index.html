@@ -4,85 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ภารกิจลดคาร์บอน</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase Imports -->
+    
     <script type="module">
         // --- Firebase Core Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, addDoc, onSnapshot, collection, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // 💡 แก้ไข: Import ทุกฟังก์ชันของ Firestore เพื่อส่งออกไปยัง Global Window
+        import { 
+            getFirestore, 
+            addDoc, 
+            onSnapshot, 
+            collection, 
+            query, 
+            limit, 
+            orderBy,
+            setLogLevel 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Set Firebase Log Level for debugging
+        // *******************************************************************
+        // 🚨 สำคัญมาก: กรุณาแทนที่ค่าเหล่านี้ด้วย Firebase Config ของคุณ 
+        // *******************************************************************
+        const firebaseConfig = {
+  apiKey: "AIzaSyDmjcXHZz3glB6hffzsgZeVzpMx48FutXw",
+  authDomain: "game-8ad3f.firebaseapp.com",
+  projectId: "game-8ad3f",
+  storageBucket: "game-8ad3f.firebasestorage.app",
+  messagingSenderId: "1076950258243",
+  appId: "1:1076950258243:web:e65a0ac6f51aa9bc4b3af6",
+  measurementId: "G-0M2L8HX0D2"
+};
+        // *******************************************************************
+        
         setLogLevel('Debug');
 
-        // Global variables provided by the environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        // The configuration provided by the user is loaded here from the environment variable.
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        let app;
+        const appId = firebaseConfig.appId;
         let db;
         let auth;
         let userId = null;
 
-        // Function to call the main game setup (exported to window)
         function notifyAppReady() {
             window.initApp(userId, appId);
         }
 
+        // 💡 แก้ไข: นำเข้าฟังก์ชัน Firestore ที่จำเป็นไปยัง Window Object
+        // เพื่อให้ฟังก์ชัน saveScore และ setupLeaderboard ในสคริปต์ด้านล่างเรียกใช้ได้
+        window.firestore = {
+            collection,
+            addDoc,
+            onSnapshot,
+            query,
+            limit,
+            orderBy
+        };
+
+
         // --- AUTHENTICATION & INITIALIZATION ---
-        if (firebaseConfig) {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            
-            // Export the db instance to the main script scope
-            window.db = db; 
+        // ตรวจสอบว่ามี config ครบถ้วนก่อนทำการ Initialize
+        if (firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                window.db = db; // ส่ง db instance ไปยัง Global Scope
 
-            async function attemptSignIn() {
-                try {
-                    if (initialAuthToken) {
-                        console.log("Attempting sign-in with Custom Token...");
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        // Fallback only if custom token is missing
-                        console.warn("Custom Token missing. Attempting Anonymous sign-in...");
+                async function attemptSignIn() {
+                    try {
+                        // ใช้วิธี Anonymous sign-in เสมอเพื่อให้ได้ User ID ทันที
                         await signInAnonymously(auth);
+                    } catch (error) {
+                        console.error("Authentication process failed:", error);
                     }
-                } catch (error) {
-                    console.error("Authentication process failed:", error);
                 }
+
+                attemptSignIn();
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Firebase Auth Ready. User ID:", userId);
+                    } else {
+                        console.log("User not authenticated or signed out.");
+                    }
+                    notifyAppReady(); 
+                });
+            } catch(e) {
+                console.error("Firebase Initialization Failed:", e);
+                notifyAppReady();
             }
-
-            // Start sign-in immediately
-            attemptSignIn();
-
-            // Authentication state listener: This is the trigger for the game logic.
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    userId = user.uid;
-                    console.log("Firebase Auth Ready. User ID:", userId);
-                    // Start game initialization after auth is confirmed
-                } else {
-                    console.log("User not authenticated or signed out.");
-                }
-                // Call initApp regardless of auth status to proceed with preloading/UI setup
-                notifyAppReady(); 
-            });
         } else {
-            console.error("Firebase configuration not found. Game data will not be saved.");
-            // Allow the game to run without saving functionality, start initialization immediately.
+            console.error("Firebase configuration missing or not replaced. Game data will not be saved.");
             notifyAppReady();
         }
     </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0fdf4; /* Green-ish background */
+            background-color: #f0fdf4; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -109,7 +131,7 @@
         .game-area {
             position: relative;
             overflow: hidden;
-            background-color: #ccfbf1; /* Light cyan for clear contrast */
+            background-color: #ccfbf1; 
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
@@ -121,20 +143,19 @@
         }
         .ranking-item:nth-child(1) {
             font-weight: bold;
-            color: #d97706; /* Gold */
+            color: #d97706; 
         }
         .ranking-item:nth-child(2) {
-            color: #9ca3af; /* Silver */
+            color: #9ca3af; 
         }
         .ranking-item:nth-child(3) {
-            color: #b45309; /* Bronze */
+            color: #b45309; 
         }
     </style>
 </head>
 <body class="p-4">
 
     <div id="app" class="w-full max-w-sm bg-white shadow-2xl rounded-xl p-4 md:p-6 transition-all duration-300">
-        <!-- Message Box Container -->
         <div id="message-box" class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
             <div class="bg-white p-6 rounded-lg shadow-xl max-w-xs text-center transform transition-transform duration-300 scale-100" onclick="event.stopPropagation()">
                 <h3 id="message-title" class="text-xl font-bold mb-3 text-emerald-600"></h3>
@@ -145,7 +166,6 @@
 
         <h1 class="text-2xl font-extrabold text-center mb-4 text-emerald-700">♻️ ภารกิจลดคาร์บอน 🌎</h1>
 
-        <!-- Game Screen (ID Input) -->
         <div id="start-screen" class="space-y-4">
             <p class="text-center text-gray-600">กรุณากรอกรหัสพนักงานเพื่อเริ่มเกมและบันทึกคะแนน</p>
             <input type="text" id="employee-id" placeholder="รหัสพนักงาน (ไม่เกิน 10 ตัวอักษร)"
@@ -153,24 +173,21 @@
                         class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-center uppercase tracking-wider">
             <button id="start-button"
                         class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 disabled:bg-gray-400" disabled>
-                ⏳ กำลังโหลดรูปภาพ...
+                กรุณากรอกรหัสพนักงาน
             </button>
         </div>
 
-        <!-- Game Play Area -->
         <div id="game-container" class="hidden">
             <div class="flex justify-between items-center mb-3 p-2 bg-emerald-100 rounded-lg shadow-sm">
                 <div class="text-lg font-bold text-emerald-800">คะแนน: <span id="score-display">0</span></div>
                 <div class="text-lg font-bold text-emerald-800">เวลา: <span id="timer-display">20</span>s</div>
                 <div id="current-user-id" class="text-xs text-gray-500 truncate" title="รหัสพนักงานของคุณ">ID: </div>
             </div>
-            <!-- The area where items fall -->
             <div id="game-area" class="game-area w-full h-80 rounded-xl mb-4 relative" style="touch-action: none;">
                 <p id="game-message" class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-red-500 hidden z-10 bg-black bg-opacity-10 rounded-xl"></p>
             </div>
         </div>
 
-        <!-- Game Over Screen -->
         <div id="game-over-screen" class="hidden text-center space-y-4">
             <h2 class="text-3xl font-extrabold text-emerald-600">ภารกิจเสร็จสิ้น!</h2>
             <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-4xl text-emerald-700">0</span></p>
@@ -181,11 +198,9 @@
             </button>
         </div>
 
-        <!-- Real-time Leaderboard -->
         <div class="mt-6">
             <h2 class="text-xl font-bold text-center mb-3 text-emerald-700">🏆 อันดับผู้ทำภารกิจ (Real-Time)</h2>
             <div id="leaderboard-list" class="space-y-1 max-h-60 overflow-y-auto rounded-lg border border-emerald-300 p-2">
-                <!-- Leaderboard items will be injected here -->
                 <p class="text-center text-gray-500" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
             </div>
         </div>
@@ -200,7 +215,7 @@
         const SCORE_REDUCTION = 10;
         const SCORE_EMISSION = -5;
 
-        // Emoji definitions: [imageSrc, type ('good' or 'bad'), score, color]
+        // Emoji definitions (ใช้ลิงก์เดิมที่เคยให้มา)
         const ITEM_DEFINITIONS = [
             // Good: Carbon Reduction 
             { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
@@ -230,7 +245,6 @@
             { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
             { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
             { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-
         ];
 
         // --- Global Game State ---
@@ -269,7 +283,9 @@
             currentUserId: document.getElementById('current-user-id')
         };
 
+        // ---------------------------------------------------------------------
         // --- Utility Functions ---
+        // ---------------------------------------------------------------------
 
         function showMessage(title, body) {
             document.getElementById('message-title').textContent = title;
@@ -278,21 +294,16 @@
         }
 
         function getCollectionPath(appId) {
-            // Public leaderboard path for sharing data across users
             return `artifacts/${appId}/public/data/carbon_game_rankings`;
         }
         
-        // --- NEW: Image Preloading Function ---
         function preloadImages() {
             return new Promise(resolve => {
                 const imagePromises = ITEM_DEFINITIONS.map(item => {
                     return new Promise(imgResolve => {
                         const img = new Image();
                         img.onload = imgResolve;
-                        img.onerror = () => {
-                            console.warn(`Failed to load image: ${item.imageSrc}. Using placeholder logic.`);
-                            imgResolve(); // Resolve even on error to allow the game to start
-                        };
+                        img.onerror = imgResolve; 
                         img.src = item.imageSrc;
                     });
                 });
@@ -304,9 +315,10 @@
                 });
             });
         }
-        // --- END NEW: Image Preloading Function ---
-
+        
+        // ---------------------------------------------------------------------
         // --- Game Logic ---
+        // ---------------------------------------------------------------------
 
         function resetGame() {
             gameState.score = 0;
@@ -320,23 +332,14 @@
         }
 
         function startGame() {
-            if (!gameState.isImagesPreloaded) {
-                showMessage("กำลังโหลด", "กรุณารอสักครู่ กำลังโหลดรูปภาพเกม...");
-                return;
+            if (!gameState.employeeId) {
+                gameState.employeeId = dom.employeeIdInput.value.toUpperCase().trim();
             }
-
-            gameState.employeeId = dom.employeeIdInput.value.toUpperCase().trim();
 
             if (!gameState.employeeId) {
-                showMessage("รหัสพนักงานไม่ถูกต้อง", "กรุณากรอกรหัสพนักงานก่อนเริ่มเกม");
+                 showMessage("รหัสพนักงานไม่ถูกต้อง", "กรุณากรอกรหัสพนักงานก่อนเริ่มเกม");
                 return;
             }
-
-            // Check if Firebase Auth is ready before proceeding (for saving scores later)
-            if (!gameState.userId) {
-                showMessage("การเชื่อมต่อฐานข้อมูลล้มเหลว", "เกมจะเริ่มทำงานแต่คะแนนจะไม่ถูกบันทึก เนื่องจากไม่สามารถยืนยันตัวตนได้");
-            }
-
 
             resetGame();
             dom.startScreen.classList.add('hidden');
@@ -348,7 +351,6 @@
             gameState.spawnIntervalId = setInterval(spawnItem, SPAWN_INTERVAL);
             gameState.timerIntervalId = setInterval(updateTimer, 1000);
 
-            // Start the main animation loop
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
 
@@ -362,7 +364,6 @@
             dom.finalScore.textContent = gameState.score;
             dom.gameOverScreen.classList.remove('hidden');
 
-            // Attempt to save the score
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
         }
 
@@ -386,21 +387,18 @@
             const gameAreaWidth = dom.gameArea.clientWidth;
             const itemId = gameState.itemIdCounter++;
 
-            // Create DOM element (the container div)
             const itemElement = document.createElement('div');
             itemElement.className = `game-item ${definition.color}`;
             itemElement.dataset.id = itemId; 
             itemElement.dataset.type = definition.type;
             
-            // Create the image element inside the container
             const imgElement = document.createElement('img');
             imgElement.src = definition.imageSrc;
             imgElement.alt = definition.type === 'good' ? 'Good item' : 'Bad item';
-            imgElement.className = 'w-full h-full object-contain p-1'; // Ensure image fits the item div and has slight padding
+            imgElement.className = 'w-full h-full object-contain p-1'; 
             
             itemElement.appendChild(imgElement);
 
-            // Random horizontal position (ensure it stays within bounds)
             const itemSize = ITEM_SIZE; 
             const posX = Math.random() * (gameAreaWidth - itemSize);
             itemElement.style.left = `${posX}px`;
@@ -408,7 +406,6 @@
 
             dom.gameArea.appendChild(itemElement);
 
-            // Create item object for state management
             const item = {
                 id: itemId,
                 definition: definition,
@@ -418,7 +415,6 @@
                 speed: ITEM_SPEED + Math.random() * 1.5 
             };
 
-            // Add item to the items object using its ID as the key
             gameState.items[itemId] = item;
         }
 
@@ -454,13 +450,11 @@
 
             dom.gameArea.appendChild(popup);
 
-            // Animate it upwards and fade out
             setTimeout(() => {
                 popup.style.transform = 'translateY(-50px) scale(1.1)';
                 popup.style.opacity = '0';
             }, 10);
 
-            // Remove after animation
             setTimeout(() => {
                 popup.remove();
             }, 500);
@@ -483,17 +477,13 @@
                 item.y += item.speed;
                 item.element.style.top = `${item.y}px`;
 
-                // Check if item fell off the bottom (missed or ignored)
                 if (item.y > gameAreaHeight) {
-                    // Penalty only if it was a GOOD item that was missed
                     if (item.definition.type === 'good') {
-                        gameState.score -= 5; // Moderate penalty for missing a good item
+                        gameState.score -= 5; 
                         dom.scoreDisplay.textContent = gameState.score;
-                        // Show penalty feedback
                         showScoreChange(item.element.style.left, item.element.style.top, -5);
                     }
 
-                    // Remove item from DOM and state object
                     item.element.remove();
                     delete gameState.items[itemId]; 
                 }
@@ -502,9 +492,10 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
 
+        // ---------------------------------------------------------------------
         // --- Firestore / Leaderboard Logic ---
+        // ---------------------------------------------------------------------
 
-        // Exponential backoff for Firebase API calls
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -515,7 +506,6 @@
                         console.warn(`Firestore operation failed, retrying in ${delay}ms...`, error.code);
                         await new Promise(resolve => setTimeout(resolve, delay));
                     } else {
-                        // Throw error if max retries reached
                         throw error; 
                     }
                 }
@@ -523,13 +513,14 @@
         }
 
         async function saveScore(employeeId, score, userId) {
-            if (!gameState.db || !userId) {
+            // 💡 แก้ไข: เรียกใช้ฟังก์ชันผ่าน window.firestore
+            if (!gameState.db || !userId || !window.firestore) {
                 console.warn("Firestore not initialized or User ID missing. Score not saved.");
-                dom.rankingStatus.textContent = "ไม่สามารถบันทึกคะแนนได้ (ไม่สามารถยืนยันตัวตนได้)";
+                dom.rankingStatus.textContent = "ไม่สามารถบันทึกคะแนนได้ (ฐานข้อมูลไม่พร้อม)";
                 return;
             }
 
-            const rankingsRef = collection(gameState.db, getCollectionPath(gameState.appId));
+            const rankingsRef = window.firestore.collection(gameState.db, getCollectionPath(gameState.appId));
 
             const data = {
                 employeeId: employeeId,
@@ -539,35 +530,34 @@
             };
 
             try {
-                await fetchWithBackoff(() => addDoc(rankingsRef, data));
-                
+                await fetchWithBackoff(() => window.firestore.addDoc(rankingsRef, data));
                 dom.rankingStatus.textContent = "🎉 บันทึกคะแนนเรียบร้อยแล้ว!";
             } catch (error) {
                 console.error("Error saving score to Firestore:", error);
-                // More explicit error message if it's a permission issue
-                if (error.code === 'permission-denied') {
-                    dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว: ข้อผิดพลาดด้านสิทธิ์การเข้าถึง";
-                } else {
-                    dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว: " + error.message;
-                }
-                showMessage("บันทึกคะแนนล้มเหลว", "เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล หรือสิทธิ์การเข้าถึงไม่เพียงพอ");
+                dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว: " + (error.code === 'permission-denied' ? 'ข้อผิดพลาดด้านสิทธิ์' : error.message);
+                showMessage("บันทึกคะแนนล้มเหลว", "เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล");
             }
         }
 
         function setupLeaderboard(appId) {
-            if (!gameState.db) {
+            // 💡 แก้ไข: เรียกใช้ฟังก์ชันผ่าน window.firestore
+            if (!gameState.db || !window.firestore) {
                 dom.loadingLeaderboard.textContent = "ไม่สามารถโหลดอันดับ (Firebase ไม่พร้อม)";
                 return;
             }
 
-            const rankingsRef = collection(gameState.db, getCollectionPath(appId));
+            const rankingsRef = window.firestore.collection(gameState.db, getCollectionPath(appId));
             
-            // Query only sorts by score descending, simplifying index requirements
-            const q = query(rankingsRef, orderBy("score", "desc"), limit(10));
+            // 💡 แก้ไข: เรียกใช้ฟังก์ชันผ่าน window.firestore
+            const q = window.firestore.query(
+                rankingsRef, 
+                window.firestore.orderBy("score", "desc"), 
+                window.firestore.limit(10)
+            );
 
-            // Real-time listener
-            onSnapshot(q, (snapshot) => {
-                dom.leaderboardList.innerHTML = ''; // Clear existing list
+            // 💡 แก้ไข: เรียกใช้ฟังก์ชันผ่าน window.firestore
+            window.firestore.onSnapshot(q, (snapshot) => {
+                dom.leaderboardList.innerHTML = ''; 
                 let rank = 1;
 
                 if (snapshot.empty) {
@@ -595,18 +585,14 @@
                 if (dom.loadingLeaderboard) dom.loadingLeaderboard.classList.add('hidden');
             }, (error) => {
                 console.error("Error fetching leaderboard:", error);
-                    let errorMessage = error.message;
-                if (error.code === 'permission-denied') {
-                    errorMessage = "ข้อผิดพลาดด้านสิทธิ์การเข้าถึง (Permission Denied)";
-                } else if (error.code === 'failed-precondition') {
-                    errorMessage = "ข้อผิดพลาดด้านดัชนี (Missing Index) - กรุณาตรวจสอบ Console";
-                }
-                dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">เกิดข้อผิดพลาดในการโหลดอันดับ: ${errorMessage}</p>`;
+                dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">เกิดข้อผิดพลาดในการโหลดอันดับ</p>`;
             });
         }
 
 
+        // ---------------------------------------------------------------------
         // --- Event Listeners and Initialization ---
+        // ---------------------------------------------------------------------
 
         function setupEventListeners() {
             dom.startButton.addEventListener('click', startGame);
@@ -614,16 +600,24 @@
                 dom.gameContainer.classList.add('hidden');
                 dom.gameOverScreen.classList.add('hidden');
                 dom.startScreen.classList.remove('hidden');
-                // Re-enable start button after screen transition
-                if (gameState.isImagesPreloaded) {
-                    dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
-                    dom.startButton.disabled = false;
-                    dom.startButton.classList.add('hover:bg-emerald-700');
-                }
+                dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)'; 
+                dom.startButton.classList.add('hover:bg-emerald-700');
             });
+            
+            // ทำให้ปุ่มเริ่มทำงานเมื่อมีการกรอกรหัสพนักงาน
             dom.employeeIdInput.addEventListener('input', (e) => {
-                // Force uppercase and limit length/characters
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+                
+                const id = e.target.value.trim();
+                if (id.length > 0) {
+                    dom.startButton.disabled = false;
+                    dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
+                    dom.startButton.classList.remove('disabled:bg-gray-400');
+                } else {
+                    dom.startButton.disabled = true;
+                    dom.startButton.textContent = 'กรุณากรอกรหัสพนักงาน';
+                    dom.startButton.classList.add('disabled:bg-gray-400');
+                }
             });
 
             function handleGameAreaInteraction(event) {
@@ -638,7 +632,6 @@
                     
                     if (!gameState.items[itemId]) return;
                     
-                    // Get position relative to game area for score popup
                     const rect = dom.gameArea.getBoundingClientRect();
                     const itemRect = clickedItem.getBoundingClientRect();
                     const xPos = `${itemRect.left - rect.left}px`;
@@ -667,16 +660,10 @@
                 setupLeaderboard(appId);
             }
 
-            // 2. Start preloading images
-            preloadImages().then(() => {
-                // 3. Once images are loaded, enable the Start Button
-                dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
-                dom.startButton.disabled = false;
-                dom.startButton.classList.add('hover:bg-emerald-700');
-                console.log("Game Ready: Images loaded and button enabled.");
-            });
+            // 2. Start preloading images in the background
+            preloadImages(); 
             
-            console.log("Game App Initialized.");
+            console.log("Game App Initialized. Button is ready to be enabled by ID input.");
         }
 
         setupEventListeners();
