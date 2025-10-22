@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase Imports -->
     <script type="module">
+        // --- Firebase Core Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, addDoc, onSnapshot, collection, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -18,6 +19,7 @@
 
         // Global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // The configuration provided by the user is loaded here from the environment variable.
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
@@ -26,34 +28,33 @@
         let auth;
         let userId = null;
 
-        // --- AUTHENTICATION & INITIALIZATION FIX ---
+        // --- AUTHENTICATION & INITIALIZATION ---
         if (firebaseConfig) {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
-            window.db = db; // Make db accessible globally for game logic
+            // Export the db instance to the main script scope
+            window.db = db; 
 
-            // 1. Attempt initial sign-in using the provided custom token or fall back to anonymous
             async function attemptSignIn() {
                 try {
                     if (initialAuthToken) {
                         console.log("Attempting sign-in with Custom Token...");
                         await signInWithCustomToken(auth, initialAuthToken);
                     } else {
-                        // Fallback to anonymous sign-in only if custom token is missing
+                        // Fallback only if custom token is missing
                         console.warn("Custom Token missing. Attempting Anonymous sign-in...");
                         await signInAnonymously(auth);
                     }
                 } catch (error) {
-                    // Log the error but allow onAuthStateChanged to handle the final state
                     console.error("Authentication process failed:", error);
                 }
             }
 
-            // Execute the sign-in attempt immediately
+            // Start sign-in immediately
             attemptSignIn();
 
-            // 2. Authentication setup: Listener fires when state changes (including after successful sign-in)
+            // Authentication state listener: This is the trigger for the game logic.
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     userId = user.uid;
@@ -61,15 +62,14 @@
                     // Start game initialization after auth is confirmed
                     window.initApp(userId, appId);
                 } else {
-                    console.log("User not authenticated or signed out.");
-                    // Still initialize app, but userId will be null/undefined, preventing data saving.
-                    // This is usually only called when auth failed above.
+                    console.log("User not authenticated or signed out. Game will run without saving capability.");
+                    // Call initApp even if auth fails, passing null userId
                     window.initApp(null, appId);
                 }
             });
         } else {
             console.error("Firebase configuration not found. Game data will not be saved.");
-            // Still allow the game to run without saving functionality
+            // Allow the game to run without saving functionality
             window.initApp(null, appId);
         }
     </script>
@@ -85,14 +85,12 @@
             margin: 0;
         }
 
-        /* Custom styles for falling game elements */
         .game-item {
             position: absolute;
-            font-size: 2.5rem; /* Large enough for mobile tap */
-            /* CHANGED: Increase size for easier clicking/tapping */
+            font-size: 2.5rem; 
             width: 60px; 
             height: 60px;
-            line-height: 60px; /* Adjusted line-height for centering */
+            line-height: 60px;
             text-align: center;
             cursor: pointer;
             user-select: none;
@@ -165,7 +163,6 @@
             </div>
             <!-- The area where items fall -->
             <div id="game-area" class="game-area w-full h-80 rounded-xl mb-4 relative" style="touch-action: none;">
-                <!-- KEEP: This element is now UNUSED and will not block clicks -->
                 <p id="game-message" class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-red-500 hidden z-10 bg-black bg-opacity-10 rounded-xl"></p>
             </div>
         </div>
@@ -220,7 +217,6 @@
             score: 0,
             timeLeft: GAME_DURATION,
             employeeId: '',
-            // Using an Object (map) instead of an Array for faster lookup and safer deletion
             items: {}, 
             itemIdCounter: 0,
             animationFrameId: null,
@@ -268,9 +264,7 @@
         function resetGame() {
             gameState.score = 0;
             gameState.timeLeft = GAME_DURATION;
-            // Iterate over object values to remove DOM elements
             Object.values(gameState.items).forEach(item => item.element.remove());
-            // Clear the items object
             gameState.items = {}; 
             gameState.itemIdCounter = 0;
             dom.scoreDisplay.textContent = '0';
@@ -344,7 +338,6 @@
             const itemElement = document.createElement('div');
             itemElement.className = `game-item ${definition.color}`;
             itemElement.textContent = definition.emoji;
-            // Use the item ID as the data attribute
             itemElement.dataset.id = itemId; 
             itemElement.dataset.type = definition.type;
             
@@ -352,7 +345,6 @@
             const itemSize = ITEM_SIZE; 
             const posX = Math.random() * (gameAreaWidth - itemSize);
             itemElement.style.left = `${posX}px`;
-            // CHANGED: Use negative ITEM_SIZE to start above the screen
             itemElement.style.top = `-${ITEM_SIZE}px`; 
 
             dom.gameArea.appendChild(itemElement);
@@ -362,20 +354,18 @@
                 id: itemId,
                 definition: definition,
                 element: itemElement,
-                y: -ITEM_SIZE, // CHANGED: Initial Y coordinate
+                y: -ITEM_SIZE, 
                 x: posX,
-                speed: ITEM_SPEED + Math.random() * 1.5 // Speed based on reduced ITEM_SPEED
+                speed: ITEM_SPEED + Math.random() * 1.5 
             };
 
             // Add item to the items object using its ID as the key
             gameState.items[itemId] = item;
         }
 
-        // handleTap uses object lookup to update score and remove from state
         function handleTap(itemId, xPos, yPos) {
             if (!gameState.isRunning) return;
 
-            // Direct lookup via object key
             const item = gameState.items[itemId];
 
             if (item) {
@@ -384,10 +374,8 @@
                 gameState.score += scoreChange;
                 dom.scoreDisplay.textContent = gameState.score;
                 
-                // Visual feedback (Score popup) using passed position
                 showScoreChange(xPos, yPos, scoreChange);
 
-                // Remove item from state object using delete (DOM element was removed by event listener)
                 delete gameState.items[itemId]; 
             }
         }
@@ -395,7 +383,6 @@
         function showScoreChange(x, y, score) {
             const popup = document.createElement('div');
             popup.textContent = score > 0 ? `+${score}` : `${score}`;
-            // Use scale(0.9) to make it slightly smaller initially, then scale(1.1) to pop it
             popup.className = `absolute text-xl font-bold transition-all duration-500 ease-out z-20 pointer-events-none transform scale-[0.9]`; 
             popup.style.left = x;
             popup.style.top = y;
@@ -410,7 +397,6 @@
 
             // Animate it upwards and fade out
             setTimeout(() => {
-                // Move the popup upwards from the item's original position and scale up slightly
                 popup.style.transform = 'translateY(-50px) scale(1.1)';
                 popup.style.opacity = '0';
             }, 10);
@@ -427,14 +413,12 @@
 
             const gameAreaHeight = dom.gameArea.clientHeight;
 
-            // Iterate over the keys of the items object
             const itemIds = Object.keys(gameState.items);
 
             for (let i = 0; i < itemIds.length; i++) {
                 const itemId = itemIds[i];
                 const item = gameState.items[itemId];
 
-                // Check if item might have been deleted by click handler in a previous frame/tick
                 if (!item) continue; 
                 
                 item.y += item.speed;
@@ -459,7 +443,7 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
 
-        // --- Firestore / Leaderboard Logic (Unchanged) ---
+        // --- Firestore / Leaderboard Logic ---
 
         // Exponential backoff for Firebase API calls
         async function fetchWithBackoff(func, retries = 5) {
@@ -472,7 +456,8 @@
                         console.warn(`Firestore operation failed, retrying in ${delay}ms...`, error.code);
                         await new Promise(resolve => setTimeout(resolve, delay));
                     } else {
-                        throw error; // Re-throw if max retries reached
+                        // Throw error if max retries reached
+                        throw error; 
                     }
                 }
             }
@@ -495,14 +480,18 @@
             };
 
             try {
-                // We add a new record for simplicity (leaderboard will sort by score/timestamp).
                 await fetchWithBackoff(() => addDoc(rankingsRef, data));
                 
                 dom.rankingStatus.textContent = "🎉 บันทึกคะแนนเรียบร้อยแล้ว!";
             } catch (error) {
                 console.error("Error saving score to Firestore:", error);
-                dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว: " + error.message;
-                showMessage("บันทึกคะแนนล้มเหลว", "เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง");
+                // More explicit error message if it's a permission issue
+                if (error.code === 'permission-denied') {
+                    dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว: ข้อผิดพลาดด้านสิทธิ์การเข้าถึง";
+                } else {
+                    dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว: " + error.message;
+                }
+                showMessage("บันทึกคะแนนล้มเหลว", "เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล หรือสิทธิ์การเข้าถึงไม่เพียงพอ");
             }
         }
 
@@ -513,8 +502,10 @@
             }
 
             const rankingsRef = collection(gameState.db, getCollectionPath(appId));
-            // Query: Order by score descending, then by timestamp ascending, limit to top 10
-            const q = query(rankingsRef, orderBy("score", "desc"), orderBy("timestamp", "asc"), limit(10));
+            
+            // *FIX*: Simplified Query to prevent "Missing Index" errors. 
+            // We only sort by score descending.
+            const q = query(rankingsRef, orderBy("score", "desc"), limit(10));
 
             // Real-time listener
             onSnapshot(q, (snapshot) => {
@@ -546,7 +537,13 @@
                 if (dom.loadingLeaderboard) dom.loadingLeaderboard.classList.add('hidden');
             }, (error) => {
                 console.error("Error fetching leaderboard:", error);
-                dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">เกิดข้อผิดพลาดในการโหลดอันดับ: ${error.message}</p>`;
+                 let errorMessage = error.message;
+                if (error.code === 'permission-denied') {
+                    errorMessage = "ข้อผิดพลาดด้านสิทธิ์การเข้าถึง (Permission Denied)";
+                } else if (error.code === 'failed-precondition') {
+                    errorMessage = "ข้อผิดพลาดด้านดัชนี (Missing Index) - กรุณาลองสร้างดัชนีตามข้อความใน Console";
+                }
+                dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">เกิดข้อผิดพลาดในการโหลดอันดับ: ${errorMessage}</p>`;
             });
         }
 
@@ -565,51 +562,45 @@
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
             });
 
-            // --- UNIFIED TAP/CLICK DELEGATION: Handle fast taps and clicks on falling items ---
-            
             function handleGameAreaInteraction(event) {
-                // Prevent default behavior on touch events (like scrolling/zoom)
                 if (event.type === 'touchstart') {
                     event.preventDefault();
                 }
 
-                // Use .closest() to find the nearest ancestor that is a game-item
                 const clickedItem = event.target.closest('.game-item');
                 
                 if (clickedItem && gameState.isRunning) {
                     const itemId = parseInt(clickedItem.dataset.id);
                     
-                    // Critical check: ensure the item still exists in the state. 
                     if (!gameState.items[itemId]) return;
                     
-                    // 1. Extract position before removal
                     const xPos = clickedItem.style.left;
                     const yPos = clickedItem.style.top;
 
-                    // 2. Immediately remove the DOM element
                     clickedItem.remove(); 
                     
-                    // 3. Call handler to update score and remove from state object
                     handleTap(itemId, xPos, yPos);
                 }
             }
             
-            // Attach both 'click' (for mouse/desktop) and 'touchstart' (for fast mobile taps)
             dom.gameArea.addEventListener('click', handleGameAreaInteraction);
             dom.gameArea.addEventListener('touchstart', handleGameAreaInteraction);
-            // ---------------------------------------------------------------------------------
         }
         
         // This function is called after Firebase initialization is complete
         window.initApp = function(userId, appId) {
             gameState.userId = userId;
             gameState.appId = appId;
-            gameState.db = window.db; // Get the global Firestore instance
-            setupLeaderboard(appId);
+            // Retrieve the db instance exported from the module script
+            gameState.db = window.db; 
+            
+            // Only attempt to load leaderboard if the database object is available
+            if (gameState.db) {
+                setupLeaderboard(appId);
+            }
             console.log("Game App Initialized.");
         }
 
-        // [FIX]: เรียกใช้ทันทีเพื่อให้ปุ่มกดได้แม้ Firebase ยังไม่พร้อม
         setupEventListeners();
     </script>
 </body>
