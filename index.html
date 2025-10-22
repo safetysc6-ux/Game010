@@ -28,11 +28,17 @@
         let auth;
         let userId = null;
 
+        // Function to call the main game setup (exported to window)
+        function notifyAppReady() {
+            window.initApp(userId, appId);
+        }
+
         // --- AUTHENTICATION & INITIALIZATION ---
         if (firebaseConfig) {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
+            
             // Export the db instance to the main script scope
             window.db = db; 
 
@@ -60,17 +66,16 @@
                     userId = user.uid;
                     console.log("Firebase Auth Ready. User ID:", userId);
                     // Start game initialization after auth is confirmed
-                    window.initApp(userId, appId);
                 } else {
-                    console.log("User not authenticated or signed out. Game will run without saving capability.");
-                    // Call initApp even if auth fails, passing null userId
-                    window.initApp(null, appId);
+                    console.log("User not authenticated or signed out.");
                 }
+                // Call initApp regardless of auth status to proceed with preloading/UI setup
+                notifyAppReady(); 
             });
         } else {
             console.error("Firebase configuration not found. Game data will not be saved.");
-            // Allow the game to run without saving functionality
-            window.initApp(null, appId);
+            // Allow the game to run without saving functionality, start initialization immediately.
+            notifyAppReady();
         }
     </script>
     <style>
@@ -87,10 +92,8 @@
 
         .game-item {
             position: absolute;
-            font-size: 2.5rem; 
             width: 60px; 
             height: 60px;
-            line-height: 60px;
             text-align: center;
             cursor: pointer;
             user-select: none;
@@ -146,11 +149,11 @@
         <div id="start-screen" class="space-y-4">
             <p class="text-center text-gray-600">กรุณากรอกรหัสพนักงานเพื่อเริ่มเกมและบันทึกคะแนน</p>
             <input type="text" id="employee-id" placeholder="รหัสพนักงาน (ไม่เกิน 10 ตัวอักษร)"
-                   maxlength="10"
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-center uppercase tracking-wider">
+                        maxlength="10"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-center uppercase tracking-wider">
             <button id="start-button"
-                    class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-emerald-700 transition duration-200 disabled:bg-gray-400">
-                🚀 เริ่มภารกิจ (20 วินาที)
+                        class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 disabled:bg-gray-400" disabled>
+                ⏳ กำลังโหลดรูปภาพ...
             </button>
         </div>
 
@@ -173,7 +176,7 @@
             <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-4xl text-emerald-700">0</span></p>
             <p id="ranking-status" class="text-md text-gray-600"></p>
             <button id="restart-button"
-                    class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition duration-200">
+                        class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition duration-200">
                 🔁 เล่นอีกครั้ง
             </button>
         </div>
@@ -197,22 +200,42 @@
         const SCORE_REDUCTION = 10;
         const SCORE_EMISSION = -5;
 
-        // Emoji definitions: [emoji, type ('good' or 'bad'), score]
+        // Emoji definitions: [imageSrc, type ('good' or 'bad'), score, color]
         const ITEM_DEFINITIONS = [
-            // Good: Carbon Reduction
-            { emoji: '🌿', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { emoji: '♻️', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { emoji: '🚲', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { emoji: '💡', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            // Good: Carbon Reduction 
+            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+
             // Bad: Carbon Emission
-            { emoji: '🏭', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { emoji: '💨', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { emoji: '🚗', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { emoji: '🗑️', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+
         ];
 
         // --- Global Game State ---
         let gameState = {
+            isImagesPreloaded: false,
             isRunning: false,
             score: 0,
             timeLeft: GAME_DURATION,
@@ -258,6 +281,30 @@
             // Public leaderboard path for sharing data across users
             return `artifacts/${appId}/public/data/carbon_game_rankings`;
         }
+        
+        // --- NEW: Image Preloading Function ---
+        function preloadImages() {
+            return new Promise(resolve => {
+                const imagePromises = ITEM_DEFINITIONS.map(item => {
+                    return new Promise(imgResolve => {
+                        const img = new Image();
+                        img.onload = imgResolve;
+                        img.onerror = () => {
+                            console.warn(`Failed to load image: ${item.imageSrc}. Using placeholder logic.`);
+                            imgResolve(); // Resolve even on error to allow the game to start
+                        };
+                        img.src = item.imageSrc;
+                    });
+                });
+
+                Promise.all(imagePromises).then(() => {
+                    console.log("All game images preloaded.");
+                    gameState.isImagesPreloaded = true;
+                    resolve();
+                });
+            });
+        }
+        // --- END NEW: Image Preloading Function ---
 
         // --- Game Logic ---
 
@@ -273,6 +320,11 @@
         }
 
         function startGame() {
+            if (!gameState.isImagesPreloaded) {
+                showMessage("กำลังโหลด", "กรุณารอสักครู่ กำลังโหลดรูปภาพเกม...");
+                return;
+            }
+
             gameState.employeeId = dom.employeeIdInput.value.toUpperCase().trim();
 
             if (!gameState.employeeId) {
@@ -282,7 +334,7 @@
 
             // Check if Firebase Auth is ready before proceeding (for saving scores later)
             if (!gameState.userId) {
-                 showMessage("การเชื่อมต่อฐานข้อมูลล้มเหลว", "เกมจะเริ่มทำงานแต่คะแนนจะไม่ถูกบันทึก เนื่องจากไม่สามารถยืนยันตัวตนได้");
+                showMessage("การเชื่อมต่อฐานข้อมูลล้มเหลว", "เกมจะเริ่มทำงานแต่คะแนนจะไม่ถูกบันทึก เนื่องจากไม่สามารถยืนยันตัวตนได้");
             }
 
 
@@ -334,13 +386,20 @@
             const gameAreaWidth = dom.gameArea.clientWidth;
             const itemId = gameState.itemIdCounter++;
 
-            // Create DOM element
+            // Create DOM element (the container div)
             const itemElement = document.createElement('div');
             itemElement.className = `game-item ${definition.color}`;
-            itemElement.textContent = definition.emoji;
             itemElement.dataset.id = itemId; 
             itemElement.dataset.type = definition.type;
             
+            // Create the image element inside the container
+            const imgElement = document.createElement('img');
+            imgElement.src = definition.imageSrc;
+            imgElement.alt = definition.type === 'good' ? 'Good item' : 'Bad item';
+            imgElement.className = 'w-full h-full object-contain p-1'; // Ensure image fits the item div and has slight padding
+            
+            itemElement.appendChild(imgElement);
+
             // Random horizontal position (ensure it stays within bounds)
             const itemSize = ITEM_SIZE; 
             const posX = Math.random() * (gameAreaWidth - itemSize);
@@ -503,8 +562,7 @@
 
             const rankingsRef = collection(gameState.db, getCollectionPath(appId));
             
-            // *FIX*: Simplified Query to prevent "Missing Index" errors. 
-            // We only sort by score descending.
+            // Query only sorts by score descending, simplifying index requirements
             const q = query(rankingsRef, orderBy("score", "desc"), limit(10));
 
             // Real-time listener
@@ -537,11 +595,11 @@
                 if (dom.loadingLeaderboard) dom.loadingLeaderboard.classList.add('hidden');
             }, (error) => {
                 console.error("Error fetching leaderboard:", error);
-                 let errorMessage = error.message;
+                    let errorMessage = error.message;
                 if (error.code === 'permission-denied') {
                     errorMessage = "ข้อผิดพลาดด้านสิทธิ์การเข้าถึง (Permission Denied)";
                 } else if (error.code === 'failed-precondition') {
-                    errorMessage = "ข้อผิดพลาดด้านดัชนี (Missing Index) - กรุณาลองสร้างดัชนีตามข้อความใน Console";
+                    errorMessage = "ข้อผิดพลาดด้านดัชนี (Missing Index) - กรุณาตรวจสอบ Console";
                 }
                 dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">เกิดข้อผิดพลาดในการโหลดอันดับ: ${errorMessage}</p>`;
             });
@@ -556,6 +614,12 @@
                 dom.gameContainer.classList.add('hidden');
                 dom.gameOverScreen.classList.add('hidden');
                 dom.startScreen.classList.remove('hidden');
+                // Re-enable start button after screen transition
+                if (gameState.isImagesPreloaded) {
+                    dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
+                    dom.startButton.disabled = false;
+                    dom.startButton.classList.add('hover:bg-emerald-700');
+                }
             });
             dom.employeeIdInput.addEventListener('input', (e) => {
                 // Force uppercase and limit length/characters
@@ -574,8 +638,12 @@
                     
                     if (!gameState.items[itemId]) return;
                     
-                    const xPos = clickedItem.style.left;
-                    const yPos = clickedItem.style.top;
+                    // Get position relative to game area for score popup
+                    const rect = dom.gameArea.getBoundingClientRect();
+                    const itemRect = clickedItem.getBoundingClientRect();
+                    const xPos = `${itemRect.left - rect.left}px`;
+                    const yPos = `${itemRect.top - rect.top}px`;
+
 
                     clickedItem.remove(); 
                     
@@ -594,10 +662,20 @@
             // Retrieve the db instance exported from the module script
             gameState.db = window.db; 
             
-            // Only attempt to load leaderboard if the database object is available
+            // 1. Setup Leaderboard (if DB is ready)
             if (gameState.db) {
                 setupLeaderboard(appId);
             }
+
+            // 2. Start preloading images
+            preloadImages().then(() => {
+                // 3. Once images are loaded, enable the Start Button
+                dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
+                dom.startButton.disabled = false;
+                dom.startButton.classList.add('hover:bg-emerald-700');
+                console.log("Game Ready: Images loaded and button enabled.");
+            });
+            
             console.log("Game App Initialized.");
         }
 
