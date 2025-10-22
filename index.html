@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ภารกิจลดคาร์บอน</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, addDoc, onSnapshot, collection, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set Firebase Log Level for debugging
+        setLogLevel('Debug');
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+
+        // --- AUTHENTICATION & INITIALIZATION FIX ---
+        if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            window.db = db; // Make db accessible globally for game logic
+
+            // 1. Attempt initial sign-in using the provided custom token or fall back to anonymous
+            async function attemptSignIn() {
+                try {
+                    if (initialAuthToken) {
+                        console.log("Attempting sign-in with Custom Token...");
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        // Fallback to anonymous sign-in only if custom token is missing
+                        console.warn("Custom Token missing. Attempting Anonymous sign-in...");
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    // Log the error but allow onAuthStateChanged to handle the final state
+                    console.error("Authentication process failed:", error);
+                }
+            }
+
+            // Execute the sign-in attempt immediately
+            attemptSignIn();
+
+            // 2. Authentication setup: Listener fires when state changes (including after successful sign-in)
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("Firebase Auth Ready. User ID:", userId);
+                    // Start game initialization after auth is confirmed
+                    window.initApp(userId, appId);
+                } else {
+                    console.log("User not authenticated or signed out.");
+                    // Still initialize app, but userId will be null/undefined, preventing data saving.
+                    // This is usually only called when auth failed above.
+                    window.initApp(null, appId);
+                }
+            });
+        } else {
+            console.error("Firebase configuration not found. Game data will not be saved.");
+            // Still allow the game to run without saving functionality
+            window.initApp(null, appId);
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* Green-ish background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Custom styles for falling game elements */
+        .game-item {
+            position: absolute;
+            font-size: 2.5rem; /* Large enough for mobile tap */
+            /* CHANGED: Increase size for easier clicking/tapping */
+            width: 60px; 
+            height: 60px;
+            line-height: 60px; /* Adjusted line-height for centering */
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.05s;
+        }
+
+        .game-item:active {
+            transform: scale(0.9);
+        }
+
+        .game-area {
+            position: relative;
+            overflow: hidden;
+            background-color: #ccfbf1; /* Light cyan for clear contrast */
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .ranking-item:nth-child(odd) {
+            background-color: #d1fae5;
+        }
+        .ranking-item:nth-child(even) {
+            background-color: #ecfdf5;
+        }
+        .ranking-item:nth-child(1) {
+            font-weight: bold;
+            color: #d97706; /* Gold */
+        }
+        .ranking-item:nth-child(2) {
+            color: #9ca3af; /* Silver */
+        }
+        .ranking-item:nth-child(3) {
+            color: #b45309; /* Bronze */
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div id="app" class="w-full max-w-sm bg-white shadow-2xl rounded-xl p-4 md:p-6 transition-all duration-300">
+        <!-- Message Box Container -->
+        <div id="message-box" class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
+            <div class="bg-white p-6 rounded-lg shadow-xl max-w-xs text-center transform transition-transform duration-300 scale-100" onclick="event.stopPropagation()">
+                <h3 id="message-title" class="text-xl font-bold mb-3 text-emerald-600"></h3>
+                <p id="message-body" class="mb-4 text-gray-700"></p>
+                <button onclick="document.getElementById('message-box').classList.add('hidden')" class="bg-emerald-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-emerald-600 transition">ปิด</button>
+            </div>
+        </div>
+
+        <h1 class="text-2xl font-extrabold text-center mb-4 text-emerald-700">♻️ ภารกิจลดคาร์บอน 🌎</h1>
+
+        <!-- Game Screen (ID Input) -->
+        <div id="start-screen" class="space-y-4">
+            <p class="text-center text-gray-600">กรุณากรอกรหัสพนักงานเพื่อเริ่มเกมและบันทึกคะแนน</p>
+            <input type="text" id="employee-id" placeholder="รหัสพนักงาน (ไม่เกิน 10 ตัวอักษร)"
+                   maxlength="10"
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-center uppercase tracking-wider">
+            <button id="start-button"
+                    class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-emerald-700 transition duration-200 disabled:bg-gray-400">
+                🚀 เริ่มภารกิจ (20 วินาที)
+            </button>
+        </div>
+
+        <!-- Game Play Area -->
+        <div id="game-container" class="hidden">
+            <div class="flex justify-between items-center mb-3 p-2 bg-emerald-100 rounded-lg shadow-sm">
+                <div class="text-lg font-bold text-emerald-800">คะแนน: <span id="score-display">0</span></div>
+                <div class="text-lg font-bold text-emerald-800">เวลา: <span id="timer-display">20</span>s</div>
+                <div id="current-user-id" class="text-xs text-gray-500 truncate" title="รหัสพนักงานของคุณ">ID: </div>
+            </div>
+            <!-- The area where items fall -->
+            <div id="game-area" class="game-area w-full h-80 rounded-xl mb-4 relative" style="touch-action: none;">
+                <!-- KEEP: This element is now UNUSED and will not block clicks -->
+                <p id="game-message" class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-red-500 hidden z-10 bg-black bg-opacity-10 rounded-xl"></p>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="hidden text-center space-y-4">
+            <h2 class="text-3xl font-extrabold text-emerald-600">ภารกิจเสร็จสิ้น!</h2>
+            <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-4xl text-emerald-700">0</span></p>
+            <p id="ranking-status" class="text-md text-gray-600"></p>
+            <button id="restart-button"
+                    class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition duration-200">
+                🔁 เล่นอีกครั้ง
+            </button>
+        </div>
+
+        <!-- Real-time Leaderboard -->
+        <div class="mt-6">
+            <h2 class="text-xl font-bold text-center mb-3 text-emerald-700">🏆 อันดับผู้ทำภารกิจ (Real-Time)</h2>
+            <div id="leaderboard-list" class="space-y-1 max-h-60 overflow-y-auto rounded-lg border border-emerald-300 p-2">
+                <!-- Leaderboard items will be injected here -->
+                <p class="text-center text-gray-500" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Configuration ---
+        const GAME_DURATION = 20; // seconds
+        const SPAWN_INTERVAL = 300; // ms
+        const ITEM_SPEED = 2; // pixels per frame 
+        const ITEM_SIZE = 60; // Must match CSS width/height
+        const SCORE_REDUCTION = 10;
+        const SCORE_EMISSION = -5;
+
+        // Emoji definitions: [emoji, type ('good' or 'bad'), score]
+        const ITEM_DEFINITIONS = [
+            // Good: Carbon Reduction
+            { emoji: '🌿', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { emoji: '♻️', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { emoji: '🚲', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { emoji: '💡', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            // Bad: Carbon Emission
+            { emoji: '🏭', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { emoji: '💨', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { emoji: '🚗', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { emoji: '🗑️', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+        ];
+
+        // --- Global Game State ---
+        let gameState = {
+            isRunning: false,
+            score: 0,
+            timeLeft: GAME_DURATION,
+            employeeId: '',
+            // Using an Object (map) instead of an Array for faster lookup and safer deletion
+            items: {}, 
+            itemIdCounter: 0,
+            animationFrameId: null,
+            spawnIntervalId: null,
+            timerIntervalId: null,
+            db: null,
+            userId: null,
+            appId: null,
+        };
+
+        // --- DOM Elements ---
+        const dom = {
+            startScreen: document.getElementById('start-screen'),
+            gameContainer: document.getElementById('game-container'),
+            gameOverScreen: document.getElementById('game-over-screen'),
+            gameArea: document.getElementById('game-area'),
+            employeeIdInput: document.getElementById('employee-id'),
+            startButton: document.getElementById('start-button'),
+            restartButton: document.getElementById('restart-button'),
+            scoreDisplay: document.getElementById('score-display'),
+            timerDisplay: document.getElementById('timer-display'),
+            finalScore: document.getElementById('final-score'),
+            gameMessage: document.getElementById('game-message'),
+            leaderboardList: document.getElementById('leaderboard-list'),
+            loadingLeaderboard: document.getElementById('loading-leaderboard'),
+            rankingStatus: document.getElementById('ranking-status'),
+            currentUserId: document.getElementById('current-user-id')
+        };
+
+        // --- Utility Functions ---
+
+        function showMessage(title, body) {
+            document.getElementById('message-title').textContent = title;
+            document.getElementById('message-body').textContent = body;
+            document.getElementById('message-box').classList.remove('hidden');
+        }
+
+        function getCollectionPath(appId) {
+            // Public leaderboard path for sharing data across users
+            return `artifacts/${appId}/public/data/carbon_game_rankings`;
+        }
+
+        // --- Game Logic ---
+
+        function resetGame() {
+            gameState.score = 0;
+            gameState.timeLeft = GAME_DURATION;
+            // Iterate over object values to remove DOM elements
+            Object.values(gameState.items).forEach(item => item.element.remove());
+            // Clear the items object
+            gameState.items = {}; 
+            gameState.itemIdCounter = 0;
+            dom.scoreDisplay.textContent = '0';
+            dom.timerDisplay.textContent = GAME_DURATION;
+            dom.gameMessage.classList.add('hidden');
+        }
+
+        function startGame() {
+            gameState.employeeId = dom.employeeIdInput.value.toUpperCase().trim();
+
+            if (!gameState.employeeId) {
+                showMessage("รหัสพนักงานไม่ถูกต้อง", "กรุณากรอกรหัสพนักงานก่อนเริ่มเกม");
+                return;
+            }
+
+            // Check if Firebase Auth is ready before proceeding (for saving scores later)
+            if (!gameState.userId) {
+                 showMessage("การเชื่อมต่อฐานข้อมูลล้มเหลว", "เกมจะเริ่มทำงานแต่คะแนนจะไม่ถูกบันทึก เนื่องจากไม่สามารถยืนยันตัวตนได้");
+            }
+
+
+            resetGame();
+            dom.startScreen.classList.add('hidden');
+            dom.gameOverScreen.classList.add('hidden');
+            dom.gameContainer.classList.remove('hidden');
+            dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
+
+            gameState.isRunning = true;
+            gameState.spawnIntervalId = setInterval(spawnItem, SPAWN_INTERVAL);
+            gameState.timerIntervalId = setInterval(updateTimer, 1000);
+
+            // Start the main animation loop
+            gameState.animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            gameState.isRunning = false;
+            cancelAnimationFrame(gameState.animationFrameId);
+            clearInterval(gameState.spawnIntervalId);
+            clearInterval(gameState.timerIntervalId);
+
+            dom.gameContainer.classList.add('hidden');
+            dom.finalScore.textContent = gameState.score;
+            dom.gameOverScreen.classList.remove('hidden');
+
+            // Attempt to save the score
+            saveScore(gameState.employeeId, gameState.score, gameState.userId);
+        }
+
+        function updateTimer() {
+            gameState.timeLeft--;
+            dom.timerDisplay.textContent = gameState.timeLeft;
+
+            if (gameState.timeLeft <= 5) {
+                dom.timerDisplay.classList.add('text-red-600');
+            } else {
+                dom.timerDisplay.classList.remove('text-red-600');
+            }
+
+            if (gameState.timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function spawnItem() {
+            const definition = ITEM_DEFINITIONS[Math.floor(Math.random() * ITEM_DEFINITIONS.length)];
+            const gameAreaWidth = dom.gameArea.clientWidth;
+            const itemId = gameState.itemIdCounter++;
+
+            // Create DOM element
+            const itemElement = document.createElement('div');
+            itemElement.className = `game-item ${definition.color}`;
+            itemElement.textContent = definition.emoji;
+            // Use the item ID as the data attribute
+            itemElement.dataset.id = itemId; 
+            itemElement.dataset.type = definition.type;
+            
+            // Random horizontal position (ensure it stays within bounds)
+            const itemSize = ITEM_SIZE; 
+            const posX = Math.random() * (gameAreaWidth - itemSize);
+            itemElement.style.left = `${posX}px`;
+            // CHANGED: Use negative ITEM_SIZE to start above the screen
+            itemElement.style.top = `-${ITEM_SIZE}px`; 
+
+            dom.gameArea.appendChild(itemElement);
+
+            // Create item object for state management
+            const item = {
+                id: itemId,
+                definition: definition,
+                element: itemElement,
+                y: -ITEM_SIZE, // CHANGED: Initial Y coordinate
+                x: posX,
+                speed: ITEM_SPEED + Math.random() * 1.5 // Speed based on reduced ITEM_SPEED
+            };
+
+            // Add item to the items object using its ID as the key
+            gameState.items[itemId] = item;
+        }
+
+        // handleTap uses object lookup to update score and remove from state
+        function handleTap(itemId, xPos, yPos) {
+            if (!gameState.isRunning) return;
+
+            // Direct lookup via object key
+            const item = gameState.items[itemId];
+
+            if (item) {
+                const scoreChange = item.definition.score;
+
+                gameState.score += scoreChange;
+                dom.scoreDisplay.textContent = gameState.score;
+                
+                // Visual feedback (Score popup) using passed position
+                showScoreChange(xPos, yPos, scoreChange);
+
+                // Remove item from state object using delete (DOM element was removed by event listener)
+                delete gameState.items[itemId]; 
+            }
+        }
+        
+        function showScoreChange(x, y, score) {
+            const popup = document.createElement('div');
+            popup.textContent = score > 0 ? `+${score}` : `${score}`;
+            // Use scale(0.9) to make it slightly smaller initially, then scale(1.1) to pop it
+            popup.className = `absolute text-xl font-bold transition-all duration-500 ease-out z-20 pointer-events-none transform scale-[0.9]`; 
+            popup.style.left = x;
+            popup.style.top = y;
+            
+            if (score > 0) {
+                popup.classList.add('text-green-600', 'drop-shadow-lg');
+            } else {
+                popup.classList.add('text-red-600', 'drop-shadow-lg');
+            }
+
+            dom.gameArea.appendChild(popup);
+
+            // Animate it upwards and fade out
+            setTimeout(() => {
+                // Move the popup upwards from the item's original position and scale up slightly
+                popup.style.transform = 'translateY(-50px) scale(1.1)';
+                popup.style.opacity = '0';
+            }, 10);
+
+            // Remove after animation
+            setTimeout(() => {
+                popup.remove();
+            }, 500);
+        }
+
+
+        function gameLoop() {
+            if (!gameState.isRunning) return;
+
+            const gameAreaHeight = dom.gameArea.clientHeight;
+
+            // Iterate over the keys of the items object
+            const itemIds = Object.keys(gameState.items);
+
+            for (let i = 0; i < itemIds.length; i++) {
+                const itemId = itemIds[i];
+                const item = gameState.items[itemId];
+
+                // Check if item might have been deleted by click handler in a previous frame/tick
+                if (!item) continue; 
+                
+                item.y += item.speed;
+                item.element.style.top = `${item.y}px`;
+
+                // Check if item fell off the bottom (missed or ignored)
+                if (item.y > gameAreaHeight) {
+                    // Penalty only if it was a GOOD item that was missed
+                    if (item.definition.type === 'good') {
+                        gameState.score -= 5; // Moderate penalty for missing a good item
+                        dom.scoreDisplay.textContent = gameState.score;
+                        // Show penalty feedback
+                        showScoreChange(item.element.style.left, item.element.style.top, -5);
+                    }
+
+                    // Remove item from DOM and state object
+                    item.element.remove();
+                    delete gameState.items[itemId]; 
+                }
+            }
+
+            gameState.animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- Firestore / Leaderboard Logic (Unchanged) ---
+
+        // Exponential backoff for Firebase API calls
+        async function fetchWithBackoff(func, retries = 5) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    return await func();
+                } catch (error) {
+                    if (i < retries - 1) {
+                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        console.warn(`Firestore operation failed, retrying in ${delay}ms...`, error.code);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw error; // Re-throw if max retries reached
+                    }
+                }
+            }
+        }
+
+        async function saveScore(employeeId, score, userId) {
+            if (!gameState.db || !userId) {
+                console.warn("Firestore not initialized or User ID missing. Score not saved.");
+                dom.rankingStatus.textContent = "ไม่สามารถบันทึกคะแนนได้ (ไม่สามารถยืนยันตัวตนได้)";
+                return;
+            }
+
+            const rankingsRef = collection(gameState.db, getCollectionPath(gameState.appId));
+
+            const data = {
+                employeeId: employeeId,
+                score: score,
+                timestamp: new Date().toISOString(),
+                userId: userId,
+            };
+
+            try {
+                // We add a new record for simplicity (leaderboard will sort by score/timestamp).
+                await fetchWithBackoff(() => addDoc(rankingsRef, data));
+                
+                dom.rankingStatus.textContent = "🎉 บันทึกคะแนนเรียบร้อยแล้ว!";
+            } catch (error) {
+                console.error("Error saving score to Firestore:", error);
+                dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว: " + error.message;
+                showMessage("บันทึกคะแนนล้มเหลว", "เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณาลองใหม่ในภายหลัง");
+            }
+        }
+
+        function setupLeaderboard(appId) {
+            if (!gameState.db) {
+                dom.loadingLeaderboard.textContent = "ไม่สามารถโหลดอันดับ (Firebase ไม่พร้อม)";
+                return;
+            }
+
+            const rankingsRef = collection(gameState.db, getCollectionPath(appId));
+            // Query: Order by score descending, then by timestamp ascending, limit to top 10
+            const q = query(rankingsRef, orderBy("score", "desc"), orderBy("timestamp", "asc"), limit(10));
+
+            // Real-time listener
+            onSnapshot(q, (snapshot) => {
+                dom.leaderboardList.innerHTML = ''; // Clear existing list
+                let rank = 1;
+
+                if (snapshot.empty) {
+                    dom.leaderboardList.innerHTML = '<p class="text-center text-gray-500 p-2">ยังไม่มีคะแนนในระบบ</p>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const listItem = document.createElement('div');
+                    listItem.className = 'ranking-item flex justify-between p-2 rounded-lg text-gray-800 text-sm';
+                    
+                    const score = data.score || 0;
+                    const employeeId = data.employeeId || 'N/A';
+                    
+                    listItem.innerHTML = `
+                        <span class="font-bold w-1/12">${rank}.</span>
+                        <span class="w-1/2 truncate">${employeeId}</span>
+                        <span class="font-extrabold text-right w-2/5">${score} คะแนน</span>
+                    `;
+                    dom.leaderboardList.appendChild(listItem);
+                    rank++;
+                });
+
+                if (dom.loadingLeaderboard) dom.loadingLeaderboard.classList.add('hidden');
+            }, (error) => {
+                console.error("Error fetching leaderboard:", error);
+                dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">เกิดข้อผิดพลาดในการโหลดอันดับ: ${error.message}</p>`;
+            });
+        }
+
+
+        // --- Event Listeners and Initialization ---
+
+        function setupEventListeners() {
+            dom.startButton.addEventListener('click', startGame);
+            dom.restartButton.addEventListener('click', () => {
+                dom.gameContainer.classList.add('hidden');
+                dom.gameOverScreen.classList.add('hidden');
+                dom.startScreen.classList.remove('hidden');
+            });
+            dom.employeeIdInput.addEventListener('input', (e) => {
+                // Force uppercase and limit length/characters
+                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+            });
+
+            // --- UNIFIED TAP/CLICK DELEGATION: Handle fast taps and clicks on falling items ---
+            
+            function handleGameAreaInteraction(event) {
+                // Prevent default behavior on touch events (like scrolling/zoom)
+                if (event.type === 'touchstart') {
+                    event.preventDefault();
+                }
+
+                // Use .closest() to find the nearest ancestor that is a game-item
+                const clickedItem = event.target.closest('.game-item');
+                
+                if (clickedItem && gameState.isRunning) {
+                    const itemId = parseInt(clickedItem.dataset.id);
+                    
+                    // Critical check: ensure the item still exists in the state. 
+                    if (!gameState.items[itemId]) return;
+                    
+                    // 1. Extract position before removal
+                    const xPos = clickedItem.style.left;
+                    const yPos = clickedItem.style.top;
+
+                    // 2. Immediately remove the DOM element
+                    clickedItem.remove(); 
+                    
+                    // 3. Call handler to update score and remove from state object
+                    handleTap(itemId, xPos, yPos);
+                }
+            }
+            
+            // Attach both 'click' (for mouse/desktop) and 'touchstart' (for fast mobile taps)
+            dom.gameArea.addEventListener('click', handleGameAreaInteraction);
+            dom.gameArea.addEventListener('touchstart', handleGameAreaInteraction);
+            // ---------------------------------------------------------------------------------
+        }
+        
+        // This function is called after Firebase initialization is complete
+        window.initApp = function(userId, appId) {
+            gameState.userId = userId;
+            gameState.appId = appId;
+            gameState.db = window.db; // Get the global Firestore instance
+            setupLeaderboard(appId);
+            console.log("Game App Initialized.");
+        }
+
+        // [FIX]: เรียกใช้ทันทีเพื่อให้ปุ่มกดได้แม้ Firebase ยังไม่พร้อม
+        setupEventListeners();
+    </script>
+</body>
+</html>
