@@ -24,17 +24,17 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // *******************************************************************
-        // 🚨 สำคัญมาก: กรุณาแทนที่ค่าเหล่านี้ด้วย Firebase Config ของคุณ 
+        // 🚨 ข้อมูล Firebase Config ของคุณ
         // *******************************************************************
         const firebaseConfig = {
-  apiKey: "AIzaSyDmjcXHZz3glB6hffzsgZeVzpMx48FutXw",
-  authDomain: "game-8ad3f.firebaseapp.com",
-  projectId: "game-8ad3f",
-  storageBucket: "game-8ad3f.firebasestorage.app",
-  messagingSenderId: "1076950258243",
-  appId: "1:1076950258243:web:e65a0ac6f51aa9bc4b3af6",
-  measurementId: "G-0M2L8HX0D2"
-};
+            apiKey: "AIzaSyDmjcXHZz3glB6hffzsgZeVzpMx48FutXw",
+            authDomain: "game-8ad3f.firebaseapp.com",
+            projectId: "game-8ad3f",
+            storageBucket: "game-8ad3f.firebasestorage.app",
+            messagingSenderId: "1076950258243",
+            appId: "1:1076950258243:web:e65a0ac6f51aa9bc4b3af6",
+            measurementId: "G-0M2L8HX0D2"
+        };
         // *******************************************************************
         
         setLogLevel('Debug');
@@ -49,7 +49,6 @@
         }
 
         // 💡 แก้ไข: นำเข้าฟังก์ชัน Firestore ที่จำเป็นไปยัง Window Object
-        // เพื่อให้ฟังก์ชัน saveScore และ setupLeaderboard ในสคริปต์ด้านล่างเรียกใช้ได้
         window.firestore = {
             collection,
             addDoc,
@@ -61,7 +60,6 @@
 
 
         // --- AUTHENTICATION & INITIALIZATION ---
-        // ตรวจสอบว่ามี config ครบถ้วนก่อนทำการ Initialize
         if (firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -72,7 +70,6 @@
 
                 async function attemptSignIn() {
                     try {
-                        // ใช้วิธี Anonymous sign-in เสมอเพื่อให้ได้ User ID ทันที
                         await signInAnonymously(auth);
                     } catch (error) {
                         console.error("Authentication process failed:", error);
@@ -95,7 +92,7 @@
                 notifyAppReady();
             }
         } else {
-            console.error("Firebase configuration missing or not replaced. Game data will not be saved.");
+            console.error("Firebase configuration missing. Game data will not be saved.");
             notifyAppReady();
         }
     </script>
@@ -479,6 +476,7 @@
 
                 if (item.y > gameAreaHeight) {
                     if (item.definition.type === 'good') {
+                        // Penalize for missing a good item
                         gameState.score -= 5; 
                         dom.scoreDisplay.textContent = gameState.score;
                         showScoreChange(item.element.style.left, item.element.style.top, -5);
@@ -513,7 +511,6 @@
         }
 
         async function saveScore(employeeId, score, userId) {
-            // 💡 แก้ไข: เรียกใช้ฟังก์ชันผ่าน window.firestore
             if (!gameState.db || !userId || !window.firestore) {
                 console.warn("Firestore not initialized or User ID missing. Score not saved.");
                 dom.rankingStatus.textContent = "ไม่สามารถบันทึกคะแนนได้ (ฐานข้อมูลไม่พร้อม)";
@@ -540,7 +537,6 @@
         }
 
         function setupLeaderboard(appId) {
-            // 💡 แก้ไข: เรียกใช้ฟังก์ชันผ่าน window.firestore
             if (!gameState.db || !window.firestore) {
                 dom.loadingLeaderboard.textContent = "ไม่สามารถโหลดอันดับ (Firebase ไม่พร้อม)";
                 return;
@@ -548,35 +544,57 @@
 
             const rankingsRef = window.firestore.collection(gameState.db, getCollectionPath(appId));
             
-            // 💡 แก้ไข: เรียกใช้ฟังก์ชันผ่าน window.firestore
+            // ดึงข้อมูลจำนวนมากพอเพื่อครอบคลุมอันดับสูงสุด (เช่น 100 อันล่าสุด)
             const q = window.firestore.query(
                 rankingsRef, 
                 window.firestore.orderBy("score", "desc"), 
-                window.firestore.limit(10)
+                window.firestore.limit(100) // ดึง 100 อันดับแรกมาประมวลผลใน Client
             );
 
-            // 💡 แก้ไข: เรียกใช้ฟังก์ชันผ่าน window.firestore
             window.firestore.onSnapshot(q, (snapshot) => {
-                dom.leaderboardList.innerHTML = ''; 
-                let rank = 1;
+                const highestScoresMap = new Map();
 
                 if (snapshot.empty) {
                     dom.leaderboardList.innerHTML = '<p class="text-center text-gray-500 p-2">ยังไม่มีคะแนนในระบบ</p>';
+                    if (dom.loadingLeaderboard) dom.loadingLeaderboard.classList.add('hidden');
                     return;
                 }
 
                 snapshot.forEach((doc) => {
                     const data = doc.data();
+                    const score = data.score || 0;
+                    const employeeId = (data.employeeId || 'N/A').toUpperCase().trim();
+                    
+                    // จัดกลุ่มและเก็บเฉพาะคะแนนที่สูงที่สุดของแต่ละรหัสพนักงาน
+                    if (employeeId !== 'N/A') {
+                        const currentHighest = highestScoresMap.get(employeeId) || -Infinity; // ใช้ -Infinity เพื่อให้คะแนน 0 ถูกบันทึก
+                        if (score > currentHighest) {
+                            highestScoresMap.set(employeeId, score);
+                        }
+                    }
+                });
+                
+                // แปลง Map เป็น Array และจัดเรียงตามคะแนนจากมากไปน้อย
+                let filteredRankings = Array.from(highestScoresMap, ([employeeId, score]) => ({
+                    employeeId,
+                    score
+                }));
+
+                filteredRankings.sort((a, b) => b.score - a.score);
+
+                // แสดงผลเฉพาะ 10 อันดับแรก
+                dom.leaderboardList.innerHTML = '';
+                const top10 = filteredRankings.slice(0, 10);
+                let rank = 1;
+
+                top10.forEach((item) => {
                     const listItem = document.createElement('div');
                     listItem.className = 'ranking-item flex justify-between p-2 rounded-lg text-gray-800 text-sm';
                     
-                    const score = data.score || 0;
-                    const employeeId = data.employeeId || 'N/A';
-                    
                     listItem.innerHTML = `
                         <span class="font-bold w-1/12">${rank}.</span>
-                        <span class="w-1/2 truncate">${employeeId}</span>
-                        <span class="font-extrabold text-right w-2/5">${score} คะแนน</span>
+                        <span class="w-1/2 truncate">${item.employeeId}</span>
+                        <span class="font-extrabold text-right w-2/5">${item.score} คะแนน</span>
                     `;
                     dom.leaderboardList.appendChild(listItem);
                     rank++;
