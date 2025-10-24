@@ -1,858 +1,873 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ภารกิจลดคาร์บอน | เกมมือถือ</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
-    <script type="module">
-        // --- Firebase Core Imports ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            addDoc, 
-            onSnapshot, 
-            collection, 
-            query, 
-            orderBy,
-            setLogLevel 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ภารกิจลดคาร์บอน | เกมมือถือ</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <script type="module">
+        // --- Firebase Core Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            addDoc, 
+            onSnapshot, 
+            collection, 
+            query, 
+            orderBy,
+            setLogLevel 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // *******************************************************************
-        // 🚨 สำคัญมาก: กรุณาแทนที่ค่าเหล่านี้ด้วย Firebase Config ของคุณ 
-        // *******************************************************************
-        const firebaseConfig = {
-            apiKey: "AIzaSyDmjcXHZz3glB6hffzsgZeVzpMx48FutXw",
-            authDomain: "game-8ad3f.firebaseapp.com",
-            projectId: "game-8ad3f",
-            storageBucket: "game-8ad3f.firebasestorage.app",
-            messagingSenderId: "1076950258243",
-            appId: "1:1076950258243:web:e65a0ac6f51aa9bc4b3af6",
-            measurementId: "G-0M2L8HX0D2"
-        };
-        // *******************************************************************
-        
-        setLogLevel('Debug');
+        // *******************************************************************
+        // 🚨 สำคัญมาก: กรุณาแทนที่ค่าเหล่านี้ด้วย Firebase Config ของคุณ 
+        // *******************************************************************
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmjcXHZz3glB6hffzsgZeVzpMx48FutXw",
+            authDomain: "game-8ad3f.firebaseapp.com",
+            projectId: "game-8ad3f",
+            storageBucket: "game-8ad3f.firebasestorage.app",
+            messagingSenderId: "1076950258243",
+            appId: "1:1076950258243:web:e65a0ac6f51aa9bc4b3af6",
+            measurementId: "G-0M2L8HX0D2"
+        };
+        // *******************************************************************
+        
+        setLogLevel('Debug');
 
-        const appId = firebaseConfig.appId;
-        let db;
-        let auth;
-        let userId = null;
+        const appId = firebaseConfig.appId;
+        let db;
+        let auth;
+        let userId = null;
 
-        function notifyAppReady() {
-            window.initApp(userId, appId);
-        }
+        function notifyAppReady() {
+            window.initApp(userId, appId);
+        }
 
-        window.firestore = {
-            collection,
-            addDoc,
-            onSnapshot,
-            query,
-            orderBy
-        };
+        window.firestore = {
+            collection,
+            addDoc,
+            onSnapshot,
+            query,
+            orderBy
+        };
 
-        if (firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                window.db = db; 
+        if (firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                window.db = db; 
 
-                async function attemptSignIn() {
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (error) {
-                        console.error("Authentication process failed:", error);
-                    }
-                }
+                async function attemptSignIn() {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (error) {
+                        console.error("Authentication process failed:", error);
+                    }
+                }
 
-                attemptSignIn();
+                attemptSignIn();
 
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                    } 
-                    notifyAppReady(); 
-                });
-            } catch(e) {
-                console.error("Firebase Initialization Failed:", e);
-                notifyAppReady();
-            }
-        } else {
-            notifyAppReady();
-        }
-    </script>
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                    } 
+                    notifyAppReady(); 
+                });
+            } catch(e) {
+                console.error("Firebase Initialization Failed:", e);
+                notifyAppReady();
+            }
+        } else {
+            notifyAppReady();
+        }
+    </script>
 
-    <style>
-        /* ------------------------------------------------------------------- */
-        /* --- CORE LAYOUT & NEUMORPHISM THEME (Bootstrap Integration) --- */
-        /* ------------------------------------------------------------------- */
-        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&display=swap');
-        
-        /* CSS Variables for Theme */
-        :root {
-            --bg-color: #ecfdf5; /* Light Mint/Green Base */
-            --primary-color: #047857; /* Dark Emerald */
-            --secondary-color: #67e8f9; /* Cyan */
-            --text-color: #15803d; /* Darker Green for text */
-            --shadow-light: #ffffff;
-            --shadow-dark: #dbece0;
-        }
+    <style>
+        /* ------------------------------------------------------------------- */
+        /* --- CORE LAYOUT & NEUMORPHISM THEME (Bootstrap Integration) --- */
+        /* ------------------------------------------------------------------- */
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&display=swap');
+        
+        /* CSS Variables for Theme */
+        :root {
+            --bg-color: #ecfdf5; /* Light Mint/Green Base */
+            --primary-color: #047857; /* Dark Emerald */
+            --secondary-color: #67e8f9; /* Cyan */
+            --text-color: #15803d; /* Darker Green for text */
+            --shadow-light: #ffffff;
+            --shadow-dark: #dbece0;
+        }
 
-        /* Base Setup */
-        html, body { 
-            height: 100%; 
-            overflow: hidden; 
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Chakra Petch', sans-serif;
-            background-color: var(--bg-color); 
-        }
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+        /* Base Setup */
+        html, body { 
+            height: 100%; 
+            overflow: hidden; 
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: var(--bg-color); 
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-        /* App Container - Crucial for Mobile Responsive */
-        #app {
-            width: 100vw;
-            height: 100vh;
-            max-width: 600px; 
-            background-color: var(--bg-color); 
-            padding: 1rem; 
-            box-sizing: border-box; 
-            
-            /* เว้นระยะ Header จากขอบบนของมือถือ */
-            padding-top: 1.5rem; 
-            padding-top: calc(1.5rem + env(safe-area-inset-top));
-            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-        }
+        /* App Container - Crucial for Mobile Responsive */
+        #app {
+            width: 100vw;
+            height: 100vh;
+            max-width: 600px; 
+            background-color: var(--bg-color); 
+            padding: 1rem; 
+            box-sizing: border-box; 
+            
+            /* เว้นระยะ Header จากขอบบนของมือถือ */
+            padding-top: 1.5rem; 
+            padding-top: calc(1.5rem + env(safe-area-inset-top));
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+        }
 
-        /* Neumorphism Card Style */
-        .card-panel {
-            background-color: var(--bg-color); 
-            border-radius: 1.5rem;
-            box-shadow: 
-                8px 8px 16px var(--shadow-dark), 
-                -8px -8px 16px var(--shadow-light); 
-            transition: all 0.3s ease;
-        }
-        
-        /* Primary Button Style */
-        .btn-main {
-            background-color: var(--primary-color); 
-            color: white;
-            font-weight: bold;
-            border-radius: 1rem;
-            box-shadow: 
-                4px 4px 8px rgba(4, 120, 87, 0.4), 
-                -2px -2px 4px rgba(255, 255, 255, 0.8);
-            transition: all 0.2s ease;
-            border: none; 
-        }
-        
-        .btn-main:hover { background-color: #069c67; color: white; }
+        /* Neumorphism Card Style */
+        .card-panel {
+            background-color: var(--bg-color); 
+            border-radius: 1.5rem;
+            box-shadow: 
+                8px 8px 16px var(--shadow-dark), 
+                -8px -8px 16px var(--shadow-light); 
+            transition: all 0.3s ease;
+        }
+        
+        /* Primary Button Style */
+        .btn-main {
+            background-color: var(--primary-color); 
+            color: white;
+            font-weight: bold;
+            border-radius: 1rem;
+            box-shadow: 
+                4px 4px 8px rgba(4, 120, 87, 0.4), 
+                -2px -2px 4px rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+            border: none; 
+        }
+        
+        .btn-main:hover { background-color: #069c67; color: white; }
 
-        .btn-main:active {
-            box-shadow: 
-                inset 3px 3px 7px rgba(0, 0, 0, 0.25), 
-                inset -3px -3px 7px rgba(255, 255, 255, 0.5);
-            transform: scale(0.97);
-        }
+        .btn-main:active {
+            box-shadow: 
+                inset 3px 3px 7px rgba(0, 0, 0, 0.25), 
+                inset -3px -3px 7px rgba(255, 255, 255, 0.5);
+            transform: scale(0.97);
+        }
 
-        /* Input Field Style */
-        .input-recessed {
-            background-color: var(--bg-color);
-            border: none;
-            border-radius: 1rem;
-            box-shadow: 
-                inset 3px 3px 7px rgba(0, 0, 0, 0.15), 
-                inset -3px -3px 7px var(--shadow-light);
-            padding: 1rem 1.25rem;
-            color: var(--text-color);
-            text-transform: uppercase;
-            text-align: center;
-        }
-        
-        /* --- GAME AREA LAYOUT --- */
-        #game-area {
-            position: relative;
-            overflow: hidden;
-            background-color: #a7f3d0; 
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35);
-            flex-grow: 1; 
-            border-radius: 1.5rem;
-            min-height: 200px; 
-        }
-        
-        /* --- ITEM ANIMATIONS (ไม่เปลี่ยนแปลง) --- */
-        .game-item {
-            position: absolute;
-            width: 60px; 
-            height: 60px;
-            cursor: pointer;
-            user-select: none;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.7);
-            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 4px rgba(255, 255, 255, 0.7);
-            transition: transform 0.05s ease-out;
-            z-index: 10; 
+        /* Input Field Style */
+        .input-recessed {
+            background-color: var(--bg-color);
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 
+                inset 3px 3px 7px rgba(0, 0, 0, 0.15), 
+                inset -3px -3px 7px var(--shadow-light);
+            padding: 1rem 1.25rem;
+            color: var(--text-color);
+            text-transform: uppercase;
+            text-align: center;
+        }
+        
+        /* --- GAME AREA LAYOUT --- */
+        #game-area {
+            position: relative;
+            overflow: hidden;
+            background-color: #a7f3d0; 
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35);
+            flex-grow: 1; 
+            border-radius: 1.5rem;
+            min-height: 200px; 
+        }
+        
+        /* --- ITEM ANIMATIONS (ไม่เปลี่ยนแปลง) --- */
+        .game-item {
+            position: absolute;
+            width: 60px; 
+            height: 60px;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 4px rgba(255, 255, 255, 0.7);
+            transition: transform 0.05s ease-out;
+            z-index: 10; 
 
-            opacity: 0;
-            transform: scale(0.5); 
-            animation: item-spawn 0.3s ease-out forwards;
-        }
+            opacity: 0;
+            transform: scale(0.5); 
+            animation: item-spawn 0.3s ease-out forwards;
+        }
 
-        @keyframes item-spawn {
-            from { opacity: 0; transform: scale(0.5) translateY(0); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        
-        /* Score Pop-up Style & Animation (ไม่เปลี่ยนแปลง) */
-        .score-popup {
-            pointer-events: none; 
-            z-index: 20; 
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); 
-            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-            will-change: transform, opacity, filter;
-            font-weight: 900;
-        }
+        @keyframes item-spawn {
+            from { opacity: 0; transform: scale(0.5) translateY(0); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        
+        /* Score Pop-up Style & Animation (ไม่เปลี่ยนแปลง) */
+        .score-popup {
+            pointer-events: none; 
+            z-index: 20; 
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); 
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: transform, opacity, filter;
+            font-weight: 900;
+        }
 
-        .score-popup.animate {
-            transform: translate(-50%, -130px) scale(1.5);
-            opacity: 0;
-            filter: blur(5px); 
-        }
+        .score-popup.animate {
+            transform: translate(-50%, -130px) scale(1.5);
+            opacity: 0;
+            filter: blur(5px); 
+        }
 
-        /* --- LEADERBOARD --- */
+        /* --- LEADERBOARD ENHANCEMENTS --- */
         #leaderboard-panel {
             max-height: 40vh; /* จำกัดความสูงของ Leaderboard */
             overflow-y: auto;
             margin-top: 1rem;
             padding: 0.75rem; 
         }
-        
-        /* Responsive Text Size for smaller mobile screens */
-        @media (max-width: 370px) {
-            #app h1 { font-size: 1.35rem !important; }
-            .fs-6 { font-size: 0.75rem !important; }
-            .btn-main { font-size: 0.9rem !important; }
-            .game-item { width: 50px; height: 50px; }
+
+        .leaderboard-item {
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+            padding: 0.75rem 1rem !important;
+            transition: all 0.2s ease-in-out;
         }
-    </style>
+
+        .leaderboard-rank-1 {
+            background: linear-gradient(135deg, #FFD700 0%, #FFEB80 100%); /* Gold */
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.5);
+            color: #614e1a !important;
+        }
+        .leaderboard-rank-2 {
+            background: linear-gradient(135deg, #C0C0C0 0%, #E0E0E0 100%); /* Silver */
+            color: #333 !important;
+        }
+        .leaderboard-rank-3 {
+            background: linear-gradient(135deg, #CD7F32 0%, #F4A460 100%); /* Bronze */
+            color: #333 !important;
+        }
+        
+        .leaderboard-current-user {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            border: 3px solid var(--secondary-color) !important;
+            transform: scale(1.02);
+            font-weight: bold; /* เพิ่มความหนาเพื่อเน้น */
+        }
+        
+        .leaderboard-current-user .leaderboard-score,
+        .leaderboard-current-user .leaderboard-rank-text {
+            color: white !important; /* ให้คะแนนเป็นสีขาวเมื่อเป็นผู้เล่นปัจจุบัน */
+        }
+        
+        /* Responsive Text Size for smaller mobile screens */
+        @media (max-width: 370px) {
+            #app h1 { font-size: 1.35rem !important; }
+            .fs-6 { font-size: 0.75rem !important; }
+            .btn-main { font-size: 0.9rem !important; }
+            .game-item { width: 50px; height: 50px; }
+        }
+    </style>
 </head>
 <body>
 
-    <div id="app" class="d-flex flex-column vh-100 mx-auto">
-        
-        <div class="modal fade" id="messageBox" tabindex="-1" aria-labelledby="messageBoxLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="card-panel modal-content">
-              <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-success fw-bold" id="messageTitle"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body pt-0 text-secondary">
-                <p id="messageBody"></p>
-              </div>
-              <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-main w-100 py-2" data-bs-dismiss="modal">ปิด</button>
-              </div>
+    <div id="app" class="d-flex flex-column vh-100 mx-auto">
+        
+        <div class="modal fade" id="messageBox" tabindex="-1" aria-labelledby="messageBoxLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="card-panel modal-content">
+              <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-success fw-bold" id="messageTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body pt-0 text-secondary">
+                <p id="messageBody"></p>
+              </div>
+              <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-main w-100 py-2" data-bs-dismiss="modal">ปิด</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="card-panel modal-content">
+              <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-success fw-bold" id="infoModalLabel">💡 ข้อมูลการปลดปล่อยคาร์บอน</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <h4 class="h5 mt-3 mb-2 text-success">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
+                <div id="goodInfoList" class="space-y-3"></div>
+                <h4 class="h5 mt-4 mb-2 text-danger">❌ การปล่อยคาร์บอน (Bad Items: -5 คะแนน)</h4>
+                <div id="badInfoList" class="space-y-3"></div>
+              </div>
+              <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-main w-100 py-3 fs-5" data-bs-dismiss="modal">รับทราบและเริ่มภารกิจ</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-shrink-0 mt-2"> 
+            <h1 class="fs-4 fw-bolder text-success">🌲 CARBON MISSION 🌎</h1>
+            <button id="info-button" class="btn btn-sm btn-info text-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#infoModal">ข้อมูล</button>
+        </div>
+
+        
+        <div id="start-screen" class="p-4 card-panel mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
+            
+            <h2 class="display-6 fw-black text-primary mb-3">🌱 หยุด! มลพิษคาร์บอน!</h2>
+            <p class="fs-5 text-secondary fw-semibold mb-4">
+                แตะ **กิจกรรมรักษ์โลก** <span class="text-success">(+10)</span> และหลีกเลี่ยง **กิจกรรมปล่อยคาร์บอน** <span class="text-danger">(-5)</span>
+            </p>
+            <div class="mb-4">
+                <img src="https://i.postimg.cc/mD8q5v32/Earth-Mission.png" alt="Carbon Mission Logo" style="width: 150px; height: auto;">
             </div>
-          </div>
-        </div>
-        
-        <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-scrollable modal-lg">
-            <div class="card-panel modal-content">
-              <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title text-success fw-bold" id="infoModalLabel">💡 ข้อมูลการปลดปล่อยคาร์บอน</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <h4 class="h5 mt-3 mb-2 text-success">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
-                <div id="goodInfoList" class="space-y-3"></div>
-                <h4 class="h5 mt-4 mb-2 text-danger">❌ การปล่อยคาร์บอน (Bad Items: -5 คะแนน)</h4>
-                <div id="badInfoList" class="space-y-3"></div>
-              </div>
-              <div class="modal-footer border-top-0 pt-0">
-                <button type="button" class="btn btn-main w-100 py-3 fs-5" data-bs-dismiss="modal">รับทราบและเริ่มภารกิจ</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-shrink-0 mt-2"> 
-            <h1 class="fs-4 fw-bolder text-success">🌲 CARBON MISSION 🌎</h1>
-            <button id="info-button" class="btn btn-sm btn-info text-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#infoModal">ข้อมูล</button>
-        </div>
 
-        
-        <div id="start-screen" class="p-4 card-panel mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
-            
-            <h2 class="display-6 fw-black text-primary mb-4">หยุด! มลพิษคาร์บอน!</h2>
-            <p class="fs-5 text-secondary fw-semibold mb-5">
-                แตะ **กิจกรรมรักษ์โลก** (+10) และหลีกเลี่ยง **กิจกรรมปล่อยคาร์บอน** (-5)
-            </p>
+            <div class="w-100" style="max-width: 300px;">
+                <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
+                            maxlength="10"
+                            class="form-control mb-4 input-recessed fs-5">
+                <button id="start-button"
+                            class="btn btn-main w-100 py-3 fs-5" disabled>
+                    กรุณากรอกรหัสพนักงาน
+                </button>
+            </div>
+        </div>
+        
+        <div id="game-container" class="d-none flex-grow-1 d-flex flex-column">
+            
+            <div class="d-flex justify-content-between align-items-center p-3 card-panel mb-3 flex-shrink-0">
+                <div class="fw-bold text-success fs-6">SCORE: <span id="score-display" class="fs-4 fw-bolder text-success">0</span></div>
+                <div class="fw-bold text-success fs-6">TIME: <span id="timer-display" class="fs-4 fw-bolder text-primary">20</span>s</div>
+                <div id="current-user-id" class="fs-6 text-muted text-truncate font-monospace" title="รหัสพนักงานของคุณ">ID: </div>
+            </div>
+            
+            <div id="game-area" class="flex-grow-1 position-relative">
+                <p id="game-message" class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center fs-4 fw-bold text-danger bg-dark bg-opacity-10 rounded-3 d-none"></p>
+            </div>
+        </div>
 
-            <div class="w-100" style="max-width: 300px;">
-                <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
-                            maxlength="10"
-                            class="form-control mb-4 input-recessed fs-5">
-                <button id="start-button"
-                            class="btn btn-main w-100 py-3 fs-5" disabled>
-                    กรุณากรอกรหัสพนักงาน
-                </button>
-            </div>
-        </div>
-        
-        <div id="game-container" class="d-none flex-grow-1 d-flex flex-column">
-            
-            <div class="d-flex justify-content-between align-items-center p-3 card-panel mb-3 flex-shrink-0">
-                <div class="fw-bold text-success fs-6">SCORE: <span id="score-display" class="fs-4 fw-bolder text-success">0</span></div>
-                <div class="fw-bold text-success fs-6">TIME: <span id="timer-display" class="fs-4 fw-bolder text-primary">20</span>s</div>
-                <div id="current-user-id" class="fs-6 text-muted text-truncate font-monospace" title="รหัสพนักงานของคุณ">ID: </div>
-            </div>
-            
-            <div id="game-area" class="flex-grow-1 position-relative">
-                <p id="game-message" class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center fs-4 fw-bold text-danger bg-dark bg-opacity-10 rounded-3 d-none"></p>
-            </div>
-        </div>
+        
+        <div id="game-over-screen" class="d-none text-center p-3 card-panel mb-3 flex-shrink-0">
+            <h2 class="fs-3 fw-bolder text-success">🎉 ภารกิจสำเร็จ!</h2>
+            <p class="fs-5 text-secondary">คะแนนสุดท้าย: <span id="final-score" class="d-block fw-black display-4 text-danger my-2">0</span></p>
+            <p id="ranking-status" class="fs-6 fw-semibold text-success"></p>
+            <button id="restart-button"
+                        class="btn btn-main w-100 py-3 fs-5">
+                🔁 เล่นอีกครั้ง
+            </button>
+        </div>
 
-        
-        <div id="game-over-screen" class="d-none text-center p-3 card-panel mb-3 flex-shrink-0">
-            <h2 class="fs-3 fw-bolder text-success">🎉 ภารกิจสำเร็จ!</h2>
-            <p class="fs-5 text-secondary">คะแนนสุดท้าย: <span id="final-score" class="d-block fw-black display-4 text-danger my-2">0</span></p>
-            <p id="ranking-status" class="fs-6 fw-semibold text-success"></p>
-            <button id="restart-button"
-                        class="btn btn-main w-100 py-3 fs-5">
-                🔁 เล่นอีกครั้ง
-            </button>
-        </div>
+        
+        <div id="leaderboard-panel" class="card-panel flex-shrink-0">
+            <h2 class="fs-6 fw-bold text-center mb-2 text-success">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
+            <div id="leaderboard-list">
+                <p class="text-center text-muted" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
+            </div>
+        </div>
+    </div>
 
-        
-        <div id="leaderboard-panel" class="card-panel flex-shrink-0">
-            <h2 class="fs-6 fw-bold text-center mb-2 text-success">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
-            <div id="leaderboard-list">
-                <p class="text-center text-muted" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
-            </div>
-        </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        // --- Game Configuration (Constants) ---
+        const GAME_DURATION = 20; 
+        const SPAWN_INTERVAL = 300; 
+        const ITEM_SPEED = 2; 
+        const ITEM_SIZE = 60; 
+        const SCORE_REDUCTION = 10;
+        const SCORE_EMISSION = -5;
+        
+        // Modal instances for Bootstrap 
+        let messageModal;
+        let infoModal;
 
-    <script>
-        // --- Game Configuration (Constants) ---
-        const GAME_DURATION = 20; 
-        const SPAWN_INTERVAL = 300; 
-        const ITEM_SPEED = 2; 
-        const ITEM_SIZE = 60; 
-        const SCORE_REDUCTION = 10;
-        const SCORE_EMISSION = -5;
-        
-        // Modal instances for Bootstrap 
-        let messageModal;
-        let infoModal;
+        // Emoji definitions (ใช้ชุดเดิม)
+        const ITEM_DEFINITIONS = [
+            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'เลือกทานอาหารมังสวิรัติ' },
+            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ระบบขนส่งสาธารณะ' },
+            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
+            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้พลังงานสะอาด (โซลาร์เซลล์)' },
+            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ลดการใช้ถุงพลาสติก' },
+            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'นำขวดน้ำมาใช้ซ้ำ' },
+            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ซ่อมแซมอุปกรณ์ไฟฟ้าที่ชำรุด' },
+            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ปิดไฟเมื่อไม่ใช้งาน' },
+            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'แยกประเภทขยะก่อนทิ้ง' },
+            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ประหยัดการใช้น้ำ' },
+            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ซื้อสินค้ามือสอง' },
+            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'การเดิน/ปั่นจักรยานแทนรถ' },
+            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ผลิตภัณฑ์ที่เป็นมิตรต่อสิ่งแวดล้อม' },
+            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'งดเผาขยะ' },
+            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'การปลูกผักสวนครัว' },
+            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
+            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
 
-        // Emoji definitions (ใช้ชุดเดิม)
-        const ITEM_DEFINITIONS = [
-            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'เลือกทานอาหารมังสวิรัติ' },
-            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ระบบขนส่งสาธารณะ' },
-            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
-            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้พลังงานสะอาด (โซลาร์เซลล์)' },
-            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ลดการใช้ถุงพลาสติก' },
-            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'นำขวดน้ำมาใช้ซ้ำ' },
-            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ซ่อมแซมอุปกรณ์ไฟฟ้าที่ชำรุด' },
-            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ปิดไฟเมื่อไม่ใช้งาน' },
-            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'แยกประเภทขยะก่อนทิ้ง' },
-            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ประหยัดการใช้น้ำ' },
-            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ซื้อสินค้ามือสอง' },
-            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'การเดิน/ปั่นจักรยานแทนรถ' },
-            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ผลิตภัณฑ์ที่เป็นมิตรต่อสิ่งแวดล้อม' },
-            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'งดเผาขยะ' },
-            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'การปลูกผักสวนครัว' },
-            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
-            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
+            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เดินทางด้วยเครื่องบินบ่อย' },
+            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้รถยนต์ส่วนตัวคนเดียว' },
+            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ทิ้งขยะไม่แยกประเภท' },
+            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เปิดไฟทิ้งไว้ตลอดเวลา' },
+            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'สั่งอาหารแบบ Delivery บ่อยเกินไป' },
+            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
+        ];
 
-            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เดินทางด้วยเครื่องบินบ่อย' },
-            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้รถยนต์ส่วนตัวคนเดียว' },
-            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ทิ้งขยะไม่แยกประเภท' },
-            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เปิดไฟทิ้งไว้ตลอดเวลา' },
-            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'สั่งอาหารแบบ Delivery บ่อยเกินไป' },
-            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
-        ];
+        // --- Global Game State ---
+        let gameState = {
+            isImagesPreloaded: false,
+            isRunning: false,
+            score: 0,
+            timeLeft: GAME_DURATION,
+            employeeId: '',
+            items: {}, 
+            itemIdCounter: 0,
+            animationFrameId: null,
+            spawnIntervalId: null,
+            timerIntervalId: null,
+            db: null,
+            userId: null,
+            appId: null,
+        };
 
-        // --- Global Game State ---
-        let gameState = {
-            isImagesPreloaded: false,
-            isRunning: false,
-            score: 0,
-            timeLeft: GAME_DURATION,
-            employeeId: '',
-            items: {}, 
-            itemIdCounter: 0,
-            animationFrameId: null,
-            spawnIntervalId: null,
-            timerIntervalId: null,
-            db: null,
-            userId: null,
-            appId: null,
-        };
+        // --- DOM Elements ---
+        const dom = {
+            startScreen: document.getElementById('start-screen'),
+            gameContainer: document.getElementById('game-container'),
+            gameOverScreen: document.getElementById('game-over-screen'),
+            gameArea: document.getElementById('game-area'),
+            employeeIdInput: document.getElementById('employee-id'),
+            startButton: document.getElementById('start-button'),
+            restartButton: document.getElementById('restart-button'),
+            scoreDisplay: document.getElementById('score-display'),
+            timerDisplay: document.getElementById('timer-display'),
+            finalScore: document.getElementById('final-score'),
+            gameMessage: document.getElementById('game-message'),
+            leaderboardPanel: document.getElementById('leaderboard-panel'), 
+            leaderboardList: document.getElementById('leaderboard-list'),
+            loadingLeaderboard: document.getElementById('loading-leaderboard'),
+            rankingStatus: document.getElementById('ranking-status'),
+            currentUserId: document.getElementById('current-user-id'),
+            infoButton: document.getElementById('info-button'),     
+            goodInfoList: document.getElementById('goodInfoList'), 
+            badInfoList: document.getElementById('badInfoList'),
+        };
+        
+        // ***************************************************************
+        // --- Game Logic Functions ---
+        // ***************************************************************
+        
+        function showMessage(title, body) {
+            document.getElementById('messageTitle').textContent = title;
+            document.getElementById('messageBody').textContent = body;
+            messageModal.show();
+        }
 
-        // --- DOM Elements ---
-        const dom = {
-            startScreen: document.getElementById('start-screen'),
-            gameContainer: document.getElementById('game-container'),
-            gameOverScreen: document.getElementById('game-over-screen'),
-            gameArea: document.getElementById('game-area'),
-            employeeIdInput: document.getElementById('employee-id'),
-            startButton: document.getElementById('start-button'),
-            restartButton: document.getElementById('restart-button'),
-            scoreDisplay: document.getElementById('score-display'),
-            timerDisplay: document.getElementById('timer-display'),
-            finalScore: document.getElementById('final-score'),
-            gameMessage: document.getElementById('game-message'),
-            leaderboardPanel: document.getElementById('leaderboard-panel'), 
-            leaderboardList: document.getElementById('leaderboard-list'),
-            loadingLeaderboard: document.getElementById('loading-leaderboard'),
-            rankingStatus: document.getElementById('ranking-status'),
-            currentUserId: document.getElementById('current-user-id'),
-            infoButton: document.getElementById('info-button'),     
-            goodInfoList: document.getElementById('goodInfoList'), 
-            badInfoList: document.getElementById('badInfoList'),
-        };
-        
-        // ***************************************************************
-        // --- Game Logic Functions (ใช้ชุดเดิม) ---
-        // ***************************************************************
-        
-        function showMessage(title, body) {
-            document.getElementById('messageTitle').textContent = title;
-            document.getElementById('messageBody').textContent = body;
-            messageModal.show();
-        }
+        function resetGame() {
+            gameState.score = 0;
+            gameState.timeLeft = GAME_DURATION;
+            Object.values(gameState.items).forEach(item => item.element.remove());
+            gameState.items = {}; 
+            gameState.itemIdCounter = 0;
+            dom.scoreDisplay.textContent = '0';
+            dom.timerDisplay.textContent = GAME_DURATION;
+            dom.gameMessage.classList.add('d-none');
+            dom.timerDisplay.classList.remove('text-danger');
+        }
+        
+        function startGame() {
+            if (!gameState.employeeId) {
+                gameState.employeeId = dom.employeeIdInput.value.toUpperCase().trim();
+            }
 
-        function resetGame() {
-            gameState.score = 0;
-            gameState.timeLeft = GAME_DURATION;
-            Object.values(gameState.items).forEach(item => item.element.remove());
-            gameState.items = {}; 
-            gameState.itemIdCounter = 0;
-            dom.scoreDisplay.textContent = '0';
-            dom.timerDisplay.textContent = GAME_DURATION;
-            dom.gameMessage.classList.add('d-none');
-            dom.timerDisplay.classList.remove('text-danger');
-        }
-        
-        function startGame() {
-            if (!gameState.employeeId) {
-                gameState.employeeId = dom.employeeIdInput.value.toUpperCase().trim();
-            }
+            if (!gameState.employeeId) {
+                 showMessage("รหัสพนักงานไม่ถูกต้อง", "กรุณากรอกรหัสพนักงานก่อนเริ่มเกม");
+                return;
+            }
 
-            if (!gameState.employeeId) {
-                 showMessage("รหัสพนักงานไม่ถูกต้อง", "กรุณากรอกรหัสพนักงานก่อนเริ่มเกม");
-                return;
-            }
+            resetGame();
+            
+            // ซ่อน Start/Game Over 
+            dom.startScreen.classList.add('d-none');
+            dom.gameOverScreen.classList.add('d-none');
+            
+            // แสดง Game Container
+            dom.gameContainer.classList.remove('d-none'); 
+            
+            dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
+            
+            startActualGame();
+        }
+        
+        function startActualGame() {
+            gameState.isRunning = true;
+            gameState.spawnIntervalId = setInterval(spawnItem, SPAWN_INTERVAL);
+            gameState.timerIntervalId = setInterval(updateTimer, 1000);
 
-            resetGame();
-            
-            // ซ่อน Start/Game Over 
-            dom.startScreen.classList.add('d-none');
-            dom.gameOverScreen.classList.add('d-none');
-            
-            // แสดง Game Container
-            dom.gameContainer.classList.remove('d-none'); 
-            
-            dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
-            
-            startActualGame();
-        }
-        
-        function startActualGame() {
-            gameState.isRunning = true;
-            gameState.spawnIntervalId = setInterval(spawnItem, SPAWN_INTERVAL);
-            gameState.timerIntervalId = setInterval(updateTimer, 1000);
-
-            gameState.animationFrameId = requestAnimationFrame(gameLoop);
-        }
+            gameState.animationFrameId = requestAnimationFrame(gameLoop);
+        }
 
 
-        function endGame() {
-            gameState.isRunning = false;
-            cancelAnimationFrame(gameState.animationFrameId);
-            clearInterval(gameState.spawnIntervalId);
-            clearInterval(gameState.timerIntervalId);
+        function endGame() {
+            gameState.isRunning = false;
+            cancelAnimationFrame(gameState.animationFrameId);
+            clearInterval(gameState.spawnIntervalId);
+            clearInterval(gameState.timerIntervalId);
 
-            Object.values(gameState.items).forEach(item => item.element.remove()); 
-            gameState.items = {}; 
+            Object.values(gameState.items).forEach(item => item.element.remove()); 
+            gameState.items = {}; 
 
-            // ซ่อน Game Container และแสดง Game Over Screen
-            dom.gameContainer.classList.add('d-none');
-            dom.finalScore.textContent = gameState.score;
-            
-            dom.gameOverScreen.classList.remove('d-none');
-            
-            // Leaderboard แสดงอยู่แล้ว ไม่ต้องทำอะไร
-            
-            saveScore(gameState.employeeId, gameState.score, gameState.userId);
-        }
+            // ซ่อน Game Container และแสดง Game Over Screen
+            dom.gameContainer.classList.add('d-none');
+            dom.finalScore.textContent = gameState.score;
+            
+            dom.gameOverScreen.classList.remove('d-none');
+            
+            saveScore(gameState.employeeId, gameState.score, gameState.userId);
+        }
 
-        function updateTimer() {
-            gameState.timeLeft--;
-            dom.timerDisplay.textContent = gameState.timeLeft;
+        function updateTimer() {
+            gameState.timeLeft--;
+            dom.timerDisplay.textContent = gameState.timeLeft;
 
-            if (gameState.timeLeft <= 5) {
-                dom.timerDisplay.classList.add('text-danger');
-            } else {
-                dom.timerDisplay.classList.remove('text-danger');
-            }
+            if (gameState.timeLeft <= 5) {
+                dom.timerDisplay.classList.add('text-danger');
+            } else {
+                dom.timerDisplay.classList.remove('text-danger');
+            }
 
-            if (gameState.timeLeft <= 0) {
-                endGame();
-            }
-        }
+            if (gameState.timeLeft <= 0) {
+                endGame();
+            }
+        }
 
-        function spawnItem() {
-            const definition = ITEM_DEFINITIONS[Math.floor(Math.random() * ITEM_DEFINITIONS.length)];
-            const gameAreaWidth = dom.gameArea.clientWidth;
-            const itemId = gameState.itemIdCounter++;
+        function spawnItem() {
+            const definition = ITEM_DEFINITIONS[Math.floor(Math.random() * ITEM_DEFINITIONS.length)];
+            const gameAreaWidth = dom.gameArea.clientWidth;
+            const itemId = gameState.itemIdCounter++;
 
-            const itemElement = document.createElement('div');
-            itemElement.addEventListener('click', handleItemClick);
-            itemElement.addEventListener('touchstart', (e) => {
-                e.preventDefault(); 
-                handleItemClick(e.touches[0]);
-            });
-            
-            itemElement.className = `game-item`; 
-            itemElement.dataset.id = itemId; 
-            itemElement.dataset.type = definition.type;
-            
-            const imgElement = document.createElement('img');
-            imgElement.src = definition.imageSrc;
-            imgElement.className = "w-100 h-100 object-fit-contain p-2"; 
-            
-            itemElement.appendChild(imgElement);
+            const itemElement = document.createElement('div');
+            itemElement.addEventListener('click', handleItemClick);
+            itemElement.addEventListener('touchstart', (e) => {
+                e.preventDefault(); 
+                handleItemClick(e.touches[0]);
+            });
+            
+            itemElement.className = `game-item`; 
+            itemElement.dataset.id = itemId; 
+            itemElement.dataset.type = definition.type;
+            
+            const imgElement = document.createElement('img');
+            imgElement.src = definition.imageSrc;
+            imgElement.className = "w-100 h-100 object-fit-contain p-2"; 
+            
+            itemElement.appendChild(imgElement);
 
-            const itemSize = ITEM_SIZE; 
-            const posX = Math.random() * (gameAreaWidth - itemSize);
-            itemElement.style.left = `${posX}px`;
-            itemElement.style.top = `-${ITEM_SIZE}px`; 
+            const itemSize = ITEM_SIZE; 
+            const posX = Math.random() * (gameAreaWidth - itemSize);
+            itemElement.style.left = `${posX}px`;
+            itemElement.style.top = `-${ITEM_SIZE}px`; 
 
-            dom.gameArea.appendChild(itemElement);
+            dom.gameArea.appendChild(itemElement);
 
-            const item = {
-                id: itemId,
-                definition: definition,
-                element: itemElement,
-                y: -ITEM_SIZE, 
-                x: posX,
-                speed: ITEM_SPEED + Math.random() * 1.5 
-            };
+            const item = {
+                id: itemId,
+                definition: definition,
+                element: itemElement,
+                y: -ITEM_SIZE, 
+                x: posX,
+                speed: ITEM_SPEED + Math.random() * 1.5 
+            };
 
-            gameState.items[itemId] = item;
-        }
-        
-        function handleItemClick(event) {
-            if (!gameState.isRunning) return;
-            
-            const clickedItem = event.target.closest('.game-item'); 
-            
-            if (clickedItem) {
-                const itemId = parseInt(clickedItem.dataset.id);
-                const item = gameState.items[itemId];
-                
-                if (!item) return;
+            gameState.items[itemId] = item;
+        }
+        
+        function handleItemClick(event) {
+            if (!gameState.isRunning) return;
+            
+            const clickedItem = event.target.closest('.game-item'); 
+            
+            if (clickedItem) {
+                const itemId = parseInt(clickedItem.dataset.id);
+                const item = gameState.items[itemId];
+                
+                if (!item) return;
 
-                const scoreChange = item.definition.score;
+                const scoreChange = item.definition.score;
 
-                gameState.score += scoreChange;
-                dom.scoreDisplay.textContent = gameState.score;
-                
-                const rect = dom.gameArea.getBoundingClientRect();
-                const itemRect = clickedItem.getBoundingClientRect();
-                
-                const xPos = `${itemRect.left - rect.left + itemRect.width / 2}px`;
-                const yPos = `${itemRect.top - rect.top + itemRect.height / 2}px`;
-                
-                clickedItem.remove(); 
-                delete gameState.items[itemId]; 
-                
-                showScoreChange(xPos, yPos, scoreChange);
-            }
-        }
-        
-        function showScoreChange(x, y, score) {
-            const popup = document.createElement('div');
-            popup.textContent = score > 0 ? `+${score}` : `${score}`;
-            popup.className = `score-popup position-absolute fs-4 text-center`; 
-            popup.style.left = x;
-            popup.style.top = y;
-            popup.style.transform = 'translate(-50%, -50%)'; 
-            
-            if (score > 0) {
-                popup.classList.add('text-success');
-            } else {
-                popup.classList.add('text-danger');
-            }
+                gameState.score += scoreChange;
+                dom.scoreDisplay.textContent = gameState.score;
+                
+                const rect = dom.gameArea.getBoundingClientRect();
+                const itemRect = clickedItem.getBoundingClientRect();
+                
+                const xPos = `${itemRect.left - rect.left + itemRect.width / 2}px`;
+                const yPos = `${itemRect.top - rect.top + itemRect.height / 2}px`;
+                
+                clickedItem.remove(); 
+                delete gameState.items[itemId]; 
+                
+                showScoreChange(xPos, yPos, scoreChange);
+            }
+        }
+        
+        function showScoreChange(x, y, score) {
+            const popup = document.createElement('div');
+            popup.textContent = score > 0 ? `+${score}` : `${score}`;
+            popup.className = `score-popup position-absolute fs-4 text-center`; 
+            popup.style.left = x;
+            popup.style.top = y;
+            popup.style.transform = 'translate(-50%, -50%)'; 
+            
+            if (score > 0) {
+                popup.classList.add('text-success');
+            } else {
+                popup.classList.add('text-danger');
+            }
 
-            dom.gameArea.appendChild(popup);
+            dom.gameArea.appendChild(popup);
 
-            requestAnimationFrame(() => {
-                popup.classList.add('animate');
-            });
+            requestAnimationFrame(() => {
+                popup.classList.add('animate');
+            });
 
-            setTimeout(() => {
-                popup.remove();
-            }, 600);
-        }
+            setTimeout(() => {
+                popup.remove();
+            }, 600);
+        }
 
-        function gameLoop() {
-            if (!gameState.isRunning) return;
+        function gameLoop() {
+            if (!gameState.isRunning) return;
 
-            const gameAreaHeight = dom.gameArea.clientHeight;
+            const gameAreaHeight = dom.gameArea.clientHeight;
 
-            const itemIds = Object.keys(gameState.items);
+            const itemIds = Object.keys(gameState.items);
 
-            for (let i = 0; i < itemIds.length; i++) {
-                const itemId = itemIds[i];
-                const item = gameState.items[itemId];
+            for (let i = 0; i < itemIds.length; i++) {
+                const itemId = itemIds[i];
+                const item = gameState.items[itemId];
 
-                if (!item) continue; 
-                
-                item.y += item.speed;
-                item.element.style.top = `${item.y}px`;
+                if (!item) continue; 
+                
+                item.y += item.speed;
+                item.element.style.top = `${item.y}px`;
 
-                if (item.y > gameAreaHeight) {
-                    if (item.definition.type === 'good') {
-                        gameState.score -= 5; 
-                        dom.scoreDisplay.textContent = gameState.score;
-                        showScoreChange(item.element.style.left, item.element.style.top, -5);
+                if (item.y > gameAreaHeight) {
+                    if (item.definition.type === 'good') {
+                        gameState.score -= 5; 
+                        dom.scoreDisplay.textContent = gameState.score;
+                        showScoreChange(item.element.style.left, item.element.style.top, -5);
+                    }
+
+                    item.element.remove();
+                    delete gameState.items[itemId]; 
+                }
+            }
+
+            gameState.animationFrameId = requestAnimationFrame(gameLoop);
+        }
+        
+        // --- Firebase/Leaderboard Logic ---
+        async function fetchWithBackoff(func, retries = 5) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    return await func();
+                } catch (error) {
+                    if (i === retries - 1 || error.code !== 'unavailable') {
+                        throw error;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, (2 ** i) * 1000));
+                }
+            }
+        }
+        
+        function getCollectionPath(appId) {
+            return `artifacts/${appId}/public/data/carbon_game_rankings`;
+        }
+        
+        async function saveScore(employeeId, score, userId) {
+            if (!gameState.db || !gameState.appId) {
+                dom.rankingStatus.textContent = "⚠️ Firebase ไม่พร้อม Score ไม่ถูกบันทึก";
+                return;
+            }
+            
+            const docRef = window.firestore.collection(gameState.db, getCollectionPath(gameState.appId));
+            
+            try {
+                await fetchWithBackoff(() => window.firestore.addDoc(docRef, {
+                    employeeId: employeeId,
+                    score: score,
+                    userId: userId,
+                    timestamp: new Date()
+                }));
+                dom.rankingStatus.textContent = "คะแนนถูกบันทึกเรียบร้อยแล้ว!";
+            } catch (e) {
+                dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว";
+            }
+        }
+        
+        function setupLeaderboard(appId) {
+            if (!gameState.db) {
+                dom.leaderboardList.innerHTML = `<p class="text-center text-danger">Firebase Database ไม่พร้อมใช้งาน!</p>`;
+                return;
+            }
+            
+            dom.loadingLeaderboard.classList.remove('d-none');
+
+            const rankingsQuery = window.firestore.query(
+                window.firestore.collection(gameState.db, getCollectionPath(appId)),
+                window.firestore.orderBy("timestamp", "desc") 
+            );
+
+            window.firestore.onSnapshot(rankingsQuery, (snapshot) => {
+                const leaderboard = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                const aggregatedScores = leaderboard.reduce((acc, item) => {
+                    const id = item.employeeId;
+                    
+                    if (!acc[id]) {
+                        acc[id] = { employeeId: id, score: 0 };
+                    }
+                    
+                    acc[id].score += (item.score || 0); 
+                    
+                    return acc;
+                }, {});
+
+                const topScores = Object.values(aggregatedScores)
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 10);
+                
+                dom.loadingLeaderboard.classList.add('d-none');
+                dom.leaderboardList.innerHTML = '';
+                
+                if (topScores.length === 0) {
+                     dom.leaderboardList.innerHTML = `<p class="text-center text-muted p-2">ยังไม่มีใครทำคะแนนเลย! มาเป็นคนแรกกัน!</p>`;
+                     return;
+                }
+
+                topScores.forEach((rank, index) => {
+                    const rankItem = document.createElement('div');
+                    const isCurrentUser = rank.employeeId === gameState.employeeId;
+                    const rankNumber = index + 1;
+                    
+                    let rankClass = 'text-secondary';
+                    let rankDisplay = `#${rankNumber}`;
+
+                    // กำหนด Class และ Emoji สำหรับ 3 อันดับแรก
+                    if (rankNumber === 1) {
+                        rankClass = 'leaderboard-rank-1 fw-black fs-5';
+                        rankDisplay = '🥇';
+                    } else if (rankNumber === 2) {
+                        rankClass = 'leaderboard-rank-2 fw-bold fs-5';
+                        rankDisplay = '🥈';
+                    } else if (rankNumber === 3) {
+                        rankClass = 'leaderboard-rank-3 fw-semibold fs-5';
+                        rankDisplay = '🥉';
+                    } else {
+                        rankClass = 'bg-light'; // สำหรับอันดับที่ 4 ลงไป
                     }
 
-                    item.element.remove();
-                    delete gameState.items[itemId]; 
-                }
-            }
-
-            gameState.animationFrameId = requestAnimationFrame(gameLoop);
-        }
-        
-        // --- Firebase/Leaderboard Logic (ใช้ชุดเดิม) ---
-        async function fetchWithBackoff(func, retries = 5) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    return await func();
-                } catch (error) {
-                    if (i === retries - 1 || error.code !== 'unavailable') {
-                        throw error;
-                    }
-                    await new Promise(resolve => setTimeout(resolve, (2 ** i) * 1000));
-                }
-            }
-        }
-        
-        function getCollectionPath(appId) {
-            return `artifacts/${appId}/public/data/carbon_game_rankings`;
-        }
-        
-        async function saveScore(employeeId, score, userId) {
-            if (!gameState.db || !gameState.appId) {
-                dom.rankingStatus.textContent = "⚠️ Firebase ไม่พร้อม Score ไม่ถูกบันทึก";
-                return;
-            }
-            
-            const docRef = window.firestore.collection(gameState.db, getCollectionPath(gameState.appId));
-            
-            try {
-                await fetchWithBackoff(() => window.firestore.addDoc(docRef, {
-                    employeeId: employeeId,
-                    score: score,
-                    userId: userId,
-                    timestamp: new Date()
-                }));
-                dom.rankingStatus.textContent = "คะแนนถูกบันทึกเรียบร้อยแล้ว!";
-            } catch (e) {
-                dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว";
-            }
-        }
-        
-        function setupLeaderboard(appId) {
-            if (!gameState.db) {
-                dom.leaderboardList.innerHTML = `<p class="text-center text-danger">Firebase Database ไม่พร้อมใช้งาน!</p>`;
-                return;
-            }
-            
-            dom.loadingLeaderboard.classList.remove('d-none');
-
-            const rankingsQuery = window.firestore.query(
-                window.firestore.collection(gameState.db, getCollectionPath(appId)),
-                window.firestore.orderBy("timestamp", "desc") 
-            );
-
-            window.firestore.onSnapshot(rankingsQuery, (snapshot) => {
-                const leaderboard = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-
-                const aggregatedScores = leaderboard.reduce((acc, item) => {
-                    const id = item.employeeId;
-                    
-                    if (!acc[id]) {
-                        acc[id] = { employeeId: id, score: 0 };
-                    }
-                    
-                    acc[id].score += (item.score || 0); 
-                    
-                    return acc;
-                }, {});
-
-                const topScores = Object.values(aggregatedScores)
-                    .sort((a, b) => b.score - a.score)
-                    .slice(0, 10);
-                
-                dom.loadingLeaderboard.classList.add('d-none');
-                dom.leaderboardList.innerHTML = '';
-                
-                if (topScores.length === 0) {
-                     dom.leaderboardList.innerHTML = `<p class="text-center text-muted p-2">ยังไม่มีใครทำคะแนนเลย! มาเป็นคนแรกกัน!</p>`;
-                     return;
-                }
-
-                topScores.forEach((rank, index) => {
-                    const rankItem = document.createElement('div');
-                    const isCurrentUser = rank.employeeId === gameState.employeeId;
-                    rankItem.className = `d-flex justify-content-between align-items-center p-2 small ${index < 3 ? 'fs-5' : 'text-secondary'} ${isCurrentUser ? 'bg-success-subtle border border-success rounded my-1 fw-bold' : ''}`;
-                    
-                    const rankNumber = index + 1;
-                    const trophyEmoji = rankNumber === 1 ? '🥇' : rankNumber === 2 ? '🥈' : rankNumber === 3 ? '🥉' : '';
-                    
+                    // สร้าง HTML ภายใน
                     rankItem.innerHTML = `
-                        <div class="font-monospace d-flex align-items-center">
-                            <span class="text-center" style="width: 1.5rem;">${trophyEmoji}</span>
-                            <span class="ms-2">${rank.employeeId}</span>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="leaderboard-rank-text me-3" style="min-width: 30px;">${rankDisplay}</span>
+                            <span class="text-truncate fw-bold flex-grow-1">${rank.employeeId}</span>
+                            <span class="leaderboard-score fw-black fs-5 ms-3 text-primary">${rank.score}</span>
                         </div>
-                        <span class="fw-bolder fs-5 ${index === 0 ? 'text-warning' : 'text-success'}">${rank.score}</span>
                     `;
-                    dom.leaderboardList.appendChild(rankItem);
-                });
 
-            });
-        }
-        
-        function populateInfoModal() {
-            dom.goodInfoList.innerHTML = '';
-            dom.badInfoList.innerHTML = '';
+                    // กำหนดคลาสรวม
+                    rankItem.className = `d-flex align-items-center leaderboard-item small ${rankClass} ${isCurrentUser ? 'leaderboard-current-user' : ''}`;
+                    
+                    dom.leaderboardList.appendChild(rankItem);
+                });
+            });
+        }
 
-            ITEM_DEFINITIONS.forEach(item => {
-                const listItem = document.createElement('div');
-                listItem.className = 'd-flex align-items-start p-3 border-bottom border-secondary-subtle';
-                
-                const imgContainer = document.createElement('div');
-                imgContainer.className = `flex-shrink-0 me-3 rounded-circle shadow d-flex justify-content-center align-items-center ${item.color}`;
-                imgContainer.style.width = '3rem';
-                imgContainer.style.height = '3rem';
-                imgContainer.innerHTML = `<img src="${item.imageSrc}" class="w-100 h-100 object-fit-contain p-1">`;
-                
-                const textContainer = document.createElement('div');
-                textContainer.className = 'flex-grow-1';
-                textContainer.innerHTML = `
-                    <p class="fw-bold mb-0 text-dark">${item.defaultDesc}</p>
-                    <p class="small mb-0 ${item.type === 'good' ? 'text-success' : 'text-danger'}">คะแนน: ${item.score > 0 ? '+' : ''}${item.score}</p>
-                `;
+        // --- Initialization and Event Handlers ---
+        
+        function populateInfoModal() {
+            const goodItems = ITEM_DEFINITIONS.filter(item => item.type === 'good');
+            const badItems = ITEM_DEFINITIONS.filter(item => item.type === 'bad');
+            
+            dom.goodInfoList.innerHTML = goodItems.map(item => `
+                <div class="d-flex align-items-center mb-2">
+                    <img src="${item.imageSrc}" style="width: 35px; height: 35px; border-radius: 50%; padding: 5px; background: rgba(0, 255, 0, 0.1);" class="me-3">
+                    <span class="text-success small fw-semibold">${item.defaultDesc}</span>
+                </div>
+            `).join('');
+            
+            dom.badInfoList.innerHTML = badItems.map(item => `
+                <div class="d-flex align-items-center mb-2">
+                    <img src="${item.imageSrc}" style="width: 35px; height: 35px; border-radius: 50%; padding: 5px; background: rgba(255, 0, 0, 0.1);" class="me-3">
+                    <span class="text-danger small fw-semibold">${item.defaultDesc}</span>
+                </div>
+            `).join('');
+        }
 
-                listItem.appendChild(imgContainer);
-                listItem.appendChild(textContainer);
-                
-                if (item.type === 'good') {
-                    dom.goodInfoList.appendChild(listItem);
-                } else {
-                    dom.badInfoList.appendChild(listItem);
-                }
-            });
-        }
+        function initialize() {
+            messageModal = new bootstrap.Modal(document.getElementById('messageBox'));
+            infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+            
+            populateInfoModal();
 
-        function preloadImages() {
-             return new Promise(resolve => {
-                const imagePromises = ITEM_DEFINITIONS.map(item => {
-                    return new Promise(imgResolve => {
-                        const img = new Image();
-                        img.onload = imgResolve;
-                        img.onerror = imgResolve; 
-                        img.src = item.imageSrc;
-                    });
-                });
+            dom.startButton.addEventListener('click', startGame);
+            dom.restartButton.addEventListener('click', () => {
+                dom.gameOverScreen.classList.add('d-none');
+                dom.startScreen.classList.remove('d-none'); // กลับไปหน้าแรกเพื่อเปลี่ยน ID หรือเริ่มใหม่
+                dom.employeeIdInput.disabled = false;
+                dom.startButton.disabled = true;
+            });
+            
+            dom.employeeIdInput.addEventListener('input', (e) => {
+                const value = e.target.value.toUpperCase().trim();
+                e.target.value = value;
+                
+                if (value.length > 0) {
+                    dom.startButton.textContent = '🚀 เริ่มภารกิจ!';
+                    dom.startButton.disabled = false;
+                } else {
+                    dom.startButton.textContent = 'กรุณากรอกรหัสพนักงาน';
+                    dom.startButton.disabled = true;
+                }
+                gameState.employeeId = value;
+            });
+        }
 
-                Promise.all(imagePromises).then(() => {
-                    gameState.isImagesPreloaded = true;
-                    resolve();
-                });
-            });
-        }
+        // Global function called by the Firebase module when ready
+        window.initApp = (userId, appId) => {
+            gameState.userId = userId;
+            gameState.appId = appId;
+            gameState.db = window.db; 
+            
+            if (gameState.appId) {
+                setupLeaderboard(gameState.appId);
+            } else {
+                dom.loadingLeaderboard.textContent = "ไม่สามารถเชื่อมต่อ Firebase ได้";
+                console.error("Firebase App ID not available for Leaderboard setup.");
+            }
+            
+            initialize();
+        };
 
-        // --- Event Listeners and Initialization ---
-        function setupEventListeners() {
-            // Initialize Bootstrap Modals
-            messageModal = new bootstrap.Modal(document.getElementById('messageBox'));
-            infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
-            
-            dom.startButton.addEventListener('click', startGame);
-            dom.restartButton.addEventListener('click', () => {
-                // กลับไปหน้า Start 
-                dom.gameContainer.classList.add('d-none');
-                dom.gameOverScreen.classList.add('d-none');
-                // Leaderboard แสดงอยู่แล้ว 
-                
-                dom.startScreen.classList.remove('d-none');
-                dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)'; 
-            });
-            
-            // Event listener for Input
-            dom.employeeIdInput.addEventListener('input', (e) => {
-                // Force uppercase and allow only A-Z, 0-9
-                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
-                
-                const id = e.target.value.trim();
-                if (id.length > 0) {
-                    dom.startButton.disabled = false;
-                    dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
-                    dom.startButton.classList.remove('btn-secondary'); 
-                    dom.startButton.classList.add('btn-main');
-                } else {
-                    dom.startButton.disabled = true;
-                    dom.startButton.textContent = 'กรุณากรอกรหัสพนักงาน';
-                    dom.startButton.classList.remove('btn-main');
-                    dom.startButton.classList.add('btn-secondary');
-                }
-            });
-            // Initial check for button state
-            dom.startButton.classList.add('btn-secondary');
-        }
-        
-        window.initApp = function(userId, appId) {
-            gameState.userId = userId;
-            gameState.appId = appId;
-            gameState.db = window.db; 
-            
-            if (gameState.db) {
-                setupLeaderboard(appId);
-            }
-
-            populateInfoModal();
-            
-            preloadImages(); 
-        }
-
-        setupEventListeners();
-    </script>
+    </script>
 </body>
 </html>
