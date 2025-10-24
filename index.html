@@ -232,47 +232,13 @@
             filter: blur(5px); 
         }
 
-        /* --- LEADERBOARD ENHANCEMENTS --- */
-        #leaderboard-panel {
-            max-height: 40vh; /* จำกัดความสูงของ Leaderboard */
-            overflow-y: auto;
-            margin-top: 1rem;
-            padding: 0.75rem; 
-        }
-
-        .leaderboard-item {
-            border-radius: 0.75rem;
-            margin-bottom: 0.5rem;
-            padding: 0.75rem 1rem !important;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .leaderboard-rank-1 {
-            background: linear-gradient(135deg, #FFD700 0%, #FFEB80 100%); /* Gold */
-            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.5);
-            color: #614e1a !important;
-        }
-        .leaderboard-rank-2 {
-            background: linear-gradient(135deg, #C0C0C0 0%, #E0E0E0 100%); /* Silver */
-            color: #333 !important;
-        }
-        .leaderboard-rank-3 {
-            background: linear-gradient(135deg, #CD7F32 0%, #F4A460 100%); /* Bronze */
-            color: #333 !important;
-        }
-        
-        .leaderboard-current-user {
-            background-color: var(--primary-color) !important;
-            color: white !important;
-            border: 3px solid var(--secondary-color) !important;
-            transform: scale(1.02);
-            font-weight: bold; /* เพิ่มความหนาเพื่อเน้น */
-        }
-        
-        .leaderboard-current-user .leaderboard-score,
-        .leaderboard-current-user .leaderboard-rank-text {
-            color: white !important; /* ให้คะแนนเป็นสีขาวเมื่อเป็นผู้เล่นปัจจุบัน */
-        }
+        /* --- LEADERBOARD --- */
+        #leaderboard-panel {
+            max-height: 40vh; /* จำกัดความสูงของ Leaderboard */
+            overflow-y: auto;
+            margin-top: 1rem;
+            padding: 0.75rem; 
+        }
         
         /* Responsive Text Size for smaller mobile screens */
         @media (max-width: 370px) {
@@ -332,13 +298,10 @@
         
         <div id="start-screen" class="p-4 card-panel mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
             
-            <h2 class="display-6 fw-black text-primary mb-3">🌱 หยุด! มลพิษคาร์บอน!</h2>
-            <p class="fs-5 text-secondary fw-semibold mb-4">
-                แตะ **กิจกรรมรักษ์โลก** <span class="text-success">(+10)</span> และหลีกเลี่ยง **กิจกรรมปล่อยคาร์บอน** <span class="text-danger">(-5)</span>
+            <h2 class="display-6 fw-black text-primary mb-4">หยุด! มลพิษคาร์บอน!</h2>
+            <p class="fs-5 text-secondary fw-semibold mb-5">
+                แตะ **กิจกรรมรักษ์โลก** (+10) และหลีกเลี่ยง **กิจกรรมปล่อยคาร์บอน** (-5)
             </p>
-            <div class="mb-4">
-                <img src="https://i.postimg.cc/mD8q5v32/Earth-Mission.png" alt="Carbon Mission Logo" style="width: 150px; height: auto;">
-            </div>
 
             <div class="w-100" style="max-width: 300px;">
                 <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
@@ -468,7 +431,7 @@
         };
         
         // ***************************************************************
-        // --- Game Logic Functions ---
+        // --- Game Logic Functions (ใช้ชุดเดิม) ---
         // ***************************************************************
         
         function showMessage(title, body) {
@@ -536,6 +499,8 @@
             dom.finalScore.textContent = gameState.score;
             
             dom.gameOverScreen.classList.remove('d-none');
+            
+            // Leaderboard แสดงอยู่แล้ว ไม่ต้องทำอะไร
             
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
         }
@@ -681,7 +646,7 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- Firebase/Leaderboard Logic ---
+        // --- Firebase/Leaderboard Logic (ใช้ชุดเดิม) ---
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -766,108 +731,4 @@
                 topScores.forEach((rank, index) => {
                     const rankItem = document.createElement('div');
                     const isCurrentUser = rank.employeeId === gameState.employeeId;
-                    const rankNumber = index + 1;
-                    
-                    let rankClass = 'text-secondary';
-                    let rankDisplay = `#${rankNumber}`;
-
-                    // กำหนด Class และ Emoji สำหรับ 3 อันดับแรก
-                    if (rankNumber === 1) {
-                        rankClass = 'leaderboard-rank-1 fw-black fs-5';
-                        rankDisplay = '🥇';
-                    } else if (rankNumber === 2) {
-                        rankClass = 'leaderboard-rank-2 fw-bold fs-5';
-                        rankDisplay = '🥈';
-                    } else if (rankNumber === 3) {
-                        rankClass = 'leaderboard-rank-3 fw-semibold fs-5';
-                        rankDisplay = '🥉';
-                    } else {
-                        rankClass = 'bg-light'; // สำหรับอันดับที่ 4 ลงไป
-                    }
-
-                    // สร้าง HTML ภายใน
-                    rankItem.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="leaderboard-rank-text me-3" style="min-width: 30px;">${rankDisplay}</span>
-                            <span class="text-truncate fw-bold flex-grow-1">${rank.employeeId}</span>
-                            <span class="leaderboard-score fw-black fs-5 ms-3 text-primary">${rank.score}</span>
-                        </div>
-                    `;
-
-                    // กำหนดคลาสรวม
-                    rankItem.className = `d-flex align-items-center leaderboard-item small ${rankClass} ${isCurrentUser ? 'leaderboard-current-user' : ''}`;
-                    
-                    dom.leaderboardList.appendChild(rankItem);
-                });
-            });
-        }
-
-        // --- Initialization and Event Handlers ---
-        
-        function populateInfoModal() {
-            const goodItems = ITEM_DEFINITIONS.filter(item => item.type === 'good');
-            const badItems = ITEM_DEFINITIONS.filter(item => item.type === 'bad');
-            
-            dom.goodInfoList.innerHTML = goodItems.map(item => `
-                <div class="d-flex align-items-center mb-2">
-                    <img src="${item.imageSrc}" style="width: 35px; height: 35px; border-radius: 50%; padding: 5px; background: rgba(0, 255, 0, 0.1);" class="me-3">
-                    <span class="text-success small fw-semibold">${item.defaultDesc}</span>
-                </div>
-            `).join('');
-            
-            dom.badInfoList.innerHTML = badItems.map(item => `
-                <div class="d-flex align-items-center mb-2">
-                    <img src="${item.imageSrc}" style="width: 35px; height: 35px; border-radius: 50%; padding: 5px; background: rgba(255, 0, 0, 0.1);" class="me-3">
-                    <span class="text-danger small fw-semibold">${item.defaultDesc}</span>
-                </div>
-            `).join('');
-        }
-
-        function initialize() {
-            messageModal = new bootstrap.Modal(document.getElementById('messageBox'));
-            infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
-            
-            populateInfoModal();
-
-            dom.startButton.addEventListener('click', startGame);
-            dom.restartButton.addEventListener('click', () => {
-                dom.gameOverScreen.classList.add('d-none');
-                dom.startScreen.classList.remove('d-none'); // กลับไปหน้าแรกเพื่อเปลี่ยน ID หรือเริ่มใหม่
-                dom.employeeIdInput.disabled = false;
-                dom.startButton.disabled = true;
-            });
-            
-            dom.employeeIdInput.addEventListener('input', (e) => {
-                const value = e.target.value.toUpperCase().trim();
-                e.target.value = value;
-                
-                if (value.length > 0) {
-                    dom.startButton.textContent = '🚀 เริ่มภารกิจ!';
-                    dom.startButton.disabled = false;
-                } else {
-                    dom.startButton.textContent = 'กรุณากรอกรหัสพนักงาน';
-                    dom.startButton.disabled = true;
-                }
-                gameState.employeeId = value;
-            });
-        }
-
-        // Global function called by the Firebase module when ready
-        window.initApp = (userId, appId) => {
-            gameState.userId = userId;
-            gameState.appId = appId;
-            gameState.db = window.db; 
-            
-            if (gameState.appId) {
-                setupLeaderboard(gameState.appId);
-            } else {
-                dom.loadingLeaderboard.textContent = "ไม่สามารถเชื่อมต่อ Firebase ได้";
-                console.error("Firebase App ID not available for Leaderboard setup.");
-            }
-            
-            initialize();
-        };
-
-    </script>
-</body>
-</html>
+                    rankItem.className = `d-flex justify-content-between align-items-center p-2 small ${index < 3 ? 'fs-5' : 'text-secondary'} ${isCurrentUser ? 'bg-success-subtle border border-success rounded my-1 fw-bold' : ''}`;
