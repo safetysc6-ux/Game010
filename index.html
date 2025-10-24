@@ -121,21 +121,36 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* App Container (Ensures full viewport height on mobile) */
+        /* App Container (Ensures full viewport height on mobile and responsive layout) */
         #app {
             width: 100vw;
             height: 100vh;
-            max-width: 600px; 
+            max-width: 600px; /* Max width for larger screens */
             background-color: var(--bg-color); 
-            padding: 4vmin; 
+            padding: 4vmin; /* Responsive padding */
             display: flex;
-            flex-direction: column; 
+            flex-direction: column; /* Stacks children vertically */
             box-sizing: border-box; 
+            /* Added safe area insets for iOS devices */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);
         }
+        
+        /* Flexbox Utility: Makes an element fixed size */
+        .flex-fixed {
+            flex-shrink: 0;
+        }
+        
+        /* Flexbox Utility: Makes an element grow to fill remaining space */
+        .flex-grow-area {
+            flex-grow: 1; 
+            min-height: 0; /* Important for flex items inside flex containers */
+            display: flex;
+            flex-direction: column;
+        }
+
 
         /* Neumorphism Card Style */
         .card-panel {
@@ -145,7 +160,6 @@
                 8px 8px 16px var(--shadow-dark), 
                 -8px -8px 16px var(--shadow-light); 
             padding: 1.5rem; 
-            flex-shrink: 0; 
             transition: all 0.3s ease;
         }
         
@@ -168,25 +182,6 @@
             transform: scale(0.97);
         }
 
-        /* Secondary Button Style */
-        .btn-secondary {
-            background-color: var(--secondary-color); 
-            color: #0e7490; 
-            border-radius: 9999px;
-            box-shadow: 
-                3px 3px 6px rgba(0, 0, 0, 0.2), 
-                -2px -2px 4px rgba(255, 255, 255, 0.8);
-            transition: all 0.15s ease;
-            font-weight: 700;
-        }
-
-        .btn-secondary:active {
-            box-shadow: 
-                inset 2px 2px 5px rgba(0, 0, 0, 0.2), 
-                inset -2px -2px 5px rgba(255, 255, 255, 0.5);
-            transform: scale(0.95);
-        }
-
         /* Input Field Style */
         .input-recessed {
             background-color: var(--bg-color);
@@ -200,25 +195,16 @@
         }
         
         /* --- GAME AREA LAYOUT --- */
-        #game-container {
-            flex-grow: 1; 
-            min-height: 0; 
-            display: flex;
-            flex-direction: column;
-        }
-
         .game-area {
             position: relative;
             overflow: hidden;
             background-color: #a7f3d0; 
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35);
             flex-grow: 1; 
-            min-height: 100%; 
             border-radius: 1.5rem;
-            margin-bottom: 0;
         }
         
-        /* --- GAME ITEM STYLE & ANIMATIONS --- */
+        /* --- ITEM ANIMATIONS --- */
         .game-item {
             position: absolute;
             width: 70px; 
@@ -241,11 +227,6 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
         
-        .game-item:active {
-            transform: scale(0.8);
-            box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.3); 
-        }
-        
         /* Score Pop-up Style & Animation */
         .score-popup {
             pointer-events: none; 
@@ -256,7 +237,7 @@
         }
 
         .score-popup.animate {
-            transform: translate(-50%, -130px) scale(1.5); /* float higher */
+            transform: translate(-50%, -130px) scale(1.5);
             opacity: 0;
             filter: blur(5px); 
         }
@@ -265,15 +246,9 @@
         #leaderboard-panel {
             max-height: 40vh; 
             overflow-y: auto;
-            background-color: var(--bg-color); 
-            border-radius: 1.5rem;
-            flex-shrink: 0; 
-            transition: max-height 0.5s ease-in-out, opacity 0.4s ease-in-out, padding 0.5s ease-in-out, margin 0.5s ease-in-out;
-            opacity: 1;
             margin-top: 1.5rem;
         }
         
-        /* 💡 แก้ไข: ใช้ class นี้เป็นค่าเริ่มต้น */
         .leaderboard-hidden {
             max-height: 0 !important;
             padding-top: 0 !important;
@@ -283,34 +258,13 @@
             overflow: hidden;
             border: none !important;
         }
-
-        /* Game Over Screen Animation */
-        @keyframes bounce-in {
-            0% { transform: scale(0.5); opacity: 0; }
-            70% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1.0); }
-        }
-
-        #game-over-screen {
-            animation: bounce-in 0.4s ease-out forwards;
-            transform-origin: center;
-        }
-
-        /* Responsive Text Sizing */
-        @media (max-width: 380px) {
-            h1 { font-size: 1.8rem !important; }
-            .text-2xl { font-size: 1.5rem !important; }
-            .text-xl { font-size: 1.25rem !important; }
-            .text-lg { font-size: 1.1rem !important; }
-        }
-
     </style>
 </head>
 <body>
 
     <div id="app">
         
-<div id="message-box" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
+        <div id="message-box" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
             <div class="card-panel p-6 max-w-xs text-center transform scale-100" onclick="event.stopPropagation()">
                 <h3 id="message-title" class="text-xl font-bold mb-3 text-emerald-600"></h3>
                 <p id="message-body" class="mb-4 text-gray-700"></p>
@@ -318,8 +272,7 @@
             </div>
         </div>
         
-        
-<div id="info-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('info-modal').classList.add('hidden')">
+        <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('info-modal').classList.add('hidden')">
             <div class="card-panel p-6 max-w-md w-11/12 max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
                 <h3 class="text-2xl font-bold mb-4 text-emerald-600 border-b-2 pb-2 border-emerald-300">💡 ข้อมูลการปลดปล่อยคาร์บอน</h3>
                 <h4 class="text-xl font-bold mt-4 mb-2 text-green-700">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
@@ -331,13 +284,13 @@
         </div>
 
         
-<div class="flex justify-between items-center mb-4 flex-shrink-0">
+        <div class="flex justify-between items-center mb-4 flex-fixed">
             <h1 class="text-2xl font-extrabold text-emerald-700">🌲 CARBON MISSION 🌎</h1>
-            <button id="info-button" class="btn-secondary px-3 py-1 text-sm font-bold shadow-lg">ข้อมูล</button>
+            <button id="info-button" class="btn-secondary px-3 py-1 text-sm font-bold shadow-lg bg-cyan-300 text-cyan-800 rounded-full">ข้อมูล</button>
         </div>
 
         
-<div id="start-screen" class="space-y-4 card-panel mb-4 flex-shrink-0">
+        <div id="start-screen" class="space-y-4 card-panel mb-4 flex-fixed">
             <p class="text-center text-gray-600 font-semibold">กรุณาระบุรหัสพนักงานเพื่อเข้าสู่ภารกิจ</p>
             <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
                         maxlength="10"
@@ -347,10 +300,10 @@
                 กรุณากรอกรหัสพนักงาน
             </button>
         </div>
-
         
-<div id="game-container" class="hidden">
-            <div class="flex justify-between items-center mb-3 p-3 card-panel flex-shrink-0">
+        <div id="game-container" class="hidden flex-grow-area">
+            
+            <div class="flex justify-between items-center mb-3 p-3 card-panel flex-fixed">
                 <div class="text-lg font-bold text-emerald-800">SCORE: <span id="score-display" class="text-2xl font-extrabold text-green-600">0</span></div>
                 <div class="text-lg font-bold text-emerald-800">TIME: <span id="timer-display" class="text-2xl font-extrabold text-blue-600">20</span>s</div>
                 <div id="current-user-id" class="text-xs text-gray-500 truncate font-mono" title="รหัสพนักงานของคุณ">ID: </div>
@@ -362,7 +315,7 @@
         </div>
 
         
-<div id="game-over-screen" class="hidden text-center space-y-4 card-panel mb-4 flex-shrink-0">
+        <div id="game-over-screen" class="hidden text-center space-y-4 card-panel mb-4 flex-fixed">
             <h2 class="text-3xl font-extrabold text-emerald-600">🎉 ภารกิจสำเร็จ!</h2>
             <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-5xl text-red-600 block my-2">0</span></p>
             <p id="ranking-status" class="text-md font-semibold text-green-700"></p>
@@ -372,7 +325,8 @@
             </button>
         </div>
 
-        <div id="leaderboard-panel" class="card-panel leaderboard-hidden">
+        
+        <div id="leaderboard-panel" class="card-panel leaderboard-hidden flex-fixed">
             <h2 class="text-xl font-bold text-center mb-3 text-emerald-700">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
             <div id="leaderboard-list">
                 <p class="text-center text-gray-500" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
@@ -391,30 +345,32 @@
 
         // Emoji definitions 
         const ITEM_DEFINITIONS = [
-            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: เลือกทานอาหารมังสวิรัติ' },
-            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้ระบบขนส่งสาธารณะ' },
-            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
-            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้พลังงานสะอาด (โซลาร์เซลล์)' },
-            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ลดการใช้ถุงพลาสติก' },
-            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: นำขวดน้ำมาใช้ซ้ำ' },
-            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ซ่อมแซมอุปกรณ์ไฟฟ้าที่ชำรุด' },
-            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ปิดไฟเมื่อไม่ใช้งาน' },
-            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: แยกประเภทขยะก่อนทิ้ง' },
-            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ประหยัดการใช้น้ำ' },
-            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ซื้อสินค้ามือสอง' },
-            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: การเดิน/ปั่นจักรยานแทนรถ' },
-            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้ผลิตภัณฑ์ที่เป็นมิตรต่อสิ่งแวดล้อม' },
-            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: งดเผาขยะ' },
-            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: การปลูกผักสวนครัว' },
-            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
-            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
+            // Good: Carbon Reduction 
+            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'เลือกทานอาหารมังสวิรัติ' },
+            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ใช้ระบบขนส่งสาธารณะ' },
+            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
+            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ใช้พลังงานสะอาด (โซลาร์เซลล์)' },
+            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ลดการใช้ถุงพลาสติก' },
+            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'นำขวดน้ำมาใช้ซ้ำ' },
+            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ซ่อมแซมอุปกรณ์ไฟฟ้าที่ชำรุด' },
+            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ปิดไฟเมื่อไม่ใช้งาน' },
+            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'แยกประเภทขยะก่อนทิ้ง' },
+            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ประหยัดการใช้น้ำ' },
+            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ซื้อสินค้ามือสอง' },
+            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'การเดิน/ปั่นจักรยานแทนรถ' },
+            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ใช้ผลิตภัณฑ์ที่เป็นมิตรต่อสิ่งแวดล้อม' },
+            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'งดเผาขยะ' },
+            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'การปลูกผักสวนครัว' },
+            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
+            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
 
-            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: เดินทางด้วยเครื่องบินบ่อย' },
-            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ใช้รถยนต์ส่วนตัวคนเดียว' },
-            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ทิ้งขยะไม่แยกประเภท' },
-            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: เปิดไฟทิ้งไว้ตลอดเวลา' },
-            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: สั่งอาหารแบบ Delivery บ่อยเกินไป' },
-            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
+            // Bad: Carbon Emission
+            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'เดินทางด้วยเครื่องบินบ่อย' },
+            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ใช้รถยนต์ส่วนตัวคนเดียว' },
+            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ทิ้งขยะไม่แยกประเภท' },
+            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'เปิดไฟทิ้งไว้ตลอดเวลา' },
+            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'สั่งอาหารแบบ Delivery บ่อยเกินไป' },
+            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
         ];
 
         // --- Global Game State ---
@@ -492,12 +448,12 @@
 
             resetGame();
             
+            // 💡 ซ่อน Start/Game Over และ Leaderboard
             dom.startScreen.classList.add('hidden');
             dom.gameOverScreen.classList.add('hidden');
-            
-            // 💡 Leaderboard ถูกซ่อนตั้งแต่โหลดหน้าแล้ว ไม่ต้องซ่อนซ้ำ
             dom.leaderboardPanel.classList.add('leaderboard-hidden'); 
             
+            // 💡 แสดง Game Container
             dom.gameContainer.classList.remove('hidden'); 
             
             dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
@@ -523,12 +479,13 @@
             Object.values(gameState.items).forEach(item => item.element.remove()); 
             gameState.items = {}; 
 
+            // 💡 ซ่อน Game Container และแสดง Game Over Screen
             dom.gameContainer.classList.add('hidden');
             dom.finalScore.textContent = gameState.score;
             
             dom.gameOverScreen.classList.remove('hidden');
             
-            // 💡 แสดง Leaderboard กลับมา
+            // 💡 แสดง Leaderboard
             dom.leaderboardPanel.classList.remove('leaderboard-hidden');
 
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
@@ -567,6 +524,7 @@
             
             const imgElement = document.createElement('img');
             imgElement.src = definition.imageSrc;
+            imgElement.className = "w-full h-full object-contain p-2"; // Style image inside item
             
             itemElement.appendChild(imgElement);
 
@@ -674,7 +632,7 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- Firebase/Leaderboard Logic (Minimal changes for display) ---
+        // --- Firebase/Leaderboard Logic ---
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -829,10 +787,12 @@
         function setupEventListeners() {
             dom.startButton.addEventListener('click', startGame);
             dom.restartButton.addEventListener('click', () => {
+                // 💡 กลับไปหน้า Start โดยซ่อนทุกอย่างยกเว้น Start Screen
                 dom.gameContainer.classList.add('hidden');
                 dom.gameOverScreen.classList.add('hidden');
+                dom.leaderboardPanel.classList.add('leaderboard-hidden'); 
+                
                 dom.startScreen.classList.remove('hidden');
-                dom.leaderboardPanel.classList.remove('leaderboard-hidden'); 
                 dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)'; 
             });
             
@@ -862,7 +822,6 @@
             gameState.appId = appId;
             gameState.db = window.db; 
             
-            // 💡 โหลด Leaderboard ทันที แต่จะแสดงเมื่อเกมจบ
             if (gameState.db) {
                 setupLeaderboard(appId);
             }
