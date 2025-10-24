@@ -109,7 +109,7 @@
             overflow: hidden; 
             margin: 0;
             padding: 0;
-            box-sizing: border-box; /* Crucial for consistent sizing */
+            box-sizing: border-box;
         }
         body {
             font-family: 'Chakra Petch', sans-serif;
@@ -124,14 +124,13 @@
         /* App Container (Ensures full viewport height on mobile) */
         #app {
             width: 100vw;
-            height: 100vh; /* Use 100vh for full viewport height */
-            max-width: 600px; /* Max width for larger screens */
+            height: 100vh;
+            max-width: 600px; 
             background-color: var(--bg-color); 
-            padding: 4vmin; /* Responsive padding */
+            padding: 4vmin; 
             display: flex;
             flex-direction: column; 
             box-sizing: border-box; 
-            /* Added safe area insets for iOS devices */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
             padding-left: env(safe-area-inset-left);
@@ -141,13 +140,13 @@
         /* Neumorphism Card Style */
         .card-panel {
             background-color: var(--bg-color); 
-            border-radius: 1.5rem; /* Smoother corners */
+            border-radius: 1.5rem;
             box-shadow: 
                 8px 8px 16px var(--shadow-dark), 
                 -8px -8px 16px var(--shadow-light); 
             padding: 1.5rem; 
             flex-shrink: 0; 
-            transition: all 0.3s ease; /* Smoother transitions */
+            transition: all 0.3s ease;
         }
         
         /* Primary Button Style */
@@ -171,9 +170,9 @@
 
         /* Secondary Button Style */
         .btn-secondary {
-            background-color: var(--secondary-color); /* Cyan */
-            color: #0e7490; /* Darker Cyan */
-            border-radius: 9999px; /* Pill shape */
+            background-color: var(--secondary-color); 
+            color: #0e7490; 
+            border-radius: 9999px;
             box-shadow: 
                 3px 3px 6px rgba(0, 0, 0, 0.2), 
                 -2px -2px 4px rgba(255, 255, 255, 0.8);
@@ -191,12 +190,12 @@
         /* Input Field Style */
         .input-recessed {
             background-color: var(--bg-color);
-            border: none; /* Removed border */
+            border: none;
             border-radius: 1rem;
             box-shadow: 
                 inset 3px 3px 7px rgba(0, 0, 0, 0.15), 
-                inset -3px -3px 7px var(--shadow-light); /* Deeper inset */
-            padding: 1rem 1.25rem; /* More generous padding */
+                inset -3px -3px 7px var(--shadow-light);
+            padding: 1rem 1.25rem;
             color: var(--text-color);
         }
         
@@ -204,19 +203,19 @@
         #game-container {
             flex-grow: 1; 
             min-height: 0; 
-            display: flex; /* Make game-container a flex container for its children */
+            display: flex;
             flex-direction: column;
         }
 
         .game-area {
             position: relative;
             overflow: hidden;
-            background-color: #a7f3d0; /* Light Green Play Zone */
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35); /* Deeper inset shadow */
+            background-color: #a7f3d0; 
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35);
             flex-grow: 1; 
             min-height: 100%; 
             border-radius: 1.5rem;
-            margin-bottom: 0; /* Ensure no bottom margin pushes it up */
+            margin-bottom: 0;
         }
         
         /* --- GAME ITEM STYLE & ANIMATIONS --- */
@@ -227,15 +226,14 @@
             cursor: pointer;
             user-select: none;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.7); /* Slightly transparent background */
+            background-color: rgba(255, 255, 255, 0.7);
             box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 4px rgba(255, 255, 255, 0.7);
-            transition: transform 0.05s ease-out; /* Faster click response */
+            transition: transform 0.05s ease-out;
             z-index: 10; 
 
-            /* Initial state for spawn animation */
             opacity: 0;
             transform: scale(0.5); 
-            animation: item-spawn 0.3s ease-out forwards; /* Spawn animation */
+            animation: item-spawn 0.3s ease-out forwards;
         }
 
         @keyframes item-spawn {
@@ -244,7 +242,7 @@
         }
         
         .game-item:active {
-            transform: scale(0.8); /* More pronounced click effect */
+            transform: scale(0.8);
             box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.3); 
         }
         
@@ -253,14 +251,14 @@
             pointer-events: none; 
             z-index: 20; 
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); 
-            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); /* Smoother curve */
-            will-change: transform, opacity, filter; /* Optimize animation */
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: transform, opacity, filter;
         }
 
         .score-popup.animate {
-            transform: translateY(-80px) scale(1.5); /* Float higher, bigger */
+            transform: translate(-50%, -130px) scale(1.5); /* float higher */
             opacity: 0;
-            filter: blur(5px); /* Add blur effect */
+            filter: blur(5px); 
         }
 
         /* --- LEADERBOARD & TRANSITION --- */
@@ -272,9 +270,10 @@
             flex-shrink: 0; 
             transition: max-height 0.5s ease-in-out, opacity 0.4s ease-in-out, padding 0.5s ease-in-out, margin 0.5s ease-in-out;
             opacity: 1;
-            margin-top: 1.5rem; /* Default margin */
+            margin-top: 1.5rem;
         }
         
+        /* 💡 แก้ไข: ใช้ class นี้เป็นค่าเริ่มต้น */
         .leaderboard-hidden {
             max-height: 0 !important;
             padding-top: 0 !important;
@@ -310,7 +309,8 @@
 <body>
 
     <div id="app">
-        <div id="message-box" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
+        
+<div id="message-box" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
             <div class="card-panel p-6 max-w-xs text-center transform scale-100" onclick="event.stopPropagation()">
                 <h3 id="message-title" class="text-xl font-bold mb-3 text-emerald-600"></h3>
                 <p id="message-body" class="mb-4 text-gray-700"></p>
@@ -318,7 +318,8 @@
             </div>
         </div>
         
-        <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('info-modal').classList.add('hidden')">
+        
+<div id="info-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('info-modal').classList.add('hidden')">
             <div class="card-panel p-6 max-w-md w-11/12 max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
                 <h3 class="text-2xl font-bold mb-4 text-emerald-600 border-b-2 pb-2 border-emerald-300">💡 ข้อมูลการปลดปล่อยคาร์บอน</h3>
                 <h4 class="text-xl font-bold mt-4 mb-2 text-green-700">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
@@ -329,12 +330,14 @@
             </div>
         </div>
 
-        <div class="flex justify-between items-center mb-4 flex-shrink-0">
+        
+<div class="flex justify-between items-center mb-4 flex-shrink-0">
             <h1 class="text-2xl font-extrabold text-emerald-700">🌲 CARBON MISSION 🌎</h1>
             <button id="info-button" class="btn-secondary px-3 py-1 text-sm font-bold shadow-lg">ข้อมูล</button>
         </div>
 
-        <div id="start-screen" class="space-y-4 card-panel mb-4 flex-shrink-0">
+        
+<div id="start-screen" class="space-y-4 card-panel mb-4 flex-shrink-0">
             <p class="text-center text-gray-600 font-semibold">กรุณาระบุรหัสพนักงานเพื่อเข้าสู่ภารกิจ</p>
             <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
                         maxlength="10"
@@ -345,7 +348,8 @@
             </button>
         </div>
 
-        <div id="game-container" class="hidden">
+        
+<div id="game-container" class="hidden">
             <div class="flex justify-between items-center mb-3 p-3 card-panel flex-shrink-0">
                 <div class="text-lg font-bold text-emerald-800">SCORE: <span id="score-display" class="text-2xl font-extrabold text-green-600">0</span></div>
                 <div class="text-lg font-bold text-emerald-800">TIME: <span id="timer-display" class="text-2xl font-extrabold text-blue-600">20</span>s</div>
@@ -357,7 +361,8 @@
             </div>
         </div>
 
-        <div id="game-over-screen" class="hidden text-center space-y-4 card-panel mb-4 flex-shrink-0">
+        
+<div id="game-over-screen" class="hidden text-center space-y-4 card-panel mb-4 flex-shrink-0">
             <h2 class="text-3xl font-extrabold text-emerald-600">🎉 ภารกิจสำเร็จ!</h2>
             <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-5xl text-red-600 block my-2">0</span></p>
             <p id="ranking-status" class="text-md font-semibold text-green-700"></p>
@@ -367,7 +372,7 @@
             </button>
         </div>
 
-        <div id="leaderboard-panel" class="card-panel">
+        <div id="leaderboard-panel" class="card-panel leaderboard-hidden">
             <h2 class="text-xl font-bold text-center mb-3 text-emerald-700">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
             <div id="leaderboard-list">
                 <p class="text-center text-gray-500" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
@@ -386,7 +391,6 @@
 
         // Emoji definitions 
         const ITEM_DEFINITIONS = [
-            // Good: Carbon Reduction 
             { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: เลือกทานอาหารมังสวิรัติ' },
             { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้ระบบขนส่งสาธารณะ' },
             { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
@@ -405,7 +409,6 @@
             { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
             { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
 
-            // Bad: Carbon Emission
             { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: เดินทางด้วยเครื่องบินบ่อย' },
             { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ใช้รถยนต์ส่วนตัวคนเดียว' },
             { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ทิ้งขยะไม่แยกประเภท' },
@@ -492,6 +495,7 @@
             dom.startScreen.classList.add('hidden');
             dom.gameOverScreen.classList.add('hidden');
             
+            // 💡 Leaderboard ถูกซ่อนตั้งแต่โหลดหน้าแล้ว ไม่ต้องซ่อนซ้ำ
             dom.leaderboardPanel.classList.add('leaderboard-hidden'); 
             
             dom.gameContainer.classList.remove('hidden'); 
@@ -516,14 +520,15 @@
             clearInterval(gameState.spawnIntervalId);
             clearInterval(gameState.timerIntervalId);
 
-            Object.values(gameState.items).forEach(item => item.element.remove()); // Clear remaining items
-            gameState.items = {}; // Clear game state items
+            Object.values(gameState.items).forEach(item => item.element.remove()); 
+            gameState.items = {}; 
 
             dom.gameContainer.classList.add('hidden');
             dom.finalScore.textContent = gameState.score;
             
             dom.gameOverScreen.classList.remove('hidden');
             
+            // 💡 แสดง Leaderboard กลับมา
             dom.leaderboardPanel.classList.remove('leaderboard-hidden');
 
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
@@ -556,7 +561,7 @@
                 handleItemClick(e.touches[0]);
             });
             
-            itemElement.className = `game-item`; // Base class
+            itemElement.className = `game-item`; 
             itemElement.dataset.id = itemId; 
             itemElement.dataset.type = definition.type;
             
@@ -603,8 +608,8 @@
                 const rect = dom.gameArea.getBoundingClientRect();
                 const itemRect = clickedItem.getBoundingClientRect();
                 
-                const xPos = `${itemRect.left - rect.left + itemRect.width / 2}px`; // Center X
-                const yPos = `${itemRect.top - rect.top + itemRect.height / 2}px`; // Center Y
+                const xPos = `${itemRect.left - rect.left + itemRect.width / 2}px`;
+                const yPos = `${itemRect.top - rect.top + itemRect.height / 2}px`;
                 
                 clickedItem.remove(); 
                 delete gameState.items[itemId]; 
@@ -619,7 +624,7 @@
             popup.className = `score-popup absolute text-2xl font-black text-center whitespace-nowrap`; 
             popup.style.left = x;
             popup.style.top = y;
-            popup.style.transform = 'translate(-50%, -50%)'; /* Center the popup itself */
+            popup.style.transform = 'translate(-50%, -50%)'; 
             
             if (score > 0) {
                 popup.classList.add('text-green-600');
@@ -629,14 +634,13 @@
 
             dom.gameArea.appendChild(popup);
 
-            // Trigger animation after it's in DOM
             requestAnimationFrame(() => {
                 popup.classList.add('animate');
             });
 
             setTimeout(() => {
                 popup.remove();
-            }, 600); // Match CSS transition duration
+            }, 600);
         }
 
         function gameLoop() {
@@ -679,7 +683,6 @@
                     if (i === retries - 1 || error.code !== 'unavailable') {
                         throw error;
                     }
-                    console.warn(`Firestore call failed, retrying in ${2 ** i}s...`, error.code);
                     await new Promise(resolve => setTimeout(resolve, (2 ** i) * 1000));
                 }
             }
@@ -771,8 +774,6 @@
                     dom.leaderboardList.appendChild(rankItem);
                 });
 
-            }, (error) => {
-                 dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">ไม่สามารถโหลดอันดับได้</p>`;
             });
         }
         
@@ -782,7 +783,7 @@
 
             ITEM_DEFINITIONS.forEach(item => {
                 const listItem = document.createElement('div');
-                listItem.className = 'flex items-start p-3 rounded-lg border-b border-gray-200 last:border-b-0'; /* No border for last item */
+                listItem.className = 'flex items-start p-3 rounded-lg border-b border-gray-200 last:border-b-0';
                 
                 const imgContainer = document.createElement('div');
                 imgContainer.className = `w-12 h-12 flex-shrink-0 mr-4 rounded-full ${item.color} shadow-md flex items-center justify-center`;
@@ -861,6 +862,7 @@
             gameState.appId = appId;
             gameState.db = window.db; 
             
+            // 💡 โหลด Leaderboard ทันที แต่จะแสดงเมื่อเกมจบ
             if (gameState.db) {
                 setupLeaderboard(appId);
             }
