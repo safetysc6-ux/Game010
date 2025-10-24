@@ -121,14 +121,20 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* App Container - Constrain and use flex for full height */
+        /* App Container - Crucial for Mobile Responsive */
         #app {
             width: 100vw;
             height: 100vh;
-            max-width: 600px; /* Max width for larger screens */
+            max-width: 600px; 
             background-color: var(--bg-color); 
-            padding: 1rem; /* Bootstrap Padding p-3 (1rem) */
+            padding: 1rem; 
             box-sizing: border-box; 
+            
+            /* 💡 แก้ไข: เพิ่ม Padding-Top สำหรับเว้นระยะ Header */
+            padding-top: 1.5rem; 
+            /* 💡 แก้ไข: รองรับ Safe Area Insets สำหรับ iPhone X/12/15 */
+            padding-top: calc(1.5rem + env(safe-area-inset-top));
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
         }
 
         /* Neumorphism Card Style */
@@ -151,13 +157,10 @@
                 4px 4px 8px rgba(4, 120, 87, 0.4), 
                 -2px -2px 4px rgba(255, 255, 255, 0.8);
             transition: all 0.2s ease;
-            border: none; /* Ensure no default Bootstrap border */
+            border: none; 
         }
         
-        .btn-main:hover {
-             background-color: #069c67;
-             color: white;
-        }
+        .btn-main:hover { background-color: #069c67; color: white; }
 
         .btn-main:active {
             box-shadow: 
@@ -188,7 +191,7 @@
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35);
             flex-grow: 1; 
             border-radius: 1.5rem;
-            min-height: 200px; /* Safety measure */
+            min-height: 200px; 
         }
         
         /* --- ITEM ANIMATIONS --- */
@@ -235,7 +238,7 @@
             max-height: 40vh; 
             overflow-y: auto;
             margin-top: 1rem;
-            padding: 0.75rem; /* Adjust padding for mobile space */
+            padding: 0.75rem; 
         }
         
         .leaderboard-hidden {
@@ -298,21 +301,27 @@
           </div>
         </div>
         
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-shrink-0 mt-2"> 
             <h1 class="fs-4 fw-bolder text-success">🌲 CARBON MISSION 🌎</h1>
             <button id="info-button" class="btn btn-sm btn-info text-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#infoModal">ข้อมูล</button>
         </div>
 
         
-        <div id="start-screen" class="p-3 card-panel mb-3 flex-shrink-0">
-            <p class="text-center text-secondary fw-semibold">กรุณาระบุรหัสพนักงานเพื่อเข้าสู่ภารกิจ</p>
-            <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
-                        maxlength="10"
-                        class="form-control mb-3 input-recessed fs-5">
-            <button id="start-button"
-                        class="btn btn-main w-100 py-3 fs-5" disabled>
-                กรุณากรอกรหัสพนักงาน
-            </button>
+        <div id="start-screen" class="p-5 card-panel mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
+            
+            <img src="https://i.postimg.cc/85zK6LgJ/earth-tree-logo.png" alt="Carbon Mission Logo" class="img-fluid mb-4" style="max-width: 150px;">
+            
+            <p class="fs-5 text-secondary fw-semibold mb-4">เข้าสู่ระบบเพื่อเริ่ม **ภารกิจลดคาร์บอน** และรักษ์โลก</p>
+
+            <div class="w-100" style="max-width: 300px;">
+                <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
+                            maxlength="10"
+                            class="form-control mb-4 input-recessed fs-5">
+                <button id="start-button"
+                            class="btn btn-main w-100 py-3 fs-5" disabled>
+                    กรุณากรอกรหัสพนักงาน
+                </button>
+            </div>
         </div>
         
         <div id="game-container" class="d-none flex-grow-1 d-flex flex-column">
@@ -432,7 +441,7 @@
         };
         
         // ***************************************************************
-        // --- Game Logic Functions ---
+        // --- Game Logic Functions (ชุดเดิม) ---
         // ***************************************************************
         
         function showMessage(title, body) {
@@ -828,7 +837,7 @@
                 if (id.length > 0) {
                     dom.startButton.disabled = false;
                     dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
-                    dom.startButton.classList.remove('btn-secondary'); // Use a generic class if Bootstrap is primary color controlled
+                    dom.startButton.classList.remove('btn-secondary'); 
                     dom.startButton.classList.add('btn-main');
                 } else {
                     dom.startButton.disabled = true;
