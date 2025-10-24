@@ -130,9 +130,8 @@
             padding: 1rem; 
             box-sizing: border-box; 
             
-            /* 💡 แก้ไข: เพิ่ม Padding-Top สำหรับเว้นระยะ Header */
+            /* เว้นระยะ Header จากขอบบนของมือถือ */
             padding-top: 1.5rem; 
-            /* 💡 แก้ไข: รองรับ Safe Area Insets สำหรับ iPhone X/12/15 */
             padding-top: calc(1.5rem + env(safe-area-inset-top));
             padding-bottom: calc(1rem + env(safe-area-inset-bottom));
         }
@@ -194,7 +193,7 @@
             min-height: 200px; 
         }
         
-        /* --- ITEM ANIMATIONS --- */
+        /* --- ITEM ANIMATIONS (ไม่เปลี่ยนแปลง) --- */
         .game-item {
             position: absolute;
             width: 60px; 
@@ -217,7 +216,7 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
         
-        /* Score Pop-up Style & Animation */
+        /* Score Pop-up Style & Animation (ไม่เปลี่ยนแปลง) */
         .score-popup {
             pointer-events: none; 
             z-index: 20; 
@@ -233,24 +232,14 @@
             filter: blur(5px); 
         }
 
-        /* --- LEADERBOARD & TRANSITION --- */
+        /* --- LEADERBOARD --- */
         #leaderboard-panel {
-            max-height: 40vh; 
+            max-height: 40vh; /* จำกัดความสูงของ Leaderboard */
             overflow-y: auto;
             margin-top: 1rem;
             padding: 0.75rem; 
         }
         
-        .leaderboard-hidden {
-            max-height: 0 !important;
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-            margin-top: 0 !important;
-            opacity: 0;
-            overflow: hidden;
-            border: none !important;
-        }
-
         /* Responsive Text Size for smaller mobile screens */
         @media (max-width: 370px) {
             #app h1 { font-size: 1.35rem !important; }
@@ -307,11 +296,12 @@
         </div>
 
         
-        <div id="start-screen" class="p-5 card-panel mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
+        <div id="start-screen" class="p-4 card-panel mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
             
-            <img src="https://i.postimg.cc/85zK6LgJ/earth-tree-logo.png" alt="Carbon Mission Logo" class="img-fluid mb-4" style="max-width: 150px;">
-            
-            <p class="fs-5 text-secondary fw-semibold mb-4">เข้าสู่ระบบเพื่อเริ่ม **ภารกิจลดคาร์บอน** และรักษ์โลก</p>
+            <h2 class="display-6 fw-black text-primary mb-4">หยุด! มลพิษคาร์บอน!</h2>
+            <p class="fs-5 text-secondary fw-semibold mb-5">
+                แตะ **กิจกรรมรักษ์โลก** (+10) และหลีกเลี่ยง **กิจกรรมปล่อยคาร์บอน** (-5)
+            </p>
 
             <div class="w-100" style="max-width: 300px;">
                 <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
@@ -349,8 +339,8 @@
         </div>
 
         
-        <div id="leaderboard-panel" class="card-panel leaderboard-hidden flex-shrink-0">
-            <h2 class="fs-5 fw-bold text-center mb-3 text-success">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
+        <div id="leaderboard-panel" class="card-panel flex-shrink-0">
+            <h2 class="fs-6 fw-bold text-center mb-2 text-success">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
             <div id="leaderboard-list">
                 <p class="text-center text-muted" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
             </div>
@@ -441,7 +431,7 @@
         };
         
         // ***************************************************************
-        // --- Game Logic Functions (ชุดเดิม) ---
+        // --- Game Logic Functions (ใช้ชุดเดิม) ---
         // ***************************************************************
         
         function showMessage(title, body) {
@@ -474,10 +464,9 @@
 
             resetGame();
             
-            // ซ่อน Start/Game Over และ Leaderboard
+            // ซ่อน Start/Game Over 
             dom.startScreen.classList.add('d-none');
             dom.gameOverScreen.classList.add('d-none');
-            dom.leaderboardPanel.classList.add('leaderboard-hidden'); 
             
             // แสดง Game Container
             dom.gameContainer.classList.remove('d-none'); 
@@ -511,9 +500,8 @@
             
             dom.gameOverScreen.classList.remove('d-none');
             
-            // แสดง Leaderboard
-            dom.leaderboardPanel.classList.remove('leaderboard-hidden');
-
+            // Leaderboard แสดงอยู่แล้ว ไม่ต้องทำอะไร
+            
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
         }
 
@@ -822,7 +810,7 @@
                 // กลับไปหน้า Start 
                 dom.gameContainer.classList.add('d-none');
                 dom.gameOverScreen.classList.add('d-none');
-                dom.leaderboardPanel.classList.add('leaderboard-hidden'); 
+                // Leaderboard แสดงอยู่แล้ว 
                 
                 dom.startScreen.classList.remove('d-none');
                 dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)'; 
