@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ภารกิจลดคาร์บอน | เกมมือถือ</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     
     <script type="module">
         // --- Firebase Core Imports ---
@@ -89,7 +89,7 @@
 
     <style>
         /* ------------------------------------------------------------------- */
-        /* --- CORE LAYOUT & NEUMORPHISM THEME (PROFESSIONAL REFINEMENT) --- */
+        /* --- CORE LAYOUT & NEUMORPHISM THEME (Bootstrap Integration) --- */
         /* ------------------------------------------------------------------- */
         @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&display=swap');
         
@@ -110,10 +110,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-        body {
             font-family: 'Chakra Petch', sans-serif;
             background-color: var(--bg-color); 
+        }
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -121,36 +121,15 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* App Container (Ensures full viewport height on mobile and responsive layout) */
+        /* App Container - Constrain and use flex for full height */
         #app {
             width: 100vw;
             height: 100vh;
             max-width: 600px; /* Max width for larger screens */
             background-color: var(--bg-color); 
-            padding: 4vmin; /* Responsive padding */
-            display: flex;
-            flex-direction: column; /* Stacks children vertically */
+            padding: 1rem; /* Bootstrap Padding p-3 (1rem) */
             box-sizing: border-box; 
-            /* Added safe area insets for iOS devices */
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
         }
-        
-        /* Flexbox Utility: Makes an element fixed size */
-        .flex-fixed {
-            flex-shrink: 0;
-        }
-        
-        /* Flexbox Utility: Makes an element grow to fill remaining space */
-        .flex-grow-area {
-            flex-grow: 1; 
-            min-height: 0; /* Important for flex items inside flex containers */
-            display: flex;
-            flex-direction: column;
-        }
-
 
         /* Neumorphism Card Style */
         .card-panel {
@@ -159,7 +138,6 @@
             box-shadow: 
                 8px 8px 16px var(--shadow-dark), 
                 -8px -8px 16px var(--shadow-light); 
-            padding: 1.5rem; 
             transition: all 0.3s ease;
         }
         
@@ -173,8 +151,14 @@
                 4px 4px 8px rgba(4, 120, 87, 0.4), 
                 -2px -2px 4px rgba(255, 255, 255, 0.8);
             transition: all 0.2s ease;
+            border: none; /* Ensure no default Bootstrap border */
         }
         
+        .btn-main:hover {
+             background-color: #069c67;
+             color: white;
+        }
+
         .btn-main:active {
             box-shadow: 
                 inset 3px 3px 7px rgba(0, 0, 0, 0.25), 
@@ -192,23 +176,26 @@
                 inset -3px -3px 7px var(--shadow-light);
             padding: 1rem 1.25rem;
             color: var(--text-color);
+            text-transform: uppercase;
+            text-align: center;
         }
         
         /* --- GAME AREA LAYOUT --- */
-        .game-area {
+        #game-area {
             position: relative;
             overflow: hidden;
             background-color: #a7f3d0; 
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35);
             flex-grow: 1; 
             border-radius: 1.5rem;
+            min-height: 200px; /* Safety measure */
         }
         
         /* --- ITEM ANIMATIONS --- */
         .game-item {
             position: absolute;
-            width: 70px; 
-            height: 70px;
+            width: 60px; 
+            height: 60px;
             cursor: pointer;
             user-select: none;
             border-radius: 50%;
@@ -234,6 +221,7 @@
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); 
             transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
             will-change: transform, opacity, filter;
+            font-weight: 900;
         }
 
         .score-popup.animate {
@@ -246,7 +234,8 @@
         #leaderboard-panel {
             max-height: 40vh; 
             overflow-y: auto;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
+            padding: 0.75rem; /* Adjust padding for mobile space */
         }
         
         .leaderboard-hidden {
@@ -258,119 +247,148 @@
             overflow: hidden;
             border: none !important;
         }
+
+        /* Responsive Text Size for smaller mobile screens */
+        @media (max-width: 370px) {
+            #app h1 { font-size: 1.35rem !important; }
+            .fs-6 { font-size: 0.75rem !important; }
+            .btn-main { font-size: 0.9rem !important; }
+            .game-item { width: 50px; height: 50px; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="app">
+    <div id="app" class="d-flex flex-column vh-100 mx-auto">
         
-        <div id="message-box" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
-            <div class="card-panel p-6 max-w-xs text-center transform scale-100" onclick="event.stopPropagation()">
-                <h3 id="message-title" class="text-xl font-bold mb-3 text-emerald-600"></h3>
-                <p id="message-body" class="mb-4 text-gray-700"></p>
-                <button onclick="document.getElementById('message-box').classList.add('hidden')" class="btn-main px-4 py-2 text-sm">ปิด</button>
+        <div class="modal fade" id="messageBox" tabindex="-1" aria-labelledby="messageBoxLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="card-panel modal-content">
+              <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-success fw-bold" id="messageTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body pt-0 text-secondary">
+                <p id="messageBody"></p>
+              </div>
+              <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-main w-100 py-2" data-bs-dismiss="modal">ปิด</button>
+              </div>
             </div>
+          </div>
         </div>
         
-        <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('info-modal').classList.add('hidden')">
-            <div class="card-panel p-6 max-w-md w-11/12 max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
-                <h3 class="text-2xl font-bold mb-4 text-emerald-600 border-b-2 pb-2 border-emerald-300">💡 ข้อมูลการปลดปล่อยคาร์บอน</h3>
-                <h4 class="text-xl font-bold mt-4 mb-2 text-green-700">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
-                <div id="good-info-list" class="space-y-4"></div>
-                <h4 class="text-xl font-bold mt-6 mb-2 text-red-700">❌ การปล่อยคาร์บอน (Bad Items: -5 คะแนน)</h4>
-                <div id="bad-info-list" class="space-y-4"></div>
-                <button onclick="document.getElementById('info-modal').classList.add('hidden')" class="btn-main w-full mt-6 py-3 text-lg">รับทราบและเริ่มภารกิจ</button>
+        <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="card-panel modal-content">
+              <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-success fw-bold" id="infoModalLabel">💡 ข้อมูลการปลดปล่อยคาร์บอน</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <h4 class="h5 mt-3 mb-2 text-success">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
+                <div id="goodInfoList" class="space-y-3"></div>
+                <h4 class="h5 mt-4 mb-2 text-danger">❌ การปล่อยคาร์บอน (Bad Items: -5 คะแนน)</h4>
+                <div id="badInfoList" class="space-y-3"></div>
+              </div>
+              <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-main w-100 py-3 fs-5" data-bs-dismiss="modal">รับทราบและเริ่มภารกิจ</button>
+              </div>
             </div>
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+            <h1 class="fs-4 fw-bolder text-success">🌲 CARBON MISSION 🌎</h1>
+            <button id="info-button" class="btn btn-sm btn-info text-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#infoModal">ข้อมูล</button>
         </div>
 
         
-        <div class="flex justify-between items-center mb-4 flex-fixed">
-            <h1 class="text-2xl font-extrabold text-emerald-700">🌲 CARBON MISSION 🌎</h1>
-            <button id="info-button" class="btn-secondary px-3 py-1 text-sm font-bold shadow-lg bg-cyan-300 text-cyan-800 rounded-full">ข้อมูล</button>
-        </div>
-
-        
-        <div id="start-screen" class="space-y-4 card-panel mb-4 flex-fixed">
-            <p class="text-center text-gray-600 font-semibold">กรุณาระบุรหัสพนักงานเพื่อเข้าสู่ภารกิจ</p>
+        <div id="start-screen" class="p-3 card-panel mb-3 flex-shrink-0">
+            <p class="text-center text-secondary fw-semibold">กรุณาระบุรหัสพนักงานเพื่อเข้าสู่ภารกิจ</p>
             <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
                         maxlength="10"
-                        class="w-full text-center uppercase tracking-wider input-recessed font-mono text-gray-700">
+                        class="form-control mb-3 input-recessed fs-5">
             <button id="start-button"
-                        class="w-full btn-main py-3 text-lg" disabled>
+                        class="btn btn-main w-100 py-3 fs-5" disabled>
                 กรุณากรอกรหัสพนักงาน
             </button>
         </div>
         
-        <div id="game-container" class="hidden flex-grow-area">
+        <div id="game-container" class="d-none flex-grow-1 d-flex flex-column">
             
-            <div class="flex justify-between items-center mb-3 p-3 card-panel flex-fixed">
-                <div class="text-lg font-bold text-emerald-800">SCORE: <span id="score-display" class="text-2xl font-extrabold text-green-600">0</span></div>
-                <div class="text-lg font-bold text-emerald-800">TIME: <span id="timer-display" class="text-2xl font-extrabold text-blue-600">20</span>s</div>
-                <div id="current-user-id" class="text-xs text-gray-500 truncate font-mono" title="รหัสพนักงานของคุณ">ID: </div>
+            <div class="d-flex justify-content-between align-items-center p-3 card-panel mb-3 flex-shrink-0">
+                <div class="fw-bold text-success fs-6">SCORE: <span id="score-display" class="fs-4 fw-bolder text-success">0</span></div>
+                <div class="fw-bold text-success fs-6">TIME: <span id="timer-display" class="fs-4 fw-bolder text-primary">20</span>s</div>
+                <div id="current-user-id" class="fs-6 text-muted text-truncate font-monospace" title="รหัสพนักงานของคุณ">ID: </div>
             </div>
             
-            <div id="game-area" class="game-area w-full relative">
-                <p id="game-message" class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-red-500 hidden z-10 bg-black bg-opacity-10 rounded-xl"></p>
+            <div id="game-area" class="flex-grow-1 position-relative">
+                <p id="game-message" class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center fs-4 fw-bold text-danger bg-dark bg-opacity-10 rounded-3 d-none"></p>
             </div>
         </div>
 
         
-        <div id="game-over-screen" class="hidden text-center space-y-4 card-panel mb-4 flex-fixed">
-            <h2 class="text-3xl font-extrabold text-emerald-600">🎉 ภารกิจสำเร็จ!</h2>
-            <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-5xl text-red-600 block my-2">0</span></p>
-            <p id="ranking-status" class="text-md font-semibold text-green-700"></p>
+        <div id="game-over-screen" class="d-none text-center p-3 card-panel mb-3 flex-shrink-0">
+            <h2 class="fs-3 fw-bolder text-success">🎉 ภารกิจสำเร็จ!</h2>
+            <p class="fs-5 text-secondary">คะแนนสุดท้าย: <span id="final-score" class="d-block fw-black display-4 text-danger my-2">0</span></p>
+            <p id="ranking-status" class="fs-6 fw-semibold text-success"></p>
             <button id="restart-button"
-                        class="w-full btn-main py-3 text-lg">
+                        class="btn btn-main w-100 py-3 fs-5">
                 🔁 เล่นอีกครั้ง
             </button>
         </div>
 
         
-        <div id="leaderboard-panel" class="card-panel leaderboard-hidden flex-fixed">
-            <h2 class="text-xl font-bold text-center mb-3 text-emerald-700">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
+        <div id="leaderboard-panel" class="card-panel leaderboard-hidden flex-shrink-0">
+            <h2 class="fs-5 fw-bold text-center mb-3 text-success">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
             <div id="leaderboard-list">
-                <p class="text-center text-gray-500" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
+                <p class="text-center text-muted" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
         // --- Game Configuration (Constants) ---
         const GAME_DURATION = 20; 
         const SPAWN_INTERVAL = 300; 
         const ITEM_SPEED = 2; 
-        const ITEM_SIZE = 70; 
+        const ITEM_SIZE = 60; 
         const SCORE_REDUCTION = 10;
         const SCORE_EMISSION = -5;
+        
+        // Modal instances for Bootstrap 
+        let messageModal;
+        let infoModal;
 
-        // Emoji definitions 
+        // Emoji definitions (ใช้ชุดเดิม)
         const ITEM_DEFINITIONS = [
-            // Good: Carbon Reduction 
-            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'เลือกทานอาหารมังสวิรัติ' },
-            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ใช้ระบบขนส่งสาธารณะ' },
-            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
-            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ใช้พลังงานสะอาด (โซลาร์เซลล์)' },
-            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ลดการใช้ถุงพลาสติก' },
-            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'นำขวดน้ำมาใช้ซ้ำ' },
-            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ซ่อมแซมอุปกรณ์ไฟฟ้าที่ชำรุด' },
-            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ปิดไฟเมื่อไม่ใช้งาน' },
-            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'แยกประเภทขยะก่อนทิ้ง' },
-            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ประหยัดการใช้น้ำ' },
-            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ซื้อสินค้ามือสอง' },
-            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'การเดิน/ปั่นจักรยานแทนรถ' },
-            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ใช้ผลิตภัณฑ์ที่เป็นมิตรต่อสิ่งแวดล้อม' },
-            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'งดเผาขยะ' },
-            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'การปลูกผักสวนครัว' },
-            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
-            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
+            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'เลือกทานอาหารมังสวิรัติ' },
+            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ระบบขนส่งสาธารณะ' },
+            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
+            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้พลังงานสะอาด (โซลาร์เซลล์)' },
+            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ลดการใช้ถุงพลาสติก' },
+            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'นำขวดน้ำมาใช้ซ้ำ' },
+            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ซ่อมแซมอุปกรณ์ไฟฟ้าที่ชำรุด' },
+            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ปิดไฟเมื่อไม่ใช้งาน' },
+            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'แยกประเภทขยะก่อนทิ้ง' },
+            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ประหยัดการใช้น้ำ' },
+            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ซื้อสินค้ามือสอง' },
+            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'การเดิน/ปั่นจักรยานแทนรถ' },
+            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ผลิตภัณฑ์ที่เป็นมิตรต่อสิ่งแวดล้อม' },
+            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'งดเผาขยะ' },
+            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'การปลูกผักสวนครัว' },
+            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
+            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
 
-            // Bad: Carbon Emission
-            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'เดินทางด้วยเครื่องบินบ่อย' },
-            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ใช้รถยนต์ส่วนตัวคนเดียว' },
-            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ทิ้งขยะไม่แยกประเภท' },
-            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'เปิดไฟทิ้งไว้ตลอดเวลา' },
-            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'สั่งอาหารแบบ Delivery บ่อยเกินไป' },
-            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
+            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เดินทางด้วยเครื่องบินบ่อย' },
+            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้รถยนต์ส่วนตัวคนเดียว' },
+            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ทิ้งขยะไม่แยกประเภท' },
+            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เปิดไฟทิ้งไว้ตลอดเวลา' },
+            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'สั่งอาหารแบบ Delivery บ่อยเกินไป' },
+            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
         ];
 
         // --- Global Game State ---
@@ -408,10 +426,9 @@
             loadingLeaderboard: document.getElementById('loading-leaderboard'),
             rankingStatus: document.getElementById('ranking-status'),
             currentUserId: document.getElementById('current-user-id'),
-            infoButton: document.getElementById('info-button'), 
-            infoModal: document.getElementById('info-modal'),     
-            goodInfoList: document.getElementById('good-info-list'), 
-            badInfoList: document.getElementById('bad-info-list'),
+            infoButton: document.getElementById('info-button'),     
+            goodInfoList: document.getElementById('goodInfoList'), 
+            badInfoList: document.getElementById('badInfoList'),
         };
         
         // ***************************************************************
@@ -419,9 +436,9 @@
         // ***************************************************************
         
         function showMessage(title, body) {
-            document.getElementById('message-title').textContent = title;
-            document.getElementById('message-body').textContent = body;
-            document.getElementById('message-box').classList.remove('hidden');
+            document.getElementById('messageTitle').textContent = title;
+            document.getElementById('messageBody').textContent = body;
+            messageModal.show();
         }
 
         function resetGame() {
@@ -432,8 +449,8 @@
             gameState.itemIdCounter = 0;
             dom.scoreDisplay.textContent = '0';
             dom.timerDisplay.textContent = GAME_DURATION;
-            dom.gameMessage.classList.add('hidden');
-            dom.timerDisplay.classList.remove('text-red-600');
+            dom.gameMessage.classList.add('d-none');
+            dom.timerDisplay.classList.remove('text-danger');
         }
         
         function startGame() {
@@ -448,13 +465,13 @@
 
             resetGame();
             
-            // 💡 ซ่อน Start/Game Over และ Leaderboard
-            dom.startScreen.classList.add('hidden');
-            dom.gameOverScreen.classList.add('hidden');
+            // ซ่อน Start/Game Over และ Leaderboard
+            dom.startScreen.classList.add('d-none');
+            dom.gameOverScreen.classList.add('d-none');
             dom.leaderboardPanel.classList.add('leaderboard-hidden'); 
             
-            // 💡 แสดง Game Container
-            dom.gameContainer.classList.remove('hidden'); 
+            // แสดง Game Container
+            dom.gameContainer.classList.remove('d-none'); 
             
             dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
             
@@ -479,13 +496,13 @@
             Object.values(gameState.items).forEach(item => item.element.remove()); 
             gameState.items = {}; 
 
-            // 💡 ซ่อน Game Container และแสดง Game Over Screen
-            dom.gameContainer.classList.add('hidden');
+            // ซ่อน Game Container และแสดง Game Over Screen
+            dom.gameContainer.classList.add('d-none');
             dom.finalScore.textContent = gameState.score;
             
-            dom.gameOverScreen.classList.remove('hidden');
+            dom.gameOverScreen.classList.remove('d-none');
             
-            // 💡 แสดง Leaderboard
+            // แสดง Leaderboard
             dom.leaderboardPanel.classList.remove('leaderboard-hidden');
 
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
@@ -496,9 +513,9 @@
             dom.timerDisplay.textContent = gameState.timeLeft;
 
             if (gameState.timeLeft <= 5) {
-                dom.timerDisplay.classList.add('text-red-600');
+                dom.timerDisplay.classList.add('text-danger');
             } else {
-                dom.timerDisplay.classList.remove('text-red-600');
+                dom.timerDisplay.classList.remove('text-danger');
             }
 
             if (gameState.timeLeft <= 0) {
@@ -524,7 +541,7 @@
             
             const imgElement = document.createElement('img');
             imgElement.src = definition.imageSrc;
-            imgElement.className = "w-full h-full object-contain p-2"; // Style image inside item
+            imgElement.className = "w-100 h-100 object-fit-contain p-2"; 
             
             itemElement.appendChild(imgElement);
 
@@ -579,15 +596,15 @@
         function showScoreChange(x, y, score) {
             const popup = document.createElement('div');
             popup.textContent = score > 0 ? `+${score}` : `${score}`;
-            popup.className = `score-popup absolute text-2xl font-black text-center whitespace-nowrap`; 
+            popup.className = `score-popup position-absolute fs-4 text-center`; 
             popup.style.left = x;
             popup.style.top = y;
             popup.style.transform = 'translate(-50%, -50%)'; 
             
             if (score > 0) {
-                popup.classList.add('text-green-600');
+                popup.classList.add('text-success');
             } else {
-                popup.classList.add('text-red-600');
+                popup.classList.add('text-danger');
             }
 
             dom.gameArea.appendChild(popup);
@@ -632,7 +649,7 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- Firebase/Leaderboard Logic ---
+        // --- Firebase/Leaderboard Logic (ใช้ชุดเดิม) ---
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -673,11 +690,11 @@
         
         function setupLeaderboard(appId) {
             if (!gameState.db) {
-                dom.leaderboardList.innerHTML = `<p class="text-center text-red-500">Firebase Database ไม่พร้อมใช้งาน!</p>`;
+                dom.leaderboardList.innerHTML = `<p class="text-center text-danger">Firebase Database ไม่พร้อมใช้งาน!</p>`;
                 return;
             }
             
-            dom.loadingLeaderboard.classList.remove('hidden');
+            dom.loadingLeaderboard.classList.remove('d-none');
 
             const rankingsQuery = window.firestore.query(
                 window.firestore.collection(gameState.db, getCollectionPath(appId)),
@@ -706,28 +723,28 @@
                     .sort((a, b) => b.score - a.score)
                     .slice(0, 10);
                 
-                dom.loadingLeaderboard.classList.add('hidden');
+                dom.loadingLeaderboard.classList.add('d-none');
                 dom.leaderboardList.innerHTML = '';
                 
                 if (topScores.length === 0) {
-                     dom.leaderboardList.innerHTML = `<p class="text-center text-gray-500 p-2">ยังไม่มีใครทำคะแนนเลย! มาเป็นคนแรกกัน!</p>`;
+                     dom.leaderboardList.innerHTML = `<p class="text-center text-muted p-2">ยังไม่มีใครทำคะแนนเลย! มาเป็นคนแรกกัน!</p>`;
                      return;
                 }
 
                 topScores.forEach((rank, index) => {
                     const rankItem = document.createElement('div');
                     const isCurrentUser = rank.employeeId === gameState.employeeId;
-                    rankItem.className = `ranking-item flex justify-between items-center p-2 text-sm ${index < 3 ? 'text-lg' : ''} ${isCurrentUser ? 'bg-emerald-100 ring-2 ring-emerald-500 rounded-lg my-1 font-bold' : 'text-gray-700'}`;
+                    rankItem.className = `d-flex justify-content-between align-items-center p-2 small ${index < 3 ? 'fs-5' : 'text-secondary'} ${isCurrentUser ? 'bg-success-subtle border border-success rounded my-1 fw-bold' : ''}`;
                     
                     const rankNumber = index + 1;
                     const trophyEmoji = rankNumber === 1 ? '🥇' : rankNumber === 2 ? '🥈' : rankNumber === 3 ? '🥉' : '';
                     
                     rankItem.innerHTML = `
-                        <div class="font-mono flex items-center">
-                            <span class="w-6 text-center">${trophyEmoji}</span>
-                            <span class="ml-2">${rank.employeeId}</span>
+                        <div class="font-monospace d-flex align-items-center">
+                            <span class="text-center" style="width: 1.5rem;">${trophyEmoji}</span>
+                            <span class="ms-2">${rank.employeeId}</span>
                         </div>
-                        <span class="font-extrabold text-xl ${index === 0 ? 'text-yellow-700' : 'text-emerald-600'}">${rank.score}</span>
+                        <span class="fw-bolder fs-5 ${index === 0 ? 'text-warning' : 'text-success'}">${rank.score}</span>
                     `;
                     dom.leaderboardList.appendChild(rankItem);
                 });
@@ -741,17 +758,19 @@
 
             ITEM_DEFINITIONS.forEach(item => {
                 const listItem = document.createElement('div');
-                listItem.className = 'flex items-start p-3 rounded-lg border-b border-gray-200 last:border-b-0';
+                listItem.className = 'd-flex align-items-start p-3 border-bottom border-secondary-subtle';
                 
                 const imgContainer = document.createElement('div');
-                imgContainer.className = `w-12 h-12 flex-shrink-0 mr-4 rounded-full ${item.color} shadow-md flex items-center justify-center`;
-                imgContainer.innerHTML = `<img src="${item.imageSrc}" class="w-full h-full object-contain p-1">`;
+                imgContainer.className = `flex-shrink-0 me-3 rounded-circle shadow d-flex justify-content-center align-items-center ${item.color}`;
+                imgContainer.style.width = '3rem';
+                imgContainer.style.height = '3rem';
+                imgContainer.innerHTML = `<img src="${item.imageSrc}" class="w-100 h-100 object-fit-contain p-1">`;
                 
                 const textContainer = document.createElement('div');
-                textContainer.className = 'flex-grow';
+                textContainer.className = 'flex-grow-1';
                 textContainer.innerHTML = `
-                    <p class="font-bold text-gray-800">${item.defaultDesc}</p>
-                    <p class="text-sm ${item.type === 'good' ? 'text-green-600' : 'text-red-600'}">คะแนน: ${item.score > 0 ? '+' : ''}${item.score}</p>
+                    <p class="fw-bold mb-0 text-dark">${item.defaultDesc}</p>
+                    <p class="small mb-0 ${item.type === 'good' ? 'text-success' : 'text-danger'}">คะแนน: ${item.score > 0 ? '+' : ''}${item.score}</p>
                 `;
 
                 listItem.appendChild(imgContainer);
@@ -785,36 +804,41 @@
 
         // --- Event Listeners and Initialization ---
         function setupEventListeners() {
+            // Initialize Bootstrap Modals
+            messageModal = new bootstrap.Modal(document.getElementById('messageBox'));
+            infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+            
             dom.startButton.addEventListener('click', startGame);
             dom.restartButton.addEventListener('click', () => {
-                // 💡 กลับไปหน้า Start โดยซ่อนทุกอย่างยกเว้น Start Screen
-                dom.gameContainer.classList.add('hidden');
-                dom.gameOverScreen.classList.add('hidden');
+                // กลับไปหน้า Start 
+                dom.gameContainer.classList.add('d-none');
+                dom.gameOverScreen.classList.add('d-none');
                 dom.leaderboardPanel.classList.add('leaderboard-hidden'); 
                 
-                dom.startScreen.classList.remove('hidden');
+                dom.startScreen.classList.remove('d-none');
                 dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)'; 
             });
             
-            dom.infoButton.addEventListener('click', () => {
-                dom.infoModal.classList.remove('hidden');
-            });
-
-
+            // Event listener for Input
             dom.employeeIdInput.addEventListener('input', (e) => {
+                // Force uppercase and allow only A-Z, 0-9
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
                 
                 const id = e.target.value.trim();
                 if (id.length > 0) {
                     dom.startButton.disabled = false;
                     dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
-                    dom.startButton.classList.remove('disabled:bg-gray-400');
+                    dom.startButton.classList.remove('btn-secondary'); // Use a generic class if Bootstrap is primary color controlled
+                    dom.startButton.classList.add('btn-main');
                 } else {
                     dom.startButton.disabled = true;
                     dom.startButton.textContent = 'กรุณากรอกรหัสพนักงาน';
-                    dom.startButton.classList.add('disabled:bg-gray-400');
+                    dom.startButton.classList.remove('btn-main');
+                    dom.startButton.classList.add('btn-secondary');
                 }
             });
+            // Initial check for button state
+            dom.startButton.classList.add('btn-secondary');
         }
         
         window.initApp = function(userId, appId) {
