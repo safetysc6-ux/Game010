@@ -89,77 +89,91 @@
 
     <style>
         /* ------------------------------------------------------------------- */
-        /* --- CUSTOM STYLES: Full Screen & Neumorphism/Depth Effect --- */
+        /* --- CORE LAYOUT & NEUMORPHISM THEME (PROFESSIONAL REFINEMENT) --- */
         /* ------------------------------------------------------------------- */
         @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&display=swap');
         
-        /* 💡 Full Screen Setup for Mobile */
-        html, body {
-            height: 100%;
-            overflow: hidden;
+        /* CSS Variables for Theme */
+        :root {
+            --bg-color: #ecfdf5; /* Light Mint/Green Base */
+            --primary-color: #047857; /* Dark Emerald */
+            --secondary-color: #67e8f9; /* Cyan */
+            --text-color: #15803d; /* Darker Green for text */
+            --shadow-light: #ffffff;
+            --shadow-dark: #dbece0;
         }
 
+        /* Base Setup */
+        html, body { 
+            height: 100%; 
+            overflow: hidden; 
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box; /* Crucial for consistent sizing */
+        }
         body {
             font-family: 'Chakra Petch', sans-serif;
-            background-color: #f0fdf4; /* Very Light Mint Background */
+            background-color: var(--bg-color); 
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
+        /* App Container (Ensures full viewport height on mobile) */
         #app {
             width: 100vw;
-            height: 100vh;
-            max-width: 600px; 
-            background-color: #f0fdf4; 
-            padding: 4vmin; 
-            box-shadow: none; 
+            height: 100vh; /* Use 100vh for full viewport height */
+            max-width: 600px; /* Max width for larger screens */
+            background-color: var(--bg-color); 
+            padding: 4vmin; /* Responsive padding */
             display: flex;
             flex-direction: column; 
+            box-sizing: border-box; 
+            /* Added safe area insets for iOS devices */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
 
-        /* --- Depth/Neumorphism Effects --- */
+        /* Neumorphism Card Style */
         .card-panel {
-            background-color: #f0fdf4;
-            border-radius: 1rem;
+            background-color: var(--bg-color); 
+            border-radius: 1.5rem; /* Smoother corners */
             box-shadow: 
-                6px 6px 12px #dbece0, 
-                -6px -6px 12px #ffffff; 
-            padding: 1rem;
-            transition: all 0.2s ease;
+                8px 8px 16px var(--shadow-dark), 
+                -8px -8px 16px var(--shadow-light); 
+            padding: 1.5rem; 
+            flex-shrink: 0; 
+            transition: all 0.3s ease; /* Smoother transitions */
         }
         
-        .card-panel:hover {
-             box-shadow: 
-                4px 4px 8px #dbece0, 
-                -4px -4px 8px #ffffff;
-        }
-        
-        /* 💡 ปุ่มหลัก */
+        /* Primary Button Style */
         .btn-main {
-            background-color: #059669; /* Emerald 600 */
+            background-color: var(--primary-color); 
             color: white;
             font-weight: bold;
-            border-radius: 0.75rem;
+            border-radius: 1rem;
             box-shadow: 
-                4px 4px 8px rgba(5, 150, 105, 0.4), 
+                4px 4px 8px rgba(4, 120, 87, 0.4), 
                 -2px -2px 4px rgba(255, 255, 255, 0.8);
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
         }
         
         .btn-main:active {
             box-shadow: 
-                inset 2px 2px 5px rgba(0, 0, 0, 0.2), 
-                inset -2px -2px 5px rgba(255, 255, 255, 0.5);
-            transform: scale(0.98);
+                inset 3px 3px 7px rgba(0, 0, 0, 0.25), 
+                inset -3px -3px 7px rgba(255, 255, 255, 0.5);
+            transform: scale(0.97);
         }
-        
-        /* 💡 ปุ่มรอง/Info Button */
+
+        /* Secondary Button Style */
         .btn-secondary {
-            background-color: #67e8f9; /* Cyan 400 */
-            color: #0e7490;
-            border-radius: 9999px; /* Rounded pill shape */
+            background-color: var(--secondary-color); /* Cyan */
+            color: #0e7490; /* Darker Cyan */
+            border-radius: 9999px; /* Pill shape */
             box-shadow: 
                 3px 3px 6px rgba(0, 0, 0, 0.2), 
                 -2px -2px 4px rgba(255, 255, 255, 0.8);
@@ -168,93 +182,134 @@
         }
 
         .btn-secondary:active {
-             box-shadow: 
+            box-shadow: 
                 inset 2px 2px 5px rgba(0, 0, 0, 0.2), 
                 inset -2px -2px 5px rgba(255, 255, 255, 0.5);
             transform: scale(0.95);
         }
 
-
+        /* Input Field Style */
         .input-recessed {
-            background-color: #ecfdf4;
-            border: 1px solid #dbece0;
-            border-radius: 0.75rem;
+            background-color: var(--bg-color);
+            border: none; /* Removed border */
+            border-radius: 1rem;
             box-shadow: 
-                inset 2px 2px 5px rgba(0, 0, 0, 0.1), 
-                inset -2px -2px 5px #ffffff;
+                inset 3px 3px 7px rgba(0, 0, 0, 0.15), 
+                inset -3px -3px 7px var(--shadow-light); /* Deeper inset */
+            padding: 1rem 1.25rem; /* More generous padding */
+            color: var(--text-color);
+        }
+        
+        /* --- GAME AREA LAYOUT --- */
+        #game-container {
+            flex-grow: 1; 
+            min-height: 0; 
+            display: flex; /* Make game-container a flex container for its children */
+            flex-direction: column;
         }
 
-        /* --- Game Item Styles --- */
+        .game-area {
+            position: relative;
+            overflow: hidden;
+            background-color: #a7f3d0; /* Light Green Play Zone */
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35); /* Deeper inset shadow */
+            flex-grow: 1; 
+            min-height: 100%; 
+            border-radius: 1.5rem;
+            margin-bottom: 0; /* Ensure no bottom margin pushes it up */
+        }
+        
+        /* --- GAME ITEM STYLE & ANIMATIONS --- */
         .game-item {
             position: absolute;
             width: 70px; 
             height: 70px;
-            text-align: center;
             cursor: pointer;
             user-select: none;
             border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: transform 0.05s;
-            z-index: 10; /* ให้ไอเทมอยู่ด้านบน */
-        }
-        
-        .game-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            padding: 8px; 
+            background-color: rgba(255, 255, 255, 0.7); /* Slightly transparent background */
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 4px rgba(255, 255, 255, 0.7);
+            transition: transform 0.05s ease-out; /* Faster click response */
+            z-index: 10; 
+
+            /* Initial state for spawn animation */
+            opacity: 0;
+            transform: scale(0.5); 
+            animation: item-spawn 0.3s ease-out forwards; /* Spawn animation */
         }
 
+        @keyframes item-spawn {
+            from { opacity: 0; transform: scale(0.5) translateY(0); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        
         .game-item:active {
-            transform: scale(0.85); 
+            transform: scale(0.8); /* More pronounced click effect */
+            box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.3); 
         }
         
-        /* 💡 การแก้ไข: เพิ่ม flex-grow: 1 ใน game-area เพื่อให้ยืดเต็มที่ */
-        .game-area {
-            position: relative;
-            overflow: hidden;
-            background-color: #d1fae5; 
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2); 
-            flex-grow: 1; /* ทำให้ยืดเต็มพื้นที่ที่เหลือใน game-container */
-            min-height: 250px;
+        /* Score Pop-up Style & Animation */
+        .score-popup {
+            pointer-events: none; 
+            z-index: 20; 
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); 
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); /* Smoother curve */
+            will-change: transform, opacity, filter; /* Optimize animation */
         }
-        
-        /* --- Ranking List Styles --- */
+
+        .score-popup.animate {
+            transform: translateY(-80px) scale(1.5); /* Float higher, bigger */
+            opacity: 0;
+            filter: blur(5px); /* Add blur effect */
+        }
+
+        /* --- LEADERBOARD & TRANSITION --- */
         #leaderboard-panel {
             max-height: 40vh; 
             overflow-y: auto;
-            background-color: #e0f2f1; 
-            border: 1px solid #b2dfdb;
-            padding: 0.5rem;
-            border-radius: 0.75rem;
-            flex-shrink: 0;
+            background-color: var(--bg-color); 
+            border-radius: 1.5rem;
+            flex-shrink: 0; 
+            transition: max-height 0.5s ease-in-out, opacity 0.4s ease-in-out, padding 0.5s ease-in-out, margin 0.5s ease-in-out;
+            opacity: 1;
+            margin-top: 1.5rem; /* Default margin */
+        }
+        
+        .leaderboard-hidden {
+            max-height: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            margin-top: 0 !important;
+            opacity: 0;
+            overflow: hidden;
+            border: none !important;
         }
 
-        /* --- End Game Animation (Bounce/Pop) --- */
+        /* Game Over Screen Animation */
         @keyframes bounce-in {
             0% { transform: scale(0.5); opacity: 0; }
-            70% { transform: scale(1.1); opacity: 1; }
+            70% { transform: scale(1.05); opacity: 1; }
             100% { transform: scale(1.0); }
         }
 
         #game-over-screen {
-            animation: bounce-in 0.4s ease-out;
+            animation: bounce-in 0.4s ease-out forwards;
             transform-origin: center;
-            flex-shrink: 0;
         }
 
-        /* 💡 ลบส่วน Countdown Overlay CSS ออก */
-
-        /* 💡 แก้ไข: Score Pop-up ต้องไม่ดักจับการคลิก */
-        .score-popup {
-            pointer-events: none; /* สำคัญมาก: ไม่ให้ดักจับการคลิก */
-            z-index: 20; /* ให้แสดงบนไอเทมเกม (z-index: 10) แต่ไม่ดักจับคลิก */
+        /* Responsive Text Sizing */
+        @media (max-width: 380px) {
+            h1 { font-size: 1.8rem !important; }
+            .text-2xl { font-size: 1.5rem !important; }
+            .text-xl { font-size: 1.25rem !important; }
+            .text-lg { font-size: 1.1rem !important; }
         }
+
     </style>
 </head>
 <body>
 
-    <div id="app" class="transition-all duration-300">
+    <div id="app">
         <div id="message-box" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
             <div class="card-panel p-6 max-w-xs text-center transform scale-100" onclick="event.stopPropagation()">
                 <h3 id="message-title" class="text-xl font-bold mb-3 text-emerald-600"></h3>
@@ -266,47 +321,40 @@
         <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('info-modal').classList.add('hidden')">
             <div class="card-panel p-6 max-w-md w-11/12 max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
                 <h3 class="text-2xl font-bold mb-4 text-emerald-600 border-b-2 pb-2 border-emerald-300">💡 ข้อมูลการปลดปล่อยคาร์บอน</h3>
-                
                 <h4 class="text-xl font-bold mt-4 mb-2 text-green-700">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
-                <div id="good-info-list" class="space-y-4">
-                    </div>
-
+                <div id="good-info-list" class="space-y-4"></div>
                 <h4 class="text-xl font-bold mt-6 mb-2 text-red-700">❌ การปล่อยคาร์บอน (Bad Items: -5 คะแนน)</h4>
-                <div id="bad-info-list" class="space-y-4">
-                    </div>
-                
-                <button onclick="document.getElementById('info-modal').classList.add('hidden')" class="btn-main w-full mt-6 py-3">
-                    รับทราบและเริ่มภารกิจ
-                </button>
+                <div id="bad-info-list" class="space-y-4"></div>
+                <button onclick="document.getElementById('info-modal').classList.add('hidden')" class="btn-main w-full mt-6 py-3 text-lg">รับทราบและเริ่มภารกิจ</button>
             </div>
         </div>
 
         <div class="flex justify-between items-center mb-4 flex-shrink-0">
             <h1 class="text-2xl font-extrabold text-emerald-700">🌲 CARBON MISSION 🌎</h1>
-            <button id="info-button" class="btn-secondary px-3 py-1 text-sm font-bold shadow-lg">ข้อมูลการปลดปล่อยคาร์บอน</button>
+            <button id="info-button" class="btn-secondary px-3 py-1 text-sm font-bold shadow-lg">ข้อมูล</button>
         </div>
 
         <div id="start-screen" class="space-y-4 card-panel mb-4 flex-shrink-0">
             <p class="text-center text-gray-600 font-semibold">กรุณาระบุรหัสพนักงานเพื่อเข้าสู่ภารกิจ</p>
             <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
                         maxlength="10"
-                        class="w-full p-3 text-center uppercase tracking-wider input-recessed font-mono text-gray-700">
+                        class="w-full text-center uppercase tracking-wider input-recessed font-mono text-gray-700">
             <button id="start-button"
-                        class="w-full btn-main py-3" disabled>
+                        class="w-full btn-main py-3 text-lg" disabled>
                 กรุณากรอกรหัสพนักงาน
             </button>
         </div>
 
-        <div id="game-container" class="hidden flex-col flex-grow">
-            <div class="flex justify-between items-center mb-3 p-2 card-panel flex-shrink-0">
-                <div class="text-base font-bold text-emerald-800">SCORE: <span id="score-display" class="text-xl font-extrabold text-green-600">0</span></div>
-                <div class="text-base font-bold text-emerald-800">TIME: <span id="timer-display" class="text-xl font-extrabold text-blue-600">20</span>s</div>
+        <div id="game-container" class="hidden">
+            <div class="flex justify-between items-center mb-3 p-3 card-panel flex-shrink-0">
+                <div class="text-lg font-bold text-emerald-800">SCORE: <span id="score-display" class="text-2xl font-extrabold text-green-600">0</span></div>
+                <div class="text-lg font-bold text-emerald-800">TIME: <span id="timer-display" class="text-2xl font-extrabold text-blue-600">20</span>s</div>
                 <div id="current-user-id" class="text-xs text-gray-500 truncate font-mono" title="รหัสพนักงานของคุณ">ID: </div>
             </div>
             
-            <div id="game-area" class="game-area w-full rounded-xl mb-0 relative flex-grow">
+            <div id="game-area" class="game-area w-full relative">
                 <p id="game-message" class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-red-500 hidden z-10 bg-black bg-opacity-10 rounded-xl"></p>
-                </div>
+            </div>
         </div>
 
         <div id="game-over-screen" class="hidden text-center space-y-4 card-panel mb-4 flex-shrink-0">
@@ -314,12 +362,12 @@
             <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-5xl text-red-600 block my-2">0</span></p>
             <p id="ranking-status" class="text-md font-semibold text-green-700"></p>
             <button id="restart-button"
-                        class="w-full btn-main py-3">
+                        class="w-full btn-main py-3 text-lg">
                 🔁 เล่นอีกครั้ง
             </button>
         </div>
 
-        <div id="leaderboard-panel" class="mt-4 flex-shrink-0 card-panel transition-all duration-300">
+        <div id="leaderboard-panel" class="card-panel">
             <h2 class="text-xl font-bold text-center mb-3 text-emerald-700">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
             <div id="leaderboard-list">
                 <p class="text-center text-gray-500" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
@@ -328,7 +376,7 @@
     </div>
 
     <script>
-        // --- Game Configuration ---
+        // --- Game Configuration (Constants) ---
         const GAME_DURATION = 20; 
         const SPAWN_INTERVAL = 300; 
         const ITEM_SPEED = 2; 
@@ -405,11 +453,10 @@
             infoModal: document.getElementById('info-modal'),     
             goodInfoList: document.getElementById('good-info-list'), 
             badInfoList: document.getElementById('bad-info-list'),
-            // 💡 ลบ dom.countdownOverlay และ dom.countdownDisplay ออก
         };
         
         // ***************************************************************
-        // --- Utility & Game Logic Functions ---
+        // --- Game Logic Functions ---
         // ***************************************************************
         
         function showMessage(title, body) {
@@ -418,32 +465,9 @@
             document.getElementById('message-box').classList.remove('hidden');
         }
 
-        function getCollectionPath(appId) {
-            return `artifacts/${appId}/public/data/carbon_game_rankings`;
-        }
-        
-        function preloadImages() {
-             return new Promise(resolve => {
-                const imagePromises = ITEM_DEFINITIONS.map(item => {
-                    return new Promise(imgResolve => {
-                        const img = new Image();
-                        img.onload = imgResolve;
-                        img.onerror = imgResolve; 
-                        img.src = item.imageSrc;
-                    });
-                });
-
-                Promise.all(imagePromises).then(() => {
-                    gameState.isImagesPreloaded = true;
-                    resolve();
-                });
-            });
-        }
-
         function resetGame() {
             gameState.score = 0;
             gameState.timeLeft = GAME_DURATION;
-            // ลบไอเทมทั้งหมดออกจาก DOM และ State
             Object.values(gameState.items).forEach(item => item.element.remove());
             gameState.items = {}; 
             gameState.itemIdCounter = 0;
@@ -453,8 +477,6 @@
             dom.timerDisplay.classList.remove('text-red-600');
         }
         
-        // 💡 ลบฟังก์ชัน countdownBeforeStart() ออก
-
         function startGame() {
             if (!gameState.employeeId) {
                 gameState.employeeId = dom.employeeIdInput.value.toUpperCase().trim();
@@ -467,19 +489,15 @@
 
             resetGame();
             
-            // 1. ซ่อนหน้าจอเริ่มต้นและจบเกม
             dom.startScreen.classList.add('hidden');
             dom.gameOverScreen.classList.add('hidden');
             
-            // 2. ซ่อน Leaderboard เพื่อให้ game-area ยืดลงมา
-            dom.leaderboardPanel.classList.add('hidden'); 
+            dom.leaderboardPanel.classList.add('leaderboard-hidden'); 
             
-            // 3. ทำให้ game-container แสดงผล (เป็น flex-col)
             dom.gameContainer.classList.remove('hidden'); 
             
             dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
             
-            // 💡 เรียก startActualGame() ทันที
             startActualGame();
         }
         
@@ -498,16 +516,16 @@
             clearInterval(gameState.spawnIntervalId);
             clearInterval(gameState.timerIntervalId);
 
+            Object.values(gameState.items).forEach(item => item.element.remove()); // Clear remaining items
+            gameState.items = {}; // Clear game state items
+
             dom.gameContainer.classList.add('hidden');
             dom.finalScore.textContent = gameState.score;
             
-            // แสดง Game Over Screen พร้อม animation
             dom.gameOverScreen.classList.remove('hidden');
             
-            // แสดง Leaderboard กลับมา
-            dom.leaderboardPanel.classList.remove('hidden');
+            dom.leaderboardPanel.classList.remove('leaderboard-hidden');
 
-            // บันทึกคะแนนลง Firebase
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
         }
 
@@ -532,20 +550,18 @@
             const itemId = gameState.itemIdCounter++;
 
             const itemElement = document.createElement('div');
-            // 💡 เพิ่มการผูก Event Listener ให้กับ itemElement โดยตรง
             itemElement.addEventListener('click', handleItemClick);
             itemElement.addEventListener('touchstart', (e) => {
                 e.preventDefault(); 
                 handleItemClick(e.touches[0]);
             });
             
-            itemElement.className = `game-item ${definition.color}`;
+            itemElement.className = `game-item`; // Base class
             itemElement.dataset.id = itemId; 
             itemElement.dataset.type = definition.type;
             
             const imgElement = document.createElement('img');
             imgElement.src = definition.imageSrc;
-            imgElement.alt = definition.type === 'good' ? 'Good item' : 'Bad item';
             
             itemElement.appendChild(imgElement);
 
@@ -568,7 +584,6 @@
             gameState.items[itemId] = item;
         }
         
-        // 💡 ฟังก์ชันใหม่: จัดการการคลิกบนไอเทมโดยตรง
         function handleItemClick(event) {
             if (!gameState.isRunning) return;
             
@@ -585,33 +600,26 @@
                 gameState.score += scoreChange;
                 dom.scoreDisplay.textContent = gameState.score;
                 
-                // คำนวณตำแหน่งสำหรับแสดงคะแนนลอย
                 const rect = dom.gameArea.getBoundingClientRect();
                 const itemRect = clickedItem.getBoundingClientRect();
                 
-                const xPos = `${itemRect.left - rect.left}px`;
-                const yPos = `${itemRect.top - rect.top}px`;
+                const xPos = `${itemRect.left - rect.left + itemRect.width / 2}px`; // Center X
+                const yPos = `${itemRect.top - rect.top + itemRect.height / 2}px`; // Center Y
                 
-                // ลบไอเทมออกจาก DOM และ State
                 clickedItem.remove(); 
                 delete gameState.items[itemId]; 
                 
                 showScoreChange(xPos, yPos, scoreChange);
             }
         }
-
-
-        function handleTap(itemId, xPos, yPos) {
-            // ฟังก์ชันนี้ไม่จำเป็นต้องมีอีกต่อไป เพราะถูกรวมใน handleItemClick() แล้ว
-        }
         
         function showScoreChange(x, y, score) {
             const popup = document.createElement('div');
-            // ใช้คลาส score-popup ที่มี pointer-events: none
             popup.textContent = score > 0 ? `+${score}` : `${score}`;
-            popup.className = `score-popup absolute text-2xl font-black transition-all duration-500 ease-out drop-shadow-lg transform scale-[1.0]`; 
+            popup.className = `score-popup absolute text-2xl font-black text-center whitespace-nowrap`; 
             popup.style.left = x;
             popup.style.top = y;
+            popup.style.transform = 'translate(-50%, -50%)'; /* Center the popup itself */
             
             if (score > 0) {
                 popup.classList.add('text-green-600');
@@ -621,16 +629,15 @@
 
             dom.gameArea.appendChild(popup);
 
-            setTimeout(() => {
-                popup.style.transform = 'translateY(-50px) scale(1.2)';
-                popup.style.opacity = '0';
-            }, 10);
+            // Trigger animation after it's in DOM
+            requestAnimationFrame(() => {
+                popup.classList.add('animate');
+            });
 
             setTimeout(() => {
                 popup.remove();
-            }, 500);
+            }, 600); // Match CSS transition duration
         }
-
 
         function gameLoop() {
             if (!gameState.isRunning) return;
@@ -649,7 +656,6 @@
                 item.element.style.top = `${item.y}px`;
 
                 if (item.y > gameAreaHeight) {
-                    // หากไอเทมที่ดีหล่นถึงพื้น จะถูกหักคะแนน 5 แต้ม
                     if (item.definition.type === 'good') {
                         gameState.score -= 5; 
                         dom.scoreDisplay.textContent = gameState.score;
@@ -664,7 +670,7 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- Firestore Logic (ไม่เปลี่ยนแปลง) ---
+        // --- Firebase/Leaderboard Logic (Minimal changes for display) ---
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -679,9 +685,13 @@
             }
         }
         
+        function getCollectionPath(appId) {
+            return `artifacts/${appId}/public/data/carbon_game_rankings`;
+        }
+        
         async function saveScore(employeeId, score, userId) {
             if (!gameState.db || !gameState.appId) {
-                console.error("Firebase not initialized or appId missing. Score not saved.");
+                dom.rankingStatus.textContent = "⚠️ Firebase ไม่พร้อม Score ไม่ถูกบันทึก";
                 return;
             }
             
@@ -694,11 +704,9 @@
                     userId: userId,
                     timestamp: new Date()
                 }));
-                console.log("Score successfully saved for:", employeeId);
                 dom.rankingStatus.textContent = "คะแนนถูกบันทึกเรียบร้อยแล้ว!";
             } catch (e) {
-                console.error("Error adding document: ", e);
-                dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว กรุณาตรวจสอบการเชื่อมต่อและสิทธิ์ Firebase";
+                dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว";
             }
         }
         
@@ -748,15 +756,15 @@
                 topScores.forEach((rank, index) => {
                     const rankItem = document.createElement('div');
                     const isCurrentUser = rank.employeeId === gameState.employeeId;
-                    rankItem.className = `ranking-item flex justify-between items-center p-2 text-sm ${index < 3 ? 'text-lg' : ''} ${isCurrentUser ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`;
+                    rankItem.className = `ranking-item flex justify-between items-center p-2 text-sm ${index < 3 ? 'text-lg' : ''} ${isCurrentUser ? 'bg-emerald-100 ring-2 ring-emerald-500 rounded-lg my-1 font-bold' : 'text-gray-700'}`;
                     
                     const rankNumber = index + 1;
-                    const trophyEmoji = rankNumber === 1 ? '🥇' : rankNumber === 2 ? '🥈' : rankNumber === 3 ? '🥉' : ' ';
+                    const trophyEmoji = rankNumber === 1 ? '🥇' : rankNumber === 2 ? '🥈' : rankNumber === 3 ? '🥉' : '';
                     
                     rankItem.innerHTML = `
                         <div class="font-mono flex items-center">
                             <span class="w-6 text-center">${trophyEmoji}</span>
-                            <span class="font-bold">${rank.employeeId}</span>
+                            <span class="ml-2">${rank.employeeId}</span>
                         </div>
                         <span class="font-extrabold text-xl ${index === 0 ? 'text-yellow-700' : 'text-emerald-600'}">${rank.score}</span>
                     `;
@@ -764,22 +772,20 @@
                 });
 
             }, (error) => {
-                 console.error("Leaderboard Snapshot Error:", error);
-                 dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">ไม่สามารถโหลดอันดับได้ (Error: ${error.code})</p>`;
+                 dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">ไม่สามารถโหลดอันดับได้</p>`;
             });
         }
         
-        // --- Info Modal Population (ไม่เปลี่ยนแปลง) ---
         function populateInfoModal() {
             dom.goodInfoList.innerHTML = '';
             dom.badInfoList.innerHTML = '';
 
             ITEM_DEFINITIONS.forEach(item => {
                 const listItem = document.createElement('div');
-                listItem.className = 'flex items-start p-3 rounded-lg';
+                listItem.className = 'flex items-start p-3 rounded-lg border-b border-gray-200 last:border-b-0'; /* No border for last item */
                 
                 const imgContainer = document.createElement('div');
-                imgContainer.className = `w-12 h-12 flex-shrink-0 mr-4 rounded-full ${item.color} shadow-md`;
+                imgContainer.className = `w-12 h-12 flex-shrink-0 mr-4 rounded-full ${item.color} shadow-md flex items-center justify-center`;
                 imgContainer.innerHTML = `<img src="${item.imageSrc}" class="w-full h-full object-contain p-1">`;
                 
                 const textContainer = document.createElement('div');
@@ -800,6 +806,23 @@
             });
         }
 
+        function preloadImages() {
+             return new Promise(resolve => {
+                const imagePromises = ITEM_DEFINITIONS.map(item => {
+                    return new Promise(imgResolve => {
+                        const img = new Image();
+                        img.onload = imgResolve;
+                        img.onerror = imgResolve; 
+                        img.src = item.imageSrc;
+                    });
+                });
+
+                Promise.all(imagePromises).then(() => {
+                    gameState.isImagesPreloaded = true;
+                    resolve();
+                });
+            });
+        }
 
         // --- Event Listeners and Initialization ---
         function setupEventListeners() {
@@ -808,7 +831,7 @@
                 dom.gameContainer.classList.add('hidden');
                 dom.gameOverScreen.classList.add('hidden');
                 dom.startScreen.classList.remove('hidden');
-                dom.leaderboardPanel.classList.remove('hidden'); // แสดง Leaderboard กลับมาเมื่อกลับหน้า Start
+                dom.leaderboardPanel.classList.remove('leaderboard-hidden'); 
                 dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)'; 
             });
             
@@ -831,8 +854,6 @@
                     dom.startButton.classList.add('disabled:bg-gray-400');
                 }
             });
-
-            // 💡 ลบ Event Listener เดิมที่ผูกกับ gameArea ออกไป (เพราะเราผูกกับ itemElement โดยตรงแล้ว)
         }
         
         window.initApp = function(userId, appId) {
