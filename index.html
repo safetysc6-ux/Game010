@@ -116,7 +116,7 @@
             padding: 4vmin; 
             box-shadow: none; 
             display: flex;
-            flex-direction: column;
+            flex-direction: column; 
         }
 
         /* --- Depth/Neumorphism Effects --- */
@@ -184,7 +184,7 @@
                 inset -2px -2px 5px #ffffff;
         }
 
-        /* --- Game Item Styles (Adjusted for Aesthetics) --- */
+        /* --- Game Item Styles --- */
         .game-item {
             position: absolute;
             width: 70px; 
@@ -195,56 +195,60 @@
             border-radius: 50%;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: transform 0.05s;
+            z-index: 10; /* ให้ไอเทมอยู่ด้านบน */
         }
         
-        /* 💡 เพิ่มพื้นที่การกด (Tap Area) ด้วย Padding ที่ภาพด้านใน */
         .game-item img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 8px; /* เพิ่ม Padding รอบภาพ ทำให้พื้นที่คลิกใหญ่ขึ้น */
+            padding: 8px; 
         }
-
 
         .game-item:active {
             transform: scale(0.85); 
         }
         
+        /* 💡 การแก้ไข: เพิ่ม flex-grow: 1 ใน game-area เพื่อให้ยืดเต็มที่ */
         .game-area {
             position: relative;
             overflow: hidden;
             background-color: #d1fae5; 
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2); 
-            flex-grow: 1; 
+            flex-grow: 1; /* ทำให้ยืดเต็มพื้นที่ที่เหลือใน game-container */
             min-height: 250px;
         }
         
-        /* --- Ranking List Styles (Subtle Depth) --- */
-        #leaderboard-list {
-            max-height: 30vh; 
+        /* --- Ranking List Styles --- */
+        #leaderboard-panel {
+            max-height: 40vh; 
             overflow-y: auto;
             background-color: #e0f2f1; 
             border: 1px solid #b2dfdb;
             padding: 0.5rem;
             border-radius: 0.75rem;
-        }
-        
-        .ranking-item {
-            border-radius: 0.5rem;
-            margin-bottom: 0.25rem;
+            flex-shrink: 0;
         }
 
-        .ranking-item:nth-child(1) {
-            background: linear-gradient(45deg, #fef3c7, #fde68a); 
-            color: #b45309; 
-            font-weight: 700;
-            box-shadow: 0 2px 4px rgba(212, 163, 20, 0.5);
+        /* --- End Game Animation (Bounce/Pop) --- */
+        @keyframes bounce-in {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1.0); }
         }
-        .ranking-item:nth-child(2) {
-            background-color: #e5e7eb; 
+
+        #game-over-screen {
+            animation: bounce-in 0.4s ease-out;
+            transform-origin: center;
+            flex-shrink: 0;
         }
-        .ranking-item:nth-child(3) {
-            background-color: #fecaca; 
+
+        /* 💡 ลบส่วน Countdown Overlay CSS ออก */
+
+        /* 💡 แก้ไข: Score Pop-up ต้องไม่ดักจับการคลิก */
+        .score-popup {
+            pointer-events: none; /* สำคัญมาก: ไม่ให้ดักจับการคลิก */
+            z-index: 20; /* ให้แสดงบนไอเทมเกม (z-index: 10) แต่ไม่ดักจับคลิก */
         }
     </style>
 </head>
@@ -261,7 +265,7 @@
         
         <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('info-modal').classList.add('hidden')">
             <div class="card-panel p-6 max-w-md w-11/12 max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
-                <h3 class="text-2xl font-bold mb-4 text-emerald-600 border-b-2 pb-2 border-emerald-300">💡 ข้อมูลภารกิจคาร์บอน</h3>
+                <h3 class="text-2xl font-bold mb-4 text-emerald-600 border-b-2 pb-2 border-emerald-300">💡 ข้อมูลการปลดปล่อยคาร์บอน</h3>
                 
                 <h4 class="text-xl font-bold mt-4 mb-2 text-green-700">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
                 <div id="good-info-list" class="space-y-4">
@@ -277,12 +281,12 @@
             </div>
         </div>
 
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-between items-center mb-4 flex-shrink-0">
             <h1 class="text-2xl font-extrabold text-emerald-700">🌲 CARBON MISSION 🌎</h1>
-            <button id="info-button" class="btn-secondary w-10 h-10 text-xl flex items-center justify-center shadow-lg">i</button>
+            <button id="info-button" class="btn-secondary px-3 py-1 text-sm font-bold shadow-lg">ข้อมูลการปลดปล่อยคาร์บอน</button>
         </div>
 
-        <div id="start-screen" class="space-y-4 card-panel mb-4">
+        <div id="start-screen" class="space-y-4 card-panel mb-4 flex-shrink-0">
             <p class="text-center text-gray-600 font-semibold">กรุณาระบุรหัสพนักงานเพื่อเข้าสู่ภารกิจ</p>
             <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
                         maxlength="10"
@@ -294,18 +298,18 @@
         </div>
 
         <div id="game-container" class="hidden flex-col flex-grow">
-            <div class="flex justify-between items-center mb-3 p-2 card-panel">
+            <div class="flex justify-between items-center mb-3 p-2 card-panel flex-shrink-0">
                 <div class="text-base font-bold text-emerald-800">SCORE: <span id="score-display" class="text-xl font-extrabold text-green-600">0</span></div>
                 <div class="text-base font-bold text-emerald-800">TIME: <span id="timer-display" class="text-xl font-extrabold text-blue-600">20</span>s</div>
                 <div id="current-user-id" class="text-xs text-gray-500 truncate font-mono" title="รหัสพนักงานของคุณ">ID: </div>
             </div>
             
-            <div id="game-area" class="game-area w-full rounded-xl mb-4 relative flex-grow">
+            <div id="game-area" class="game-area w-full rounded-xl mb-0 relative flex-grow">
                 <p id="game-message" class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-red-500 hidden z-10 bg-black bg-opacity-10 rounded-xl"></p>
-            </div>
+                </div>
         </div>
 
-        <div id="game-over-screen" class="hidden text-center space-y-4 card-panel mb-4">
+        <div id="game-over-screen" class="hidden text-center space-y-4 card-panel mb-4 flex-shrink-0">
             <h2 class="text-3xl font-extrabold text-emerald-600">🎉 ภารกิจสำเร็จ!</h2>
             <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-5xl text-red-600 block my-2">0</span></p>
             <p id="ranking-status" class="text-md font-semibold text-green-700"></p>
@@ -315,7 +319,7 @@
             </button>
         </div>
 
-        <div class="mt-auto pt-4 flex-shrink-0">
+        <div id="leaderboard-panel" class="mt-4 flex-shrink-0 card-panel transition-all duration-300">
             <h2 class="text-xl font-bold text-center mb-3 text-emerald-700">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
             <div id="leaderboard-list">
                 <p class="text-center text-gray-500" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
@@ -332,7 +336,7 @@
         const SCORE_REDUCTION = 10;
         const SCORE_EMISSION = -5;
 
-        // Emoji definitions (แก้ไข URL ไอเทมที่ 23 แล้ว)
+        // Emoji definitions 
         const ITEM_DEFINITIONS = [
             // Good: Carbon Reduction 
             { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: เลือกทานอาหารมังสวิรัติ' },
@@ -359,7 +363,6 @@
             { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ทิ้งขยะไม่แยกประเภท' },
             { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: เปิดไฟทิ้งไว้ตลอดเวลา' },
             { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: สั่งอาหารแบบ Delivery บ่อยเกินไป' },
-            // 🚨 แก้ไข URL ที่ทำให้เกิด ERR_NAME_NOT_RESOLVED แล้ว
             { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
         ];
 
@@ -393,6 +396,7 @@
             timerDisplay: document.getElementById('timer-display'),
             finalScore: document.getElementById('final-score'),
             gameMessage: document.getElementById('game-message'),
+            leaderboardPanel: document.getElementById('leaderboard-panel'), 
             leaderboardList: document.getElementById('leaderboard-list'),
             loadingLeaderboard: document.getElementById('loading-leaderboard'),
             rankingStatus: document.getElementById('ranking-status'),
@@ -400,7 +404,8 @@
             infoButton: document.getElementById('info-button'), 
             infoModal: document.getElementById('info-modal'),     
             goodInfoList: document.getElementById('good-info-list'), 
-            badInfoList: document.getElementById('bad-info-list')    
+            badInfoList: document.getElementById('bad-info-list'),
+            // 💡 ลบ dom.countdownOverlay และ dom.countdownDisplay ออก
         };
         
         // ***************************************************************
@@ -414,7 +419,6 @@
         }
 
         function getCollectionPath(appId) {
-            // ใช้โครงสร้าง subcollection เพื่อความเป็นระเบียบและสเกลได้
             return `artifacts/${appId}/public/data/carbon_game_rankings`;
         }
         
@@ -439,7 +443,7 @@
         function resetGame() {
             gameState.score = 0;
             gameState.timeLeft = GAME_DURATION;
-            // ลบ items ทั้งหมดออกจาก DOM
+            // ลบไอเทมทั้งหมดออกจาก DOM และ State
             Object.values(gameState.items).forEach(item => item.element.remove());
             gameState.items = {}; 
             gameState.itemIdCounter = 0;
@@ -448,6 +452,8 @@
             dom.gameMessage.classList.add('hidden');
             dom.timerDisplay.classList.remove('text-red-600');
         }
+        
+        // 💡 ลบฟังก์ชัน countdownBeforeStart() ออก
 
         function startGame() {
             if (!gameState.employeeId) {
@@ -460,17 +466,31 @@
             }
 
             resetGame();
+            
+            // 1. ซ่อนหน้าจอเริ่มต้นและจบเกม
             dom.startScreen.classList.add('hidden');
             dom.gameOverScreen.classList.add('hidden');
-            dom.gameContainer.classList.remove('hidden');
+            
+            // 2. ซ่อน Leaderboard เพื่อให้ game-area ยืดลงมา
+            dom.leaderboardPanel.classList.add('hidden'); 
+            
+            // 3. ทำให้ game-container แสดงผล (เป็น flex-col)
+            dom.gameContainer.classList.remove('hidden'); 
+            
             dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
-
+            
+            // 💡 เรียก startActualGame() ทันที
+            startActualGame();
+        }
+        
+        function startActualGame() {
             gameState.isRunning = true;
             gameState.spawnIntervalId = setInterval(spawnItem, SPAWN_INTERVAL);
             gameState.timerIntervalId = setInterval(updateTimer, 1000);
 
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
+
 
         function endGame() {
             gameState.isRunning = false;
@@ -480,7 +500,12 @@
 
             dom.gameContainer.classList.add('hidden');
             dom.finalScore.textContent = gameState.score;
+            
+            // แสดง Game Over Screen พร้อม animation
             dom.gameOverScreen.classList.remove('hidden');
+            
+            // แสดง Leaderboard กลับมา
+            dom.leaderboardPanel.classList.remove('hidden');
 
             // บันทึกคะแนนลง Firebase
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
@@ -507,6 +532,13 @@
             const itemId = gameState.itemIdCounter++;
 
             const itemElement = document.createElement('div');
+            // 💡 เพิ่มการผูก Event Listener ให้กับ itemElement โดยตรง
+            itemElement.addEventListener('click', handleItemClick);
+            itemElement.addEventListener('touchstart', (e) => {
+                e.preventDefault(); 
+                handleItemClick(e.touches[0]);
+            });
+            
             itemElement.className = `game-item ${definition.color}`;
             itemElement.dataset.id = itemId; 
             itemElement.dataset.type = definition.type;
@@ -535,28 +567,49 @@
 
             gameState.items[itemId] = item;
         }
-
-        function handleTap(itemId, xPos, yPos) {
+        
+        // 💡 ฟังก์ชันใหม่: จัดการการคลิกบนไอเทมโดยตรง
+        function handleItemClick(event) {
             if (!gameState.isRunning) return;
+            
+            const clickedItem = event.target.closest('.game-item'); 
+            
+            if (clickedItem) {
+                const itemId = parseInt(clickedItem.dataset.id);
+                const item = gameState.items[itemId];
+                
+                if (!item) return;
 
-            const item = gameState.items[itemId];
-
-            if (item) {
                 const scoreChange = item.definition.score;
 
                 gameState.score += scoreChange;
                 dom.scoreDisplay.textContent = gameState.score;
                 
-                showScoreChange(xPos, yPos, scoreChange);
-
+                // คำนวณตำแหน่งสำหรับแสดงคะแนนลอย
+                const rect = dom.gameArea.getBoundingClientRect();
+                const itemRect = clickedItem.getBoundingClientRect();
+                
+                const xPos = `${itemRect.left - rect.left}px`;
+                const yPos = `${itemRect.top - rect.top}px`;
+                
+                // ลบไอเทมออกจาก DOM และ State
+                clickedItem.remove(); 
                 delete gameState.items[itemId]; 
+                
+                showScoreChange(xPos, yPos, scoreChange);
             }
+        }
+
+
+        function handleTap(itemId, xPos, yPos) {
+            // ฟังก์ชันนี้ไม่จำเป็นต้องมีอีกต่อไป เพราะถูกรวมใน handleItemClick() แล้ว
         }
         
         function showScoreChange(x, y, score) {
             const popup = document.createElement('div');
+            // ใช้คลาส score-popup ที่มี pointer-events: none
             popup.textContent = score > 0 ? `+${score}` : `${score}`;
-            popup.className = `absolute text-2xl font-black transition-all duration-500 ease-out z-20 pointer-events-none transform scale-[1.0] drop-shadow-lg`; 
+            popup.className = `score-popup absolute text-2xl font-black transition-all duration-500 ease-out drop-shadow-lg transform scale-[1.0]`; 
             popup.style.left = x;
             popup.style.top = y;
             
@@ -611,13 +664,12 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- Firestore Logic (กู้คืนฟังก์ชัน) ---
+        // --- Firestore Logic (ไม่เปลี่ยนแปลง) ---
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
                     return await func();
                 } catch (error) {
-                    // Only retry on 'unavailable' (network/backend issue)
                     if (i === retries - 1 || error.code !== 'unavailable') {
                         throw error;
                     }
@@ -650,9 +702,6 @@
             }
         }
         
-        // ***************************************************************
-        // 🚨 แก้ไข: เปลี่ยนตรรกะ Leaderboard ให้รวมคะแนนทั้งหมด
-        // ***************************************************************
         function setupLeaderboard(appId) {
             if (!gameState.db) {
                 dom.leaderboardList.innerHTML = `<p class="text-center text-red-500">Firebase Database ไม่พร้อมใช้งาน!</p>`;
@@ -661,7 +710,6 @@
             
             dom.loadingLeaderboard.classList.remove('hidden');
 
-            // 💡 ดึงเอกสารทั้งหมด (ไม่ใช้ limit) เพื่อให้คำนวณคะแนนรวมได้อย่างถูกต้อง
             const rankingsQuery = window.firestore.query(
                 window.firestore.collection(gameState.db, getCollectionPath(appId)),
                 window.firestore.orderBy("timestamp", "desc") 
@@ -673,22 +721,18 @@
                     ...doc.data()
                 }));
 
-                // 💡 ตรรกะใหม่: จัดกลุ่มและหาคะแนนรวมทั้งหมดต่อรหัสพนักงาน
                 const aggregatedScores = leaderboard.reduce((acc, item) => {
                     const id = item.employeeId;
                     
                     if (!acc[id]) {
-                        // ถ้าเป็นครั้งแรก ให้เริ่มต้นด้วยคะแนนรวม 0
                         acc[id] = { employeeId: id, score: 0 };
                     }
                     
-                    // รวมคะแนนทั้งหมดของรหัสพนักงานนี้
-                    acc[id].score += (item.score || 0); // เพิ่ม (|| 0) ป้องกันค่า score เป็น null/undefined
+                    acc[id].score += (item.score || 0); 
                     
                     return acc;
                 }, {});
 
-                // จัดเรียงคะแนนรวม 10 อันดับแรก
                 const topScores = Object.values(aggregatedScores)
                     .sort((a, b) => b.score - a.score)
                     .slice(0, 10);
@@ -703,7 +747,8 @@
 
                 topScores.forEach((rank, index) => {
                     const rankItem = document.createElement('div');
-                    rankItem.className = `ranking-item flex justify-between items-center p-2 text-sm ${index < 3 ? 'text-lg' : ''}`;
+                    const isCurrentUser = rank.employeeId === gameState.employeeId;
+                    rankItem.className = `ranking-item flex justify-between items-center p-2 text-sm ${index < 3 ? 'text-lg' : ''} ${isCurrentUser ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`;
                     
                     const rankNumber = index + 1;
                     const trophyEmoji = rankNumber === 1 ? '🥇' : rankNumber === 2 ? '🥈' : rankNumber === 3 ? '🥉' : ' ';
@@ -724,9 +769,7 @@
             });
         }
         
-        // ***************************************************************
-        // --- Info Modal Population ---
-        // ***************************************************************
+        // --- Info Modal Population (ไม่เปลี่ยนแปลง) ---
         function populateInfoModal() {
             dom.goodInfoList.innerHTML = '';
             dom.badInfoList.innerHTML = '';
@@ -758,27 +801,23 @@
         }
 
 
-        // ***************************************************************
         // --- Event Listeners and Initialization ---
-        // ***************************************************************
-
         function setupEventListeners() {
             dom.startButton.addEventListener('click', startGame);
             dom.restartButton.addEventListener('click', () => {
                 dom.gameContainer.classList.add('hidden');
                 dom.gameOverScreen.classList.add('hidden');
                 dom.startScreen.classList.remove('hidden');
+                dom.leaderboardPanel.classList.remove('hidden'); // แสดง Leaderboard กลับมาเมื่อกลับหน้า Start
                 dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)'; 
             });
             
-            // 💡 Info Button: Show the modal
             dom.infoButton.addEventListener('click', () => {
                 dom.infoModal.classList.remove('hidden');
             });
 
 
             dom.employeeIdInput.addEventListener('input', (e) => {
-                // บังคับเป็นตัวพิมพ์ใหญ่ และจำกัดอักขระ
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
                 
                 const id = e.target.value.trim();
@@ -793,33 +832,7 @@
                 }
             });
 
-            function handleGameAreaInteraction(event) {
-                if (event.type === 'touchstart') {
-                    event.preventDefault();
-                }
-
-                const clickedItem = event.target.closest('.game-item'); 
-                
-                if (clickedItem && gameState.isRunning) {
-                    const itemId = parseInt(clickedItem.dataset.id);
-                    
-                    if (!gameState.items[itemId]) return;
-                    
-                    const rect = dom.gameArea.getBoundingClientRect();
-                    const itemRect = clickedItem.getBoundingClientRect();
-                    
-                    // คำนวณตำแหน่งสำหรับแสดงคะแนน (+10/-5)
-                    const xPos = `${itemRect.left - rect.left}px`;
-                    const yPos = `${itemRect.top - rect.top}px`;
-
-                    clickedItem.remove(); 
-                    
-                    handleTap(itemId, xPos, yPos);
-                }
-            }
-            
-            dom.gameArea.addEventListener('click', handleGameAreaInteraction);
-            dom.gameArea.addEventListener('touchstart', handleGameAreaInteraction);
+            // 💡 ลบ Event Listener เดิมที่ผูกกับ gameArea ออกไป (เพราะเราผูกกับ itemElement โดยตรงแล้ว)
         }
         
         window.initApp = function(userId, appId) {
