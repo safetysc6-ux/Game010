@@ -2,29 +2,27 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ภารกิจลดคาร์บอน</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ภารกิจลดคาร์บอน | เกมมือถือ</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script type="module">
         // --- Firebase Core Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        
-        // 💡 แก้ไข: Import ทุกฟังก์ชันของ Firestore เพื่อส่งออกไปยัง Global Window
         import { 
             getFirestore, 
             addDoc, 
             onSnapshot, 
             collection, 
             query, 
-            limit, 
             orderBy,
             setLogLevel 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // *******************************************************************
-        // 🚨 ข้อมูล Firebase Config ของคุณ
+        // 🚨 สำคัญมาก: กรุณาแทนที่ค่าเหล่านี้ด้วย Firebase Config ของคุณ 
         // *******************************************************************
         const firebaseConfig = {
             apiKey: "AIzaSyDmjcXHZz3glB6hffzsgZeVzpMx48FutXw",
@@ -48,25 +46,21 @@
             window.initApp(userId, appId);
         }
 
-        // 💡 แก้ไข: นำเข้าฟังก์ชัน Firestore ที่จำเป็นไปยัง Window Object
         window.firestore = {
             collection,
             addDoc,
             onSnapshot,
             query,
-            limit,
             orderBy
         };
 
-
-        // --- AUTHENTICATION & INITIALIZATION ---
         if (firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                window.db = db; // ส่ง db instance ไปยัง Global Scope
+                window.db = db; 
 
                 async function attemptSignIn() {
                     try {
@@ -81,10 +75,7 @@
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
-                        console.log("Firebase Auth Ready. User ID:", userId);
-                    } else {
-                        console.log("User not authenticated or signed out.");
-                    }
+                    } 
                     notifyAppReady(); 
                 });
             } catch(e) {
@@ -92,112 +83,241 @@
                 notifyAppReady();
             }
         } else {
-            console.error("Firebase configuration missing. Game data will not be saved.");
             notifyAppReady();
         }
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        /* ------------------------------------------------------------------- */
+        /* --- CUSTOM STYLES: Full Screen & Neumorphism/Depth Effect --- */
+        /* ------------------------------------------------------------------- */
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&display=swap');
+        
+        /* 💡 Full Screen Setup for Mobile */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0fdf4; 
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: #f0fdf4; /* Very Light Mint Background */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            padding: 0;
         }
 
+        #app {
+            width: 100vw;
+            height: 100vh;
+            max-width: 600px; 
+            background-color: #f0fdf4; 
+            padding: 4vmin; 
+            box-shadow: none; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Depth/Neumorphism Effects --- */
+        .card-panel {
+            background-color: #f0fdf4;
+            border-radius: 1rem;
+            box-shadow: 
+                6px 6px 12px #dbece0, 
+                -6px -6px 12px #ffffff; 
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .card-panel:hover {
+             box-shadow: 
+                4px 4px 8px #dbece0, 
+                -4px -4px 8px #ffffff;
+        }
+        
+        /* 💡 ปุ่มหลัก */
+        .btn-main {
+            background-color: #059669; /* Emerald 600 */
+            color: white;
+            font-weight: bold;
+            border-radius: 0.75rem;
+            box-shadow: 
+                4px 4px 8px rgba(5, 150, 105, 0.4), 
+                -2px -2px 4px rgba(255, 255, 255, 0.8);
+            transition: all 0.15s ease;
+        }
+        
+        .btn-main:active {
+            box-shadow: 
+                inset 2px 2px 5px rgba(0, 0, 0, 0.2), 
+                inset -2px -2px 5px rgba(255, 255, 255, 0.5);
+            transform: scale(0.98);
+        }
+        
+        /* 💡 ปุ่มรอง/Info Button */
+        .btn-secondary {
+            background-color: #67e8f9; /* Cyan 400 */
+            color: #0e7490;
+            border-radius: 9999px; /* Rounded pill shape */
+            box-shadow: 
+                3px 3px 6px rgba(0, 0, 0, 0.2), 
+                -2px -2px 4px rgba(255, 255, 255, 0.8);
+            transition: all 0.15s ease;
+            font-weight: 700;
+        }
+
+        .btn-secondary:active {
+             box-shadow: 
+                inset 2px 2px 5px rgba(0, 0, 0, 0.2), 
+                inset -2px -2px 5px rgba(255, 255, 255, 0.5);
+            transform: scale(0.95);
+        }
+
+
+        .input-recessed {
+            background-color: #ecfdf4;
+            border: 1px solid #dbece0;
+            border-radius: 0.75rem;
+            box-shadow: 
+                inset 2px 2px 5px rgba(0, 0, 0, 0.1), 
+                inset -2px -2px 5px #ffffff;
+        }
+
+        /* --- Game Item Styles (Adjusted for Aesthetics) --- */
         .game-item {
             position: absolute;
-            width: 60px; 
-            height: 60px;
+            width: 70px; 
+            height: 70px;
             text-align: center;
             cursor: pointer;
             user-select: none;
             border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: transform 0.05s;
         }
-
-        .game-item:active {
-            transform: scale(0.9);
+        
+        /* 💡 เพิ่มพื้นที่การกด (Tap Area) ด้วย Padding ที่ภาพด้านใน */
+        .game-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 8px; /* เพิ่ม Padding รอบภาพ ทำให้พื้นที่คลิกใหญ่ขึ้น */
         }
 
+
+        .game-item:active {
+            transform: scale(0.85); 
+        }
+        
         .game-area {
             position: relative;
             overflow: hidden;
-            background-color: #ccfbf1; 
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #d1fae5; 
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2); 
+            flex-grow: 1; 
+            min-height: 250px;
+        }
+        
+        /* --- Ranking List Styles (Subtle Depth) --- */
+        #leaderboard-list {
+            max-height: 30vh; 
+            overflow-y: auto;
+            background-color: #e0f2f1; 
+            border: 1px solid #b2dfdb;
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+        }
+        
+        .ranking-item {
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
-        .ranking-item:nth-child(odd) {
-            background-color: #d1fae5;
-        }
-        .ranking-item:nth-child(even) {
-            background-color: #ecfdf5;
-        }
         .ranking-item:nth-child(1) {
-            font-weight: bold;
-            color: #d97706; 
+            background: linear-gradient(45deg, #fef3c7, #fde68a); 
+            color: #b45309; 
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(212, 163, 20, 0.5);
         }
         .ranking-item:nth-child(2) {
-            color: #9ca3af; 
+            background-color: #e5e7eb; 
         }
         .ranking-item:nth-child(3) {
-            color: #b45309; 
+            background-color: #fecaca; 
         }
     </style>
 </head>
-<body class="p-4">
+<body>
 
-    <div id="app" class="w-full max-w-sm bg-white shadow-2xl rounded-xl p-4 md:p-6 transition-all duration-300">
-        <div id="message-box" class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
-            <div class="bg-white p-6 rounded-lg shadow-xl max-w-xs text-center transform transition-transform duration-300 scale-100" onclick="event.stopPropagation()">
+    <div id="app" class="transition-all duration-300">
+        <div id="message-box" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('message-box').classList.add('hidden')">
+            <div class="card-panel p-6 max-w-xs text-center transform scale-100" onclick="event.stopPropagation()">
                 <h3 id="message-title" class="text-xl font-bold mb-3 text-emerald-600"></h3>
                 <p id="message-body" class="mb-4 text-gray-700"></p>
-                <button onclick="document.getElementById('message-box').classList.add('hidden')" class="bg-emerald-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-emerald-600 transition">ปิด</button>
+                <button onclick="document.getElementById('message-box').classList.add('hidden')" class="btn-main px-4 py-2 text-sm">ปิด</button>
+            </div>
+        </div>
+        
+        <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden transition-opacity duration-300" onclick="document.getElementById('info-modal').classList.add('hidden')">
+            <div class="card-panel p-6 max-w-md w-11/12 max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
+                <h3 class="text-2xl font-bold mb-4 text-emerald-600 border-b-2 pb-2 border-emerald-300">💡 ข้อมูลภารกิจคาร์บอน</h3>
+                
+                <h4 class="text-xl font-bold mt-4 mb-2 text-green-700">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
+                <div id="good-info-list" class="space-y-4">
+                    </div>
+
+                <h4 class="text-xl font-bold mt-6 mb-2 text-red-700">❌ การปล่อยคาร์บอน (Bad Items: -5 คะแนน)</h4>
+                <div id="bad-info-list" class="space-y-4">
+                    </div>
+                
+                <button onclick="document.getElementById('info-modal').classList.add('hidden')" class="btn-main w-full mt-6 py-3">
+                    รับทราบและเริ่มภารกิจ
+                </button>
             </div>
         </div>
 
-        <h1 class="text-2xl font-extrabold text-center mb-4 text-emerald-700">♻️ ภารกิจลดคาร์บอน 🌎</h1>
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-extrabold text-emerald-700">🌲 CARBON MISSION 🌎</h1>
+            <button id="info-button" class="btn-secondary w-10 h-10 text-xl flex items-center justify-center shadow-lg">i</button>
+        </div>
 
-        <div id="start-screen" class="space-y-4">
-            <p class="text-center text-gray-600">กรุณากรอกรหัสพนักงานเพื่อเริ่มเกมและบันทึกคะแนน</p>
-            <input type="text" id="employee-id" placeholder="รหัสพนักงาน (ไม่เกิน 10 ตัวอักษร)"
+        <div id="start-screen" class="space-y-4 card-panel mb-4">
+            <p class="text-center text-gray-600 font-semibold">กรุณาระบุรหัสพนักงานเพื่อเข้าสู่ภารกิจ</p>
+            <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
                         maxlength="10"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-center uppercase tracking-wider">
+                        class="w-full p-3 text-center uppercase tracking-wider input-recessed font-mono text-gray-700">
             <button id="start-button"
-                        class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 disabled:bg-gray-400" disabled>
+                        class="w-full btn-main py-3" disabled>
                 กรุณากรอกรหัสพนักงาน
             </button>
         </div>
 
-        <div id="game-container" class="hidden">
-            <div class="flex justify-between items-center mb-3 p-2 bg-emerald-100 rounded-lg shadow-sm">
-                <div class="text-lg font-bold text-emerald-800">คะแนน: <span id="score-display">0</span></div>
-                <div class="text-lg font-bold text-emerald-800">เวลา: <span id="timer-display">20</span>s</div>
-                <div id="current-user-id" class="text-xs text-gray-500 truncate" title="รหัสพนักงานของคุณ">ID: </div>
+        <div id="game-container" class="hidden flex-col flex-grow">
+            <div class="flex justify-between items-center mb-3 p-2 card-panel">
+                <div class="text-base font-bold text-emerald-800">SCORE: <span id="score-display" class="text-xl font-extrabold text-green-600">0</span></div>
+                <div class="text-base font-bold text-emerald-800">TIME: <span id="timer-display" class="text-xl font-extrabold text-blue-600">20</span>s</div>
+                <div id="current-user-id" class="text-xs text-gray-500 truncate font-mono" title="รหัสพนักงานของคุณ">ID: </div>
             </div>
-            <div id="game-area" class="game-area w-full h-80 rounded-xl mb-4 relative" style="touch-action: none;">
+            
+            <div id="game-area" class="game-area w-full rounded-xl mb-4 relative flex-grow">
                 <p id="game-message" class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-red-500 hidden z-10 bg-black bg-opacity-10 rounded-xl"></p>
             </div>
         </div>
 
-        <div id="game-over-screen" class="hidden text-center space-y-4">
-            <h2 class="text-3xl font-extrabold text-emerald-600">ภารกิจเสร็จสิ้น!</h2>
-            <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-4xl text-emerald-700">0</span></p>
-            <p id="ranking-status" class="text-md text-gray-600"></p>
+        <div id="game-over-screen" class="hidden text-center space-y-4 card-panel mb-4">
+            <h2 class="text-3xl font-extrabold text-emerald-600">🎉 ภารกิจสำเร็จ!</h2>
+            <p class="text-xl text-gray-700">คะแนนสุดท้าย: <span id="final-score" class="font-black text-5xl text-red-600 block my-2">0</span></p>
+            <p id="ranking-status" class="text-md font-semibold text-green-700"></p>
             <button id="restart-button"
-                        class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition duration-200">
+                        class="w-full btn-main py-3">
                 🔁 เล่นอีกครั้ง
             </button>
         </div>
 
-        <div class="mt-6">
-            <h2 class="text-xl font-bold text-center mb-3 text-emerald-700">🏆 อันดับผู้ทำภารกิจ (Real-Time)</h2>
-            <div id="leaderboard-list" class="space-y-1 max-h-60 overflow-y-auto rounded-lg border border-emerald-300 p-2">
+        <div class="mt-auto pt-4 flex-shrink-0">
+            <h2 class="text-xl font-bold text-center mb-3 text-emerald-700">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
+            <div id="leaderboard-list">
                 <p class="text-center text-gray-500" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
             </div>
         </div>
@@ -205,43 +325,42 @@
 
     <script>
         // --- Game Configuration ---
-        const GAME_DURATION = 20; // seconds
-        const SPAWN_INTERVAL = 300; // ms
-        const ITEM_SPEED = 2; // pixels per frame 
-        const ITEM_SIZE = 60; // Must match CSS width/height
+        const GAME_DURATION = 20; 
+        const SPAWN_INTERVAL = 300; 
+        const ITEM_SPEED = 2; 
+        const ITEM_SIZE = 70; 
         const SCORE_REDUCTION = 10;
         const SCORE_EMISSION = -5;
 
-        // Emoji definitions (ใช้ลิงก์เดิมที่เคยให้มา)
+        // Emoji definitions (แก้ไข URL ไอเทมที่ 23 แล้ว)
         const ITEM_DEFINITIONS = [
             // Good: Carbon Reduction 
-            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
-            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300' },
+            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: เลือกทานอาหารมังสวิรัติ' },
+            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้ระบบขนส่งสาธารณะ' },
+            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
+            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้พลังงานสะอาด (โซลาร์เซลล์)' },
+            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ลดการใช้ถุงพลาสติก' },
+            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: นำขวดน้ำมาใช้ซ้ำ' },
+            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ซ่อมแซมอุปกรณ์ไฟฟ้าที่ชำรุด' },
+            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ปิดไฟเมื่อไม่ใช้งาน' },
+            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: แยกประเภทขยะก่อนทิ้ง' },
+            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ประหยัดการใช้น้ำ' },
+            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ซื้อสินค้ามือสอง' },
+            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: การเดิน/ปั่นจักรยานแทนรถ' },
+            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้ผลิตภัณฑ์ที่เป็นมิตรต่อสิ่งแวดล้อม' },
+            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: งดเผาขยะ' },
+            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: การปลูกผักสวนครัว' },
+            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
+            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-green-300', defaultDesc: 'ตัวอย่าง: ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
 
             // Bad: Carbon Emission
-            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
-            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300' },
+            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: เดินทางด้วยเครื่องบินบ่อย' },
+            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ใช้รถยนต์ส่วนตัวคนเดียว' },
+            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ทิ้งขยะไม่แยกประเภท' },
+            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: เปิดไฟทิ้งไว้ตลอดเวลา' },
+            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: สั่งอาหารแบบ Delivery บ่อยเกินไป' },
+            // 🚨 แก้ไข URL ที่ทำให้เกิด ERR_NAME_NOT_RESOLVED แล้ว
+            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-red-300', defaultDesc: 'ตัวอย่าง: ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
         ];
 
         // --- Global Game State ---
@@ -277,13 +396,17 @@
             leaderboardList: document.getElementById('leaderboard-list'),
             loadingLeaderboard: document.getElementById('loading-leaderboard'),
             rankingStatus: document.getElementById('ranking-status'),
-            currentUserId: document.getElementById('current-user-id')
+            currentUserId: document.getElementById('current-user-id'),
+            infoButton: document.getElementById('info-button'), 
+            infoModal: document.getElementById('info-modal'),     
+            goodInfoList: document.getElementById('good-info-list'), 
+            badInfoList: document.getElementById('bad-info-list')    
         };
-
-        // ---------------------------------------------------------------------
-        // --- Utility Functions ---
-        // ---------------------------------------------------------------------
-
+        
+        // ***************************************************************
+        // --- Utility & Game Logic Functions ---
+        // ***************************************************************
+        
         function showMessage(title, body) {
             document.getElementById('message-title').textContent = title;
             document.getElementById('message-body').textContent = body;
@@ -291,11 +414,12 @@
         }
 
         function getCollectionPath(appId) {
+            // ใช้โครงสร้าง subcollection เพื่อความเป็นระเบียบและสเกลได้
             return `artifacts/${appId}/public/data/carbon_game_rankings`;
         }
         
         function preloadImages() {
-            return new Promise(resolve => {
+             return new Promise(resolve => {
                 const imagePromises = ITEM_DEFINITIONS.map(item => {
                     return new Promise(imgResolve => {
                         const img = new Image();
@@ -306,26 +430,23 @@
                 });
 
                 Promise.all(imagePromises).then(() => {
-                    console.log("All game images preloaded.");
                     gameState.isImagesPreloaded = true;
                     resolve();
                 });
             });
         }
-        
-        // ---------------------------------------------------------------------
-        // --- Game Logic ---
-        // ---------------------------------------------------------------------
 
         function resetGame() {
             gameState.score = 0;
             gameState.timeLeft = GAME_DURATION;
+            // ลบ items ทั้งหมดออกจาก DOM
             Object.values(gameState.items).forEach(item => item.element.remove());
             gameState.items = {}; 
             gameState.itemIdCounter = 0;
             dom.scoreDisplay.textContent = '0';
             dom.timerDisplay.textContent = GAME_DURATION;
             dom.gameMessage.classList.add('hidden');
+            dom.timerDisplay.classList.remove('text-red-600');
         }
 
         function startGame() {
@@ -361,6 +482,7 @@
             dom.finalScore.textContent = gameState.score;
             dom.gameOverScreen.classList.remove('hidden');
 
+            // บันทึกคะแนนลง Firebase
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
         }
 
@@ -392,7 +514,6 @@
             const imgElement = document.createElement('img');
             imgElement.src = definition.imageSrc;
             imgElement.alt = definition.type === 'good' ? 'Good item' : 'Bad item';
-            imgElement.className = 'w-full h-full object-contain p-1'; 
             
             itemElement.appendChild(imgElement);
 
@@ -435,20 +556,20 @@
         function showScoreChange(x, y, score) {
             const popup = document.createElement('div');
             popup.textContent = score > 0 ? `+${score}` : `${score}`;
-            popup.className = `absolute text-xl font-bold transition-all duration-500 ease-out z-20 pointer-events-none transform scale-[0.9]`; 
+            popup.className = `absolute text-2xl font-black transition-all duration-500 ease-out z-20 pointer-events-none transform scale-[1.0] drop-shadow-lg`; 
             popup.style.left = x;
             popup.style.top = y;
             
             if (score > 0) {
-                popup.classList.add('text-green-600', 'drop-shadow-lg');
+                popup.classList.add('text-green-600');
             } else {
-                popup.classList.add('text-red-600', 'drop-shadow-lg');
+                popup.classList.add('text-red-600');
             }
 
             dom.gameArea.appendChild(popup);
 
             setTimeout(() => {
-                popup.style.transform = 'translateY(-50px) scale(1.1)';
+                popup.style.transform = 'translateY(-50px) scale(1.2)';
                 popup.style.opacity = '0';
             }, 10);
 
@@ -475,8 +596,8 @@
                 item.element.style.top = `${item.y}px`;
 
                 if (item.y > gameAreaHeight) {
+                    // หากไอเทมที่ดีหล่นถึงพื้น จะถูกหักคะแนน 5 แต้ม
                     if (item.definition.type === 'good') {
-                        // Penalize for missing a good item
                         gameState.score -= 5; 
                         dom.scoreDisplay.textContent = gameState.score;
                         showScoreChange(item.element.style.left, item.element.style.top, -5);
@@ -489,128 +610,157 @@
 
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
-
-        // ---------------------------------------------------------------------
-        // --- Firestore / Leaderboard Logic ---
-        // ---------------------------------------------------------------------
-
+        
+        // --- Firestore Logic (กู้คืนฟังก์ชัน) ---
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
                     return await func();
                 } catch (error) {
-                    if (i < retries - 1) {
-                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-                        console.warn(`Firestore operation failed, retrying in ${delay}ms...`, error.code);
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    } else {
-                        throw error; 
+                    // Only retry on 'unavailable' (network/backend issue)
+                    if (i === retries - 1 || error.code !== 'unavailable') {
+                        throw error;
                     }
+                    console.warn(`Firestore call failed, retrying in ${2 ** i}s...`, error.code);
+                    await new Promise(resolve => setTimeout(resolve, (2 ** i) * 1000));
                 }
             }
         }
-
+        
         async function saveScore(employeeId, score, userId) {
-            if (!gameState.db || !userId || !window.firestore) {
-                console.warn("Firestore not initialized or User ID missing. Score not saved.");
-                dom.rankingStatus.textContent = "ไม่สามารถบันทึกคะแนนได้ (ฐานข้อมูลไม่พร้อม)";
+            if (!gameState.db || !gameState.appId) {
+                console.error("Firebase not initialized or appId missing. Score not saved.");
                 return;
             }
-
-            const rankingsRef = window.firestore.collection(gameState.db, getCollectionPath(gameState.appId));
-
-            const data = {
-                employeeId: employeeId,
-                score: score,
-                timestamp: new Date().toISOString(),
-                userId: userId,
-            };
-
+            
+            const docRef = window.firestore.collection(gameState.db, getCollectionPath(gameState.appId));
+            
             try {
-                await fetchWithBackoff(() => window.firestore.addDoc(rankingsRef, data));
-                dom.rankingStatus.textContent = "🎉 บันทึกคะแนนเรียบร้อยแล้ว!";
-            } catch (error) {
-                console.error("Error saving score to Firestore:", error);
-                dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว: " + (error.code === 'permission-denied' ? 'ข้อผิดพลาดด้านสิทธิ์' : error.message);
-                showMessage("บันทึกคะแนนล้มเหลว", "เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล");
+                await fetchWithBackoff(() => window.firestore.addDoc(docRef, {
+                    employeeId: employeeId,
+                    score: score,
+                    userId: userId,
+                    timestamp: new Date()
+                }));
+                console.log("Score successfully saved for:", employeeId);
+                dom.rankingStatus.textContent = "คะแนนถูกบันทึกเรียบร้อยแล้ว!";
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว กรุณาตรวจสอบการเชื่อมต่อและสิทธิ์ Firebase";
             }
         }
-
+        
+        // ***************************************************************
+        // 🚨 แก้ไข: เปลี่ยนตรรกะ Leaderboard ให้รวมคะแนนทั้งหมด
+        // ***************************************************************
         function setupLeaderboard(appId) {
-            if (!gameState.db || !window.firestore) {
-                dom.loadingLeaderboard.textContent = "ไม่สามารถโหลดอันดับ (Firebase ไม่พร้อม)";
+            if (!gameState.db) {
+                dom.leaderboardList.innerHTML = `<p class="text-center text-red-500">Firebase Database ไม่พร้อมใช้งาน!</p>`;
                 return;
             }
-
-            const rankingsRef = window.firestore.collection(gameState.db, getCollectionPath(appId));
             
-            // ดึงข้อมูลจำนวนมากพอเพื่อครอบคลุมอันดับสูงสุด (เช่น 100 อันล่าสุด)
-            const q = window.firestore.query(
-                rankingsRef, 
-                window.firestore.orderBy("score", "desc"), 
-                window.firestore.limit(100) // ดึง 100 อันดับแรกมาประมวลผลใน Client
+            dom.loadingLeaderboard.classList.remove('hidden');
+
+            // 💡 ดึงเอกสารทั้งหมด (ไม่ใช้ limit) เพื่อให้คำนวณคะแนนรวมได้อย่างถูกต้อง
+            const rankingsQuery = window.firestore.query(
+                window.firestore.collection(gameState.db, getCollectionPath(appId)),
+                window.firestore.orderBy("timestamp", "desc") 
             );
 
-            window.firestore.onSnapshot(q, (snapshot) => {
-                const highestScoresMap = new Map();
-
-                if (snapshot.empty) {
-                    dom.leaderboardList.innerHTML = '<p class="text-center text-gray-500 p-2">ยังไม่มีคะแนนในระบบ</p>';
-                    if (dom.loadingLeaderboard) dom.loadingLeaderboard.classList.add('hidden');
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const score = data.score || 0;
-                    const employeeId = (data.employeeId || 'N/A').toUpperCase().trim();
-                    
-                    // จัดกลุ่มและเก็บเฉพาะคะแนนที่สูงที่สุดของแต่ละรหัสพนักงาน
-                    if (employeeId !== 'N/A') {
-                        const currentHighest = highestScoresMap.get(employeeId) || -Infinity; // ใช้ -Infinity เพื่อให้คะแนน 0 ถูกบันทึก
-                        if (score > currentHighest) {
-                            highestScoresMap.set(employeeId, score);
-                        }
-                    }
-                });
-                
-                // แปลง Map เป็น Array และจัดเรียงตามคะแนนจากมากไปน้อย
-                let filteredRankings = Array.from(highestScoresMap, ([employeeId, score]) => ({
-                    employeeId,
-                    score
+            window.firestore.onSnapshot(rankingsQuery, (snapshot) => {
+                const leaderboard = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
                 }));
 
-                filteredRankings.sort((a, b) => b.score - a.score);
-
-                // แสดงผลเฉพาะ 10 อันดับแรก
-                dom.leaderboardList.innerHTML = '';
-                const top10 = filteredRankings.slice(0, 10);
-                let rank = 1;
-
-                top10.forEach((item) => {
-                    const listItem = document.createElement('div');
-                    listItem.className = 'ranking-item flex justify-between p-2 rounded-lg text-gray-800 text-sm';
+                // 💡 ตรรกะใหม่: จัดกลุ่มและหาคะแนนรวมทั้งหมดต่อรหัสพนักงาน
+                const aggregatedScores = leaderboard.reduce((acc, item) => {
+                    const id = item.employeeId;
                     
-                    listItem.innerHTML = `
-                        <span class="font-bold w-1/12">${rank}.</span>
-                        <span class="w-1/2 truncate">${item.employeeId}</span>
-                        <span class="font-extrabold text-right w-2/5">${item.score} คะแนน</span>
+                    if (!acc[id]) {
+                        // ถ้าเป็นครั้งแรก ให้เริ่มต้นด้วยคะแนนรวม 0
+                        acc[id] = { employeeId: id, score: 0 };
+                    }
+                    
+                    // รวมคะแนนทั้งหมดของรหัสพนักงานนี้
+                    acc[id].score += (item.score || 0); // เพิ่ม (|| 0) ป้องกันค่า score เป็น null/undefined
+                    
+                    return acc;
+                }, {});
+
+                // จัดเรียงคะแนนรวม 10 อันดับแรก
+                const topScores = Object.values(aggregatedScores)
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 10);
+                
+                dom.loadingLeaderboard.classList.add('hidden');
+                dom.leaderboardList.innerHTML = '';
+                
+                if (topScores.length === 0) {
+                     dom.leaderboardList.innerHTML = `<p class="text-center text-gray-500 p-2">ยังไม่มีใครทำคะแนนเลย! มาเป็นคนแรกกัน!</p>`;
+                     return;
+                }
+
+                topScores.forEach((rank, index) => {
+                    const rankItem = document.createElement('div');
+                    rankItem.className = `ranking-item flex justify-between items-center p-2 text-sm ${index < 3 ? 'text-lg' : ''}`;
+                    
+                    const rankNumber = index + 1;
+                    const trophyEmoji = rankNumber === 1 ? '🥇' : rankNumber === 2 ? '🥈' : rankNumber === 3 ? '🥉' : ' ';
+                    
+                    rankItem.innerHTML = `
+                        <div class="font-mono flex items-center">
+                            <span class="w-6 text-center">${trophyEmoji}</span>
+                            <span class="font-bold">${rank.employeeId}</span>
+                        </div>
+                        <span class="font-extrabold text-xl ${index === 0 ? 'text-yellow-700' : 'text-emerald-600'}">${rank.score}</span>
                     `;
-                    dom.leaderboardList.appendChild(listItem);
-                    rank++;
+                    dom.leaderboardList.appendChild(rankItem);
                 });
 
-                if (dom.loadingLeaderboard) dom.loadingLeaderboard.classList.add('hidden');
             }, (error) => {
-                console.error("Error fetching leaderboard:", error);
-                dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">เกิดข้อผิดพลาดในการโหลดอันดับ</p>`;
+                 console.error("Leaderboard Snapshot Error:", error);
+                 dom.leaderboardList.innerHTML = `<p class="text-center text-red-500 p-2">ไม่สามารถโหลดอันดับได้ (Error: ${error.code})</p>`;
+            });
+        }
+        
+        // ***************************************************************
+        // --- Info Modal Population ---
+        // ***************************************************************
+        function populateInfoModal() {
+            dom.goodInfoList.innerHTML = '';
+            dom.badInfoList.innerHTML = '';
+
+            ITEM_DEFINITIONS.forEach(item => {
+                const listItem = document.createElement('div');
+                listItem.className = 'flex items-start p-3 rounded-lg';
+                
+                const imgContainer = document.createElement('div');
+                imgContainer.className = `w-12 h-12 flex-shrink-0 mr-4 rounded-full ${item.color} shadow-md`;
+                imgContainer.innerHTML = `<img src="${item.imageSrc}" class="w-full h-full object-contain p-1">`;
+                
+                const textContainer = document.createElement('div');
+                textContainer.className = 'flex-grow';
+                textContainer.innerHTML = `
+                    <p class="font-bold text-gray-800">${item.defaultDesc}</p>
+                    <p class="text-sm ${item.type === 'good' ? 'text-green-600' : 'text-red-600'}">คะแนน: ${item.score > 0 ? '+' : ''}${item.score}</p>
+                `;
+
+                listItem.appendChild(imgContainer);
+                listItem.appendChild(textContainer);
+                
+                if (item.type === 'good') {
+                    dom.goodInfoList.appendChild(listItem);
+                } else {
+                    dom.badInfoList.appendChild(listItem);
+                }
             });
         }
 
 
-        // ---------------------------------------------------------------------
+        // ***************************************************************
         // --- Event Listeners and Initialization ---
-        // ---------------------------------------------------------------------
+        // ***************************************************************
 
         function setupEventListeners() {
             dom.startButton.addEventListener('click', startGame);
@@ -619,11 +769,16 @@
                 dom.gameOverScreen.classList.add('hidden');
                 dom.startScreen.classList.remove('hidden');
                 dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)'; 
-                dom.startButton.classList.add('hover:bg-emerald-700');
             });
             
-            // ทำให้ปุ่มเริ่มทำงานเมื่อมีการกรอกรหัสพนักงาน
+            // 💡 Info Button: Show the modal
+            dom.infoButton.addEventListener('click', () => {
+                dom.infoModal.classList.remove('hidden');
+            });
+
+
             dom.employeeIdInput.addEventListener('input', (e) => {
+                // บังคับเป็นตัวพิมพ์ใหญ่ และจำกัดอักขระ
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
                 
                 const id = e.target.value.trim();
@@ -643,7 +798,7 @@
                     event.preventDefault();
                 }
 
-                const clickedItem = event.target.closest('.game-item');
+                const clickedItem = event.target.closest('.game-item'); 
                 
                 if (clickedItem && gameState.isRunning) {
                     const itemId = parseInt(clickedItem.dataset.id);
@@ -652,9 +807,10 @@
                     
                     const rect = dom.gameArea.getBoundingClientRect();
                     const itemRect = clickedItem.getBoundingClientRect();
+                    
+                    // คำนวณตำแหน่งสำหรับแสดงคะแนน (+10/-5)
                     const xPos = `${itemRect.left - rect.left}px`;
                     const yPos = `${itemRect.top - rect.top}px`;
-
 
                     clickedItem.remove(); 
                     
@@ -666,22 +822,18 @@
             dom.gameArea.addEventListener('touchstart', handleGameAreaInteraction);
         }
         
-        // This function is called after Firebase initialization is complete
         window.initApp = function(userId, appId) {
             gameState.userId = userId;
             gameState.appId = appId;
-            // Retrieve the db instance exported from the module script
             gameState.db = window.db; 
             
-            // 1. Setup Leaderboard (if DB is ready)
             if (gameState.db) {
                 setupLeaderboard(appId);
             }
 
-            // 2. Start preloading images in the background
-            preloadImages(); 
+            populateInfoModal();
             
-            console.log("Game App Initialized. Button is ready to be enabled by ID input.");
+            preloadImages(); 
         }
 
         setupEventListeners();
