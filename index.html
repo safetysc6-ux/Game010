@@ -18,6 +18,8 @@
             collection, 
             query, 
             orderBy,
+            where,          // <--- เพิ่ม WHERE สำหรับการ Query
+            getDocs,        // <--- เพิ่ม getDocs สำหรับการนับจำนวน
             setLogLevel 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -51,7 +53,9 @@
             addDoc,
             onSnapshot,
             query,
-            orderBy
+            orderBy,
+            where,          // <--- เพิ่ม
+            getDocs         // <--- เพิ่ม
         };
 
         if (firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
@@ -326,7 +330,7 @@
                             maxlength="10"
                             class="form-control mb-4 input-recessed fs-5">
                 <button id="start-button"
-                            class="btn btn-main w-100 py-3 fs-5" disabled>
+                            class="btn w-100 py-3 fs-5 btn-secondary" disabled> 
                     กรุณากรอกรหัสพนักงาน
                 </button>
             </div>
@@ -375,6 +379,7 @@
         const ITEM_SIZE = 60; 
         const SCORE_REDUCTION = 10;
         const SCORE_EMISSION = -5;
+        const MAX_PLAYS_PER_DAY = 5; // <--- ค่าจำกัดการเล่น
         
         // Modal instances for Bootstrap 
         let messageModal;
@@ -405,6 +410,7 @@
             { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ทิ้งขยะไม่แยกประเภท' },
             { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เปิดไฟทิ้งไว้ตลอดเวลา' },
             { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'สั่งอาหารแบบ Delivery บ่อยเกินไป' },
+            // แก้ไขลิงก์ 23.png
             { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
         ];
 
@@ -449,7 +455,7 @@
         };
         
         // ***************************************************************
-        // --- Game Logic Functions (ใช้ชุดเดิม) ---
+        // --- Game Logic Functions (มีการแก้ไขส่วนการเริ่มเกม) ---
         // ***************************************************************
         
         function showMessage(title, body) {
@@ -470,16 +476,97 @@
             dom.timerDisplay.classList.remove('text-danger');
         }
         
-        function startGame() {
-            if (!gameState.employeeId) {
-                gameState.employeeId = dom.employeeIdInput.value.toUpperCase().trim();
+        // ฟังก์ชันใหม่: อัปเดตสถานะปุ่ม (นำ Logic จาก Event Listener เดิมมาใช้)
+        function updateStartButtonState(id) {
+            if (id.length > 0) {
+                dom.startButton.disabled = false;
+                dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
+                dom.startButton.classList.remove('btn-secondary'); 
+                dom.startButton.classList.add('btn-main');
+            } else {
+                dom.startButton.disabled = true;
+                dom.startButton.textContent = 'กรุณากรอกรหัสพนักงาน';
+                dom.startButton.classList.remove('btn-main');
+                dom.startButton.classList.add('btn-secondary');
             }
+        }
+        
+        // ฟังก์ชันใหม่: ตรวจสอบจำนวนการเล่นวันนี้และเริ่มเกม
+        async function checkPlayLimitAndStartGame() {
+            const employeeId = dom.employeeIdInput.value.toUpperCase().trim();
+            if (!employeeId) {
+                showMessage("รหัสพนักงานไม่ถูกต้อง", "กรุณากรอกรหัสพนักงานก่อนเริ่มเกม");
+                // updateStartButtonState(employeeId); // ไม่จำเป็นต้องเรียกเพราะ input listener ทำไปแล้ว
+                return;
+            }
+            
+            // ปิดปุ่มชั่วคราวขณะรอผลจาก Firebase
+            dom.startButton.disabled = true;
+            dom.startButton.textContent = 'กำลังตรวจสอบสิทธิ์...';
 
-            if (!gameState.employeeId) {
-                 showMessage("รหัสพนักงานไม่ถูกต้อง", "กรุณากรอกรหัสพนักงานก่อนเริ่มเกม");
+            // 1. คำนวณเวลาเที่ยงคืนของวันนี้ (00:00:00.000) - ใช้เวลาท้องถิ่น
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+            
+            if (!gameState.db || !gameState.appId) {
+                showMessage("ข้อผิดพลาดของระบบ", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้! กรุณาลองใหม่ภายหลัง");
+                updateStartButtonState(employeeId); 
                 return;
             }
 
+            const collectionPath = getCollectionPath(gameState.appId);
+            const collectionRef = window.firestore.collection(gameState.db, collectionPath);
+
+            try {
+                // 2. Query: ดึงข้อมูลที่รหัสพนักงานตรงกัน และ Timestamp อยู่ในวันปัจจุบัน (>= เที่ยงคืน)
+                const q = window.firestore.query(
+                    collectionRef,
+                    window.firestore.where("employeeId", "==", employeeId),
+                    window.firestore.where("timestamp", ">=", today),
+                    // การเรียงลำดับใน Query นี้อาจเป็นตัวที่ทำให้ต้องสร้าง index
+                    window.firestore.orderBy("employeeId"), 
+                    window.firestore.orderBy("timestamp", "asc")
+                );
+                
+                const querySnapshot = await window.firestore.getDocs(q);
+                const playCount = querySnapshot.size; // จำนวนครั้งที่เล่นไปแล้ววันนี้
+
+                // 3. ตรวจสอบลิมิต
+                if (playCount >= MAX_PLAYS_PER_DAY) {
+                    showMessage(
+                        "จำกัดการเล่น", 
+                        `รหัสพนักงาน ${employeeId} ได้เล่นไปแล้ว ${playCount} ครั้งในวันนี้ 😔\n\nสามารถเล่นใหม่ได้อีกครั้งในวันพรุ่งนี้ (หลัง 00:00 น. ตามเวลาท้องถิ่น)`
+                    );
+                    // แสดงสถานะจำกัดการเล่นบนปุ่ม
+                    dom.startButton.textContent = `จำกัดการเล่น ${MAX_PLAYS_PER_DAY} ครั้ง/วัน`; 
+                    dom.startButton.classList.remove('btn-main');
+                    dom.startButton.classList.add('btn-secondary');
+                    
+                } else {
+                    // อนุญาตให้เล่นต่อ
+                    dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
+                    updateStartButtonState(employeeId); // เปิดปุ่มอีกครั้ง
+                    
+                    // เริ่มเกมจริง
+                    startGameInternal(employeeId);
+                }
+
+            } catch (e) {
+                console.error("Error checking play limit:", e);
+                
+                if (e.code === 'failed-precondition' && e.message.includes('requires an index')) {
+                    showMessage("⚠️ ต้องสร้าง Index ใน Firebase", "การจำกัดจำนวนเล่นต้องใช้ Index พิเศษใน Firestore กรุณาคลิกที่ลิงก์ใน Console เพื่อสร้าง Index ก่อน!");
+                } else {
+                    showMessage("ข้อผิดพลาดของฐานข้อมูล", "ไม่สามารถตรวจสอบจำนวนการเล่นได้ กรุณาลองใหม่");
+                }
+                updateStartButtonState(employeeId); // เปิดปุ่มอีกครั้งเมื่อมี Error
+            }
+        }
+        
+        // เปลี่ยนชื่อ startGame เดิมเป็น startGameInternal
+        function startGameInternal(employeeId) {
+            gameState.employeeId = employeeId;
+            
             resetGame();
             
             // ซ่อน Start/Game Over 
@@ -821,14 +908,17 @@
             messageModal = new bootstrap.Modal(document.getElementById('messageBox'));
             infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
             
-            dom.startButton.addEventListener('click', startGame);
+            // เปลี่ยนให้ปุ่ม Start เรียกใช้ฟังก์ชันตรวจสอบลิมิต
+            dom.startButton.addEventListener('click', checkPlayLimitAndStartGame);
+            
             dom.restartButton.addEventListener('click', () => {
                 // กลับไปหน้า Start 
                 dom.gameContainer.classList.add('d-none');
                 dom.gameOverScreen.classList.add('d-none');
                 
                 dom.startScreen.classList.remove('d-none');
-                dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)'; 
+                // อัปเดตสถานะปุ่มเมื่อกลับมาหน้า Start
+                updateStartButtonState(dom.employeeIdInput.value.toUpperCase().trim());
             });
             
             // Event listener for Input
@@ -837,21 +927,11 @@
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
                 
                 const id = e.target.value.trim();
-                if (id.length > 0) {
-                    gameState.employeeId = id; // Update employeeId immediately
-                    dom.startButton.disabled = false;
-                    dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
-                    dom.startButton.classList.remove('btn-secondary'); 
-                    dom.startButton.classList.add('btn-main');
-                } else {
-                    dom.startButton.disabled = true;
-                    dom.startButton.textContent = 'กรุณากรอกรหัสพนักงาน';
-                    dom.startButton.classList.remove('btn-main');
-                    dom.startButton.classList.add('btn-secondary');
-                }
+                gameState.employeeId = id; // Update employeeId immediately
+                
+                // เรียกใช้ฟังก์ชันใหม่ในการอัปเดตสถานะปุ่ม
+                updateStartButtonState(id);
             });
-            // Initial check for button state
-            dom.startButton.classList.add('btn-secondary');
         }
         
         window.initApp = function(userId, appId) {
