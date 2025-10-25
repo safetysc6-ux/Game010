@@ -125,6 +125,7 @@
             color: var(--text-main);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            touch-action: pan-y; /* Fixes touch delay on mobile, prevents accidental scrolling */
         }
         body {
             display: flex;
@@ -139,26 +140,25 @@
         
         /* Ground Layer (Green Block) */
         .mario-ground {
-            position: fixed; /* Use fixed to stay at the bottom of the viewport */
+            position: fixed; 
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 100px; /* Height of the ground block */
+            height: 100px; 
             background-color: var(--bg-ground);
-            border-top: 5px solid #388e3c; /* Darker line for 2D depth */
-            box-shadow: 0 5px 0 #1b5e20; /* Bottom shadow */
-            z-index: 1; /* Below the main app content */
+            border-top: 5px solid #388e3c; 
+            box-shadow: 0 5px 0 #1b5e20; 
+            z-index: 1; 
         }
         
         /* Distant Mountains (Simple Shape) */
         .mario-mountains {
             position: fixed;
-            bottom: 95px; /* Just above the ground */
+            bottom: 95px; 
             left: 0;
             width: 200%;
             height: 100px;
             background: var(--bg-mountain);
-            /* Simple mountain peaks using clip-path */
             clip-path: polygon(0 100%, 15% 40%, 30% 80%, 45% 30%, 60% 70%, 75% 10%, 90% 60%, 100% 100%);
             opacity: 0.8;
             z-index: 0; 
@@ -171,7 +171,7 @@
              left: 10%;
              width: 500px;
              height: 150px;
-             background-color: #cccccc; /* Pastel Gray Factory Block */
+             background-color: #cccccc; 
              border: 4px solid var(--block-border);
              z-index: 2;
              opacity: 0.7;
@@ -194,10 +194,10 @@
             background-color: transparent; 
             padding: 1rem; 
             box-sizing: border-box; 
-            position: relative; /* Must be relative to sit above fixed background */
+            position: relative; 
             z-index: 10; 
             
-            /* **KEEP:** Safari Safe Area Fix (เลื่อนส่วนหัวลงมา) */
+            /* KEEP: Safari Safe Area Fix (เลื่อนส่วนหัวลงมา) */
             padding-top: calc(4rem + env(safe-area-inset-top)); 
             padding-bottom: calc(1rem + env(safe-area-inset-bottom));
         }
@@ -210,9 +210,9 @@
         .card-panel, .start-panel-style {
             background-color: var(--panel-bg); 
             backdrop-filter: none;
-            border: 4px solid var(--block-border); /* Thick border for block feel */
-            border-radius: 0; /* Square blocks */
-            box-shadow: var(--shadow-flat); /* Flat 2D shadow */
+            border: 4px solid var(--block-border); 
+            border-radius: 0; 
+            box-shadow: var(--shadow-flat); 
             transition: none;
         }
         .start-panel-style {
@@ -234,13 +234,13 @@
         .btn-main:hover { 
             background: var(--primary-color); 
             color: var(--text-main); 
-            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); /* Reduced shadow on hover */
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); 
             transform: translateY(2px);
         }
 
         .btn-main:active {
             box-shadow: none;
-            transform: translateY(4px); /* Simulate block press */
+            transform: translateY(4px); 
         }
         
         /* Secondary/Disabled Button Style */
@@ -255,7 +255,7 @@
         /* Input Field Style: Simple white box */
         .input-recessed {
             background-color: #ffffff;
-            border: 2px solid var(--secondary-color);
+            border: 2px solid var(--block-border); /* เปลี่ยนเป็นขอบดำเพื่อความชัดเจน */
             border-radius: 0;
             box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1); 
             padding: 1rem 1.25rem;
@@ -283,23 +283,21 @@
             height: 60px;
             cursor: pointer;
             user-select: none;
-            /* Make it look like a floating coin or item block */
-            border-radius: 50%; /* Keep round for coin feel */
-            background-color: var(--primary-color); /* Coin Yellow */
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); /* Soft Coin Glow */
+            border-radius: 50%; 
+            background-color: var(--primary-color); 
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); 
             border: 3px solid #ff9800;
             transition: transform 0.05s ease-out;
             z-index: 10; 
             opacity: 0;
             transform: scale(0.5); 
             animation: item-spawn 0.3s ease-out forwards;
+            touch-action: none; /* สำคัญ: ป้องกัน browser จากการจัดการ event นี้ */
         }
         
         .game-item img {
-             /* Icon within the item */
             filter: none; 
             object-fit: contain;
-            /* Use a simple animation to make them feel like floating coins */
             animation: bobbing 2s ease-in-out infinite; 
         }
 
@@ -395,21 +393,25 @@
         </div>
         
         <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0"> 
-            <h1 class="fs-4 fw-bolder text-success">🌲 ภารกิจลดคาร์บอน // V2.0</h1>
+            <h1 class="fs-4 fw-bolder text-success">🌲 ภารกิจทำความสะอาดโลก</h1>
             <button id="info-button" class="btn btn-sm btn-secondary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#infoModal">i / ข้อมูล</button>
         </div>
 
         <div id="start-screen" class="p-4 start-panel-style mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
             
             <h2 class="display-5 fw-black text-primary mb-3" style="font-family: 'Chakra Petch', sans-serif;">
-                เริ่มต้น <span class="text-success">โปรโตคอลทำความสะอาด</span>
+                เริ่มภารกิจ <span class="text-success">รักษ์โลก</span>
             </h2>
             <p class="fs-5 text-main fw-bold mb-2">
-                ระยะเวลาภารกิจ: <span class="text-primary fw-bolder">20 วินาที</span> ⏱️
+                เวลาจำกัด: <span class="text-primary fw-bolder">20 วินาที</span> ⏱️
             </p>
             <p class="fs-6 text-muted mb-4">
-                ลดการปล่อย (+10) // ปล่อยคาร์บอน (-5)
+                เก็บไอเท็มลดคาร์บอน (+10) // หลีกเลี่ยงไอเท็มปล่อยคาร์บอน (-5)
             </p>
+            
+            <div class="mb-4" style="height: 60px;">
+                 <img src="https://i.postimg.cc/85z1z6N3/employee-placeholder.png" alt="พนักงานโรงงาน" style="height: 100%; object-fit: contain; filter: drop-shadow(0 4px 0 rgba(0,0,0,0.2));">
+            </div>
 
             <div class="w-100" style="max-width: 300px;">
                 <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
@@ -426,7 +428,7 @@
             
             <div class="d-flex justify-content-between align-items-center p-3 card-panel mb-3 flex-shrink-0">
                 <div class="fw-bold text-muted fs-6">คะแนน: <span id="score-display" class="fs-4 fw-bolder text-success">0</span></div>
-                <div class="fw-bold text-muted fs-6">เวลา: <span id="timer-display" class="fs-4 fw-bolder text-primary">20</span>วินาที</div>
+                <div class="fw-bold text-muted fs-6">เวลา: <span id="timer-display" class="fs-4 fw-bolder text-primary">20</span>วิ</div>
                 <div id="current-user-id" class="fs-6 text-muted text-truncate font-monospace" title="รหัสพนักงาน">รหัส: </div>
             </div>
             
@@ -436,9 +438,9 @@
         </div>
 
         <div id="game-over-screen" class="d-none text-center p-3 card-panel mb-3 flex-shrink-0">
-            <h2 class="fs-3 fw-bolder text-success">ภารกิจเสร็จสิ้น // บันทึกข้อมูลคะแนนแล้ว</h2>
-            <p class="fs-5 text-muted">คะแนนสุดท้าย: <span id="final-score" class="d-block fw-black display-4 text-danger my-2">0</span></p>
-            <p id="ranking-status" class="fs-6 fw-semibold text-success"></p>
+            <h2 class="fs-3 fw-bolder text-success">ภารกิจเสร็จสิ้น!</h2>
+            <p class="fs-5 text-muted">คะแนนสุดท้าย: <span id="final-score" class="d-block fw-black display-4 text-success my-2">0</span></p>
+            <p id="ranking-status" class="fs-6 fw-semibold text-success">บันทึกคะแนนลงในฐานข้อมูลกลางแล้ว</p>
             <button id="restart-button"
                         class="btn btn-main w-100 py-3 fs-5">
                 🔁 เริ่มภารกิจใหม่
@@ -469,7 +471,6 @@
         let messageModal;
         let infoModal;
 
-        // **NOTE:** Item images are reused, but the CSS now styles them like floating coins/blocks.
         const ITEM_DEFINITIONS = [
             { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'เลือกทานอาหารมังสวิรัติ' },
             { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ระบบขนส่งสาธารณะ' },
@@ -538,7 +539,7 @@
         };
         
         // ***************************************************************
-        // --- Game Logic Functions (UNCHANGED) ---
+        // --- Game Logic Functions (มีการปรับปรุง Touch Handler และ Text) ---
         // ***************************************************************
         
         function showMessage(title, body) {
@@ -608,9 +609,10 @@
                 const playCount = querySnapshot.size; 
 
                 if (playCount >= MAX_PLAYS_PER_DAY) {
+                    // ปรับปรุงข้อความให้เป็นธรรมชาติ
                     showMessage(
-                        "ถึงขีดจำกัดภารกิจ", 
-                        `พนักงาน ${employeeId} ได้ทำภารกิจสำเร็จไปแล้ว ${playCount} ครั้งในวันนี้ 😔\n\nหน้าต่างภารกิจถัดไปจะเปิดในเวลา 00:00 น. ของวันพรุ่งนี้ (ตามเวลาท้องถิ่น)`
+                        "ภารกิจเต็มจำนวน", 
+                        `พนักงาน ${employeeId} ได้เล่นภารกิจครบ ${playCount} ครั้งสำหรับวันนี้แล้ว 😔\n\nสามารถเล่นใหม่ได้ในเวลา 00:00 น. ของวันพรุ่งนี้`
                     );
                     dom.startButton.textContent = `จำกัด: เล่นได้ ${MAX_PLAYS_PER_DAY} ครั้ง/วัน`; 
                     dom.startButton.classList.remove('btn-main');
@@ -639,9 +641,14 @@
             
             resetGame();
             
+            // ซ่อน Start/Game Over 
             dom.startScreen.classList.add('d-none');
             dom.gameOverScreen.classList.add('d-none');
             
+            // **การแก้ไข:** ซ่อน Leaderboard เมื่อเริ่มเกม
+            dom.leaderboardPanel.classList.add('d-none');
+            
+            // แสดง Game Container
             dom.gameContainer.classList.remove('d-none'); 
             
             dom.currentUserId.textContent = `รหัส: ${gameState.employeeId}`;
@@ -667,6 +674,9 @@
             Object.values(gameState.items).forEach(item => item.element.remove()); 
             gameState.items = {}; 
 
+            // **การแก้ไข:** แสดง Leaderboard เมื่อจบเกม
+            dom.leaderboardPanel.classList.remove('d-none');
+            
             dom.gameContainer.classList.add('d-none');
             dom.finalScore.textContent = gameState.score;
             
@@ -696,10 +706,12 @@
             const itemId = gameState.itemIdCounter++;
 
             const itemElement = document.createElement('div');
-            itemElement.addEventListener('click', handleItemClick);
+            
+            // **การแก้ไข Bug (ไอเท็มไม่หล่น):** ใช้ handleItemAction เพื่อจัดการทั้ง click และ touch
+            itemElement.addEventListener('click', (e) => handleItemAction(e.currentTarget));
             itemElement.addEventListener('touchstart', (e) => {
                 e.preventDefault(); 
-                handleItemClick(e.touches[0]);
+                handleItemAction(e.currentTarget); 
             });
             
             itemElement.className = `game-item`; 
@@ -731,33 +743,30 @@
             gameState.items[itemId] = item;
         }
         
-        function handleItemClick(event) {
+        // **ฟังก์ชันใหม่:** จัดการการกระทำเมื่อคลิก/สัมผัสไอเท็ม
+        function handleItemAction(clickedElement) {
             if (!gameState.isRunning) return;
             
-            const clickedItem = event.target.closest('.game-item'); 
+            const itemId = parseInt(clickedElement.dataset.id);
+            const item = gameState.items[itemId];
             
-            if (clickedItem) {
-                const itemId = parseInt(clickedItem.dataset.id);
-                const item = gameState.items[itemId];
-                
-                if (!item) return;
+            if (!item) return;
 
-                const scoreChange = item.definition.score;
+            const scoreChange = item.definition.score;
 
-                gameState.score += scoreChange;
-                dom.scoreDisplay.textContent = gameState.score;
-                
-                const rect = dom.gameArea.getBoundingClientRect();
-                const itemRect = clickedItem.getBoundingClientRect();
-                
-                const xPos = `${itemRect.left - rect.left + itemRect.width / 2}px`;
-                const yPos = `${itemRect.top - rect.top + itemRect.height / 2}px`;
-                
-                clickedItem.remove(); 
-                delete gameState.items[itemId]; 
-                
-                showScoreChange(xPos, yPos, scoreChange);
-            }
+            gameState.score += scoreChange;
+            dom.scoreDisplay.textContent = gameState.score;
+            
+            const rect = dom.gameArea.getBoundingClientRect();
+            const itemRect = clickedElement.getBoundingClientRect();
+            
+            const xPos = `${itemRect.left - rect.left + itemRect.width / 2}px`;
+            const yPos = `${itemRect.top - rect.top + itemRect.height / 2}px`;
+            
+            clickedElement.remove(); 
+            delete gameState.items[itemId]; 
+            
+            showScoreChange(xPos, yPos, scoreChange);
         }
         
         function showScoreChange(x, y, score) {
@@ -769,9 +778,11 @@
             popup.style.transform = 'translate(-50%, -50%)'; 
             
             if (score > 0) {
-                popup.classList.add('text-success');
+                // คะแนนบวกให้เป็นสีเขียว
+                popup.classList.add('text-success'); 
             } else {
-                popup.classList.add('text-danger');
+                // คะแนนลบให้เป็นสีแดง
+                popup.classList.add('text-danger'); 
             }
 
             dom.gameArea.appendChild(popup);
@@ -983,6 +994,8 @@
                 dom.gameOverScreen.classList.add('d-none');
                 
                 dom.startScreen.classList.remove('d-none');
+                // **การแก้ไข:** แสดง Leaderboard เมื่อกลับไปหน้า Start
+                dom.leaderboardPanel.classList.remove('d-none'); 
                 updateStartButtonState(dom.employeeIdInput.value.toUpperCase().trim());
             });
             
