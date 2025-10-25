@@ -30,7 +30,7 @@
             apiKey: "AIzaSyDmjcXHZz3glB6hffzsgZeVzpMx48FutXw",
             authDomain: "game-8ad3f.firebaseapp.com",
             projectId: "game-8ad3f",
-            storageBucket: "game-8ad3f.firebasestorage.app",
+            storageBucket: "game-8ad3f.firebaseapp.com",
             messagingSenderId: "1076950258243",
             appId: "1:1076950258243:web:e65a0ac6f51aa9bc4b3af6",
             measurementId: "G-0M2L8HX0D2"
@@ -102,9 +102,9 @@
             --bg-color: #ecfdf5; /* Light Mint/Green Base */
             --primary-color: #047857; /* Dark Emerald */
             --secondary-color: #67e8f9; /* Cyan */
-            --text-color: #15803d; /* Darker Green for text */
+            --text-color: #065f46; /* <<< ปรับปรุง: Darker Green for better readability */
             --shadow-light: #ffffff;
-            --shadow-dark: #dbece0;
+            --shadow-dark: #d1e9db; /* <<< ปรับปรุง: Softer shadow for Neumorphism */
         }
 
         /* Base Setup */
@@ -135,8 +135,8 @@
             box-sizing: border-box; 
             
             /* เว้นระยะ Header จากขอบบนของมือถือ */
-            padding-top: 4rem; /* <<< แก้ไข: เพิ่มค่าเป็น 4rem */
-            padding-top: calc(4rem + env(safe-area-inset-top)); /* <<< แก้ไข: ปรับค่าใน calc เป็น 4rem */
+            padding-top: 4rem; 
+            padding-top: calc(4rem + env(safe-area-inset-top)); 
             padding-bottom: calc(1rem + env(safe-area-inset-bottom));
         }
 
@@ -144,21 +144,21 @@
         .card-panel {
             background-color: var(--bg-color); 
             border-radius: 1.5rem;
+            /* <<< ปรับปรุง: เพิ่มความลึกของเงา */
             box-shadow: 
-                8px 8px 16px var(--shadow-dark), 
-                -8px -8px 16px var(--shadow-light); 
+                10px 10px 20px var(--shadow-dark), 
+                -10px -10px 20px var(--shadow-light); 
             transition: all 0.3s ease;
         }
         
-        /* 💡 NEW: Start Screen Style - สวยงามกว่าเดิม */
+        /* Start Screen Style */
         .start-panel-style {
             background: 
-                linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%); /* Light Mint Gradient */
+                linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%); 
             border-radius: 1.5rem;
             box-shadow: 
                 inset 0 0 10px rgba(4, 120, 87, 0.1),
                 8px 8px 16px var(--shadow-dark);
-            /* เพิ่มความโดดเด่นด้วยเส้นขอบ */
             border: 3px solid #6ee7b7;
         }
         
@@ -189,9 +189,10 @@
             background-color: var(--bg-color);
             border: none;
             border-radius: 1rem;
+            /* <<< ปรับปรุง: เงา Input ให้นุ่มลง */
             box-shadow: 
-                inset 3px 3px 7px rgba(0, 0, 0, 0.15), 
-                inset -3px -3px 7px var(--shadow-light);
+                inset 4px 4px 9px rgba(0, 0, 0, 0.1), 
+                inset -4px -4px 9px var(--shadow-light);
             padding: 1rem 1.25rem;
             color: var(--text-color);
             text-transform: uppercase;
@@ -203,14 +204,18 @@
         #game-area {
             position: relative;
             overflow: hidden;
-            background-color: #a7f3d0; 
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35);
+            /* <<< ปรับปรุง: สีเข้มขึ้นเพื่อเน้นความลึก */
+            background-color: #92e6b8; 
+            /* <<< ปรับปรุง: เพิ่ม Inset Shadow ให้ดูจมลง */
+            box-shadow: 
+                inset 5px 5px 10px rgba(0, 0, 0, 0.25), 
+                inset -5px -5px 10px rgba(255, 255, 255, 0.6); 
             flex-grow: 1; 
             border-radius: 1.5rem;
             min-height: 200px; 
         }
         
-        /* --- ITEM ANIMATIONS (ไม่เปลี่ยนแปลง) --- */
+        /* --- ITEM ANIMATIONS --- */
         .game-item {
             position: absolute;
             width: 60px; 
@@ -218,26 +223,45 @@
             cursor: pointer;
             user-select: none;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.7);
-            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 4px rgba(255, 255, 255, 0.7);
+            /* <<< ปรับปรุง: Background & Shadow */
+            background-color: rgba(255, 255, 255, 0.85); 
+            box-shadow: 
+                3px 3px 6px rgba(4, 120, 87, 0.5), 
+                -1px -1px 3px rgba(255, 255, 255, 0.5);
             transition: transform 0.05s ease-out;
             z-index: 10; 
 
             opacity: 0;
             transform: scale(0.5); 
-            animation: item-spawn 0.3s ease-out forwards;
-        }
-
-        @keyframes item-spawn {
-            from { opacity: 0; transform: scale(0.5) translateY(0); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            /* <<< ปรับปรุง: เพิ่ม Animation ลอย */
+            animation: item-spawn 0.3s ease-out forwards, item-float 5s infinite ease-in-out;
+            will-change: transform, opacity;
         }
         
-        /* Score Pop-up Style & Animation (ไม่เปลี่ยนแปลง) */
+        /* Keyframe for Item Spawning */
+        @keyframes item-spawn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* <<< ใหม่: Keyframe for floating effect */
+        @keyframes item-float {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.02); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        
+        /* Score Pop-up Style & Animation */
         .score-popup {
             pointer-events: none; 
             z-index: 20; 
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); 
+            /* <<< ปรับปรุง: เพิ่ม Text Shadow ให้เด่นชัด */
+            text-shadow: 
+                -1px -1px 0 #fff,  
+                 1px -1px 0 #fff,
+                -1px  1px 0 #fff,
+                 1px  1px 0 #fff,
+                 0px 0px 5px rgba(0, 0, 0, 0.6); 
             transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
             will-change: transform, opacity, filter;
             font-weight: 900;
@@ -249,12 +273,36 @@
             filter: blur(5px); 
         }
 
-        /* --- LEADERBOARD --- */
+        /* --- LEADERBOARD ENHANCEMENT --- */
         #leaderboard-panel {
-            max-height: 35vh; /* ลดความสูงลงเล็กน้อย */
+            max-height: 35vh; 
             overflow-y: auto;
             margin-top: 1rem;
             padding: 0.75rem; 
+        }
+
+        /* <<< ใหม่: Style สำหรับ Top 3 */
+        .leaderboard-top-rank {
+            /* Base style for top 3 */
+            background: linear-gradient(90deg, #d1fae5 0%, #ecfdf5 100%);
+            border: 3px solid var(--primary-color) !important;
+            border-radius: 1rem !important;
+            box-shadow: 0 4px 8px rgba(4, 120, 87, 0.2);
+            padding: 0.75rem !important;
+        }
+
+        /* <<< ใหม่: Style สำหรับผู้เล่นปัจจุบัน */
+        .current-user-highlight {
+            /* Style for the current user, overrides default if not in top 3 */
+            background-color: #e0f7e9 !important; /* Slightly stronger highlight */
+            border-color: #10b981 !important;
+            font-weight: bold;
+        }
+        
+        /* Ensure current user highlight is visible even if not in top 3 */
+        .current-user-highlight:not(.leaderboard-top-rank) {
+            border: 2px solid #10b981;
+            border-radius: 0.5rem;
         }
         
         /* Responsive Text Size for smaller mobile screens */
@@ -749,7 +797,7 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- Firebase/Leaderboard Logic (ใช้ชุดเดิม) ---
+        // --- Firebase/Leaderboard Logic (มีการปรับปรุงการแสดงผล) ---
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -834,7 +882,22 @@
                 topScores.forEach((rank, index) => {
                     const rankItem = document.createElement('div');
                     const isCurrentUser = rank.employeeId === gameState.employeeId;
-                    rankItem.className = `d-flex justify-content-between align-items-center p-2 small ${index < 3 ? 'fs-5' : 'text-secondary'} ${isCurrentUser ? 'bg-success-subtle border border-success rounded my-1 fw-bold' : ''}`;
+                    
+                    let rankClass = `d-flex justify-content-between align-items-center p-2 small my-1`;
+                    
+                    // 1. Base style for Top 3
+                    if (index < 3) {
+                         rankClass += ' leaderboard-top-rank fs-5';
+                    } else {
+                         rankClass += ' text-secondary';
+                    }
+                    
+                    // 2. Override/Add style for Current User
+                    if (isCurrentUser) {
+                         rankClass += ' current-user-highlight';
+                    }
+                    
+                    rankItem.className = rankClass;
                     
                     const rankNumber = index + 1;
                     const trophyEmoji = rankNumber === 1 ? '🥇' : rankNumber === 2 ? '🥈' : rankNumber === 3 ? '🥉' : '';
