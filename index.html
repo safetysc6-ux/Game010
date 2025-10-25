@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CARBON MISSION | ภารกิจพิกเซลรักษ์โลก</title>
+    <title>ภารกิจลดคาร์บอน | เกมมือถือ</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;700;900&display=swap" rel="stylesheet">
     
     <script type="module">
         // --- Firebase Core Imports ---
@@ -19,8 +18,8 @@
             collection, 
             query, 
             orderBy,
-            where,          
-            getDocs,        
+            where,          // <--- เพิ่ม WHERE สำหรับการ Query
+            getDocs,        // <--- เพิ่ม getDocs สำหรับการนับจำนวน
             setLogLevel 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -55,8 +54,8 @@
             onSnapshot,
             query,
             orderBy,
-            where,          
-            getDocs         
+            where,          // <--- เพิ่ม
+            getDocs         // <--- เพิ่ม
         };
 
         if (firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
@@ -94,302 +93,195 @@
 
     <style>
         /* ------------------------------------------------------------------- */
-        /* --- PIXEL ART MARIO STYLE THEME --- */
+        /* --- CORE LAYOUT & NEUMORPHISM THEME (Bootstrap Integration) --- */
         /* ------------------------------------------------------------------- */
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700;900&display=swap');
+        
+        /* CSS Variables for Theme */
         :root {
-            /* Pastel Pixel Palette */
-            --color-sky: #87ceeb;         /* Sky Blue */
-            --color-grass: #a8e6cf;       /* Pastel Mint Green */
-            --color-dirt: #c5a691;        /* Light Brown/Dirt */
-            --color-brick: #f2795f;       /* Orange/Brick (Main Button) */
-            --color-coin: #ffd966;        /* Yellow Coin/Highlight */
-            --color-coin-dark: #ccaa44;   /* Darker Coin */
-            --color-text-dark: #3d2f26;   /* Dark Brown Text */
-            --color-text-light: #ffffff;  /* White Text */
-            --color-frame-dark: #7b5e48;  /* Dark Brown Frame/Border */
-            --color-panel-cream: #f8f0e5; /* Cream Panel (Leaderboard) */
-            --color-shadow-offset: 4px;   /* Pixel Shadow Depth */
-            
-            /* Font for Cute/Chunky Feel */
-            --font-family-game: 'Mitr', sans-serif;
-            --color-cloud: #ffffff; /* White clouds */
+            --bg-color: #ecfdf5; /* Light Mint/Green Base */
+            --primary-color: #047857; /* Dark Emerald */
+            --secondary-color: #67e8f9; /* Cyan */
+            --text-color: #15803d; /* Darker Green for text */
+            --shadow-light: #ffffff;
+            --shadow-dark: #dbece0;
         }
 
-        /* Base Setup: Sky Background and Ground */
+        /* Base Setup */
         html, body { 
             height: 100%; 
             overflow: hidden; 
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: var(--font-family-game);
-            background: var(--color-sky);
-            color: var(--color-text-dark);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: var(--bg-color); 
         }
         body {
             display: flex;
             justify-content: center;
-            align-items: flex-end; /* Pin to the bottom for ground effect */
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        
-        /* App Container: Simulating the game screen */
+
+        /* App Container - Crucial for Mobile Responsive */
         #app {
             width: 100vw;
             height: 100vh;
             max-width: 600px; 
-            background: transparent; 
+            background-color: var(--bg-color); 
             padding: 1rem; 
             box-sizing: border-box; 
-            position: relative;
-            z-index: 10;
             
+            /* เว้นระยะ Header จากขอบบนของมือถือ */
+            padding-top: 1.5rem; 
             padding-top: calc(1.5rem + env(safe-area-inset-top));
             padding-bottom: calc(1rem + env(safe-area-inset-bottom));
         }
-        
-        /* Pixel Ground Effect */
-        #app::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 10vh; /* Adjust height for ground visibility */
-            background: linear-gradient(to top, var(--color-dirt) 50%, var(--color-grass) 50%);
-            background-size: 100% 200%; /* To show both dirt and grass layers */
-            z-index: -1;
-            box-shadow: 0 -4px var(--color-frame-dark); /* Dark line above grass */
-            border-top: 5px solid var(--color-grass);
-        }
-        
-        /* Cute Pixel Clouds (Static Decorative Element) */
-        .cloud {
-            position: absolute;
-            background: var(--color-cloud);
-            border-radius: 50%;
-            box-shadow: var(--color-frame-dark) var(--color-shadow-offset) var(--color-shadow-offset);
-            z-index: 1;
-            animation: float 20s infinite linear;
-        }
-        .cloud:nth-child(1) { width: 60px; height: 30px; top: 10%; left: 10%; animation-delay: 0s; }
-        .cloud:nth-child(1)::before { content: ''; position: absolute; top: -10px; left: 15px; width: 40px; height: 40px; border-radius: 50%; background: var(--color-cloud); }
-        .cloud:nth-child(2) { width: 80px; height: 40px; top: 20%; right: 15%; animation-delay: 10s; }
-        .cloud:nth-child(2)::before { content: ''; position: absolute; top: -15px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--color-cloud); }
-        .cloud:nth-child(3) { width: 50px; height: 25px; top: 5%; right: 50%; animation-delay: 5s; }
-        
-        @keyframes float {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(10px); }
-            100% { transform: translateX(0); }
-        }
 
-        /* --- PIXEL UI PANELS & BUTTONS --- */
-        
-        /* Panel/Card Style: Looks like a solid pixel block */
-        .pixel-panel {
-            background-color: var(--color-panel-cream);
-            border: 4px solid var(--color-frame-dark);
-            border-radius: 0; /* Sharp corners */
+        /* Neumorphism Card Style */
+        .card-panel {
+            background-color: var(--bg-color); 
+            border-radius: 1.5rem;
             box-shadow: 
-                var(--color-frame-dark) var(--color-shadow-offset) var(--color-shadow-offset) 0, /* Shadow bottom-right */
-                inset 0 0 0 2px var(--color-text-light); /* Inner highlight */
-            padding: 1rem;
-            margin-bottom: 1rem;
-            color: var(--color-text-dark);
-            text-shadow: 1px 1px var(--color-text-light); /* Slight retro text effect */
+                8px 8px 16px var(--shadow-dark), 
+                -8px -8px 16px var(--shadow-light); 
+            transition: all 0.3s ease;
         }
         
-        /* Main Button (Big Tap Button - Mario Block Style) */
+        /* 💡 NEW: Start Screen Style - สวยงามกว่าเดิม */
+        .start-panel-style {
+            background: 
+                linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%); /* Light Mint Gradient */
+            border-radius: 1.5rem;
+            box-shadow: 
+                inset 0 0 10px rgba(4, 120, 87, 0.1),
+                8px 8px 16px var(--shadow-dark);
+            /* เพิ่มความโดดเด่นด้วยเส้นขอบ */
+            border: 3px solid #6ee7b7;
+        }
+        
+        /* Primary Button Style */
         .btn-main {
-            background: var(--color-brick);
-            color: var(--color-text-light); 
-            font-weight: 900;
-            border-radius: 0;
-            border: 4px solid var(--color-frame-dark);
+            background-color: var(--primary-color); 
+            color: white;
+            font-weight: bold;
+            border-radius: 1rem;
             box-shadow: 
-                var(--color-frame-dark) var(--color-shadow-offset) var(--color-shadow-offset) 0,
-                inset 0 0 0 2px rgba(255, 255, 255, 0.4); /* Inner highlight */
-            transition: all 0.05s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 1.5rem; /* Large Tappable Area */
+                4px 4px 8px rgba(4, 120, 87, 0.4), 
+                -2px -2px 4px rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+            border: none; 
         }
         
-        .btn-main:hover { 
-            background: var(--color-brick);
-            color: var(--color-text-light); 
-        }
+        .btn-main:hover { background-color: #069c67; color: white; }
 
         .btn-main:active {
-            /* Press effect: Move down into the shadow */
-            transform: translate(var(--color-shadow-offset), var(--color-shadow-offset)); 
             box-shadow: 
-                0 0 0 0 var(--color-frame-dark), /* Shadow disappears */
-                inset 0 0 0 2px rgba(255, 255, 255, 0.4); 
-        }
-        
-        /* Secondary/Disabled Button Style */
-        .btn-secondary {
-            background: var(--color-dirt);
-            color: var(--color-text-dark);
-            border-radius: 0;
-            border: 4px solid var(--color-frame-dark);
-            box-shadow: var(--color-frame-dark) var(--color-shadow-offset) var(--color-shadow-offset) 0;
-            font-weight: bold;
-        }
-        
-        .btn-secondary:disabled {
-            opacity: 0.8;
-            cursor: not-allowed;
-            background: var(--color-dirt);
-            color: var(--color-text-dark);
-            transform: none;
-            box-shadow: var(--color-frame-dark) var(--color-shadow-offset) var(--color-shadow-offset) 0;
+                inset 3px 3px 7px rgba(0, 0, 0, 0.25), 
+                inset -3px -3px 7px rgba(255, 255, 255, 0.5);
+            transform: scale(0.97);
         }
 
-        /* Input Field Style: Pixel Text Box */
-        .input-pixel {
-            background-color: var(--color-text-light);
-            border: 2px solid var(--color-frame-dark);
-            border-radius: 0;
+        /* Input Field Style */
+        .input-recessed {
+            background-color: var(--bg-color);
+            border: none;
+            border-radius: 1rem;
             box-shadow: 
-                inset 2px 2px 0 var(--color-frame-dark); /* Inner recess effect */
-            padding: 1rem;
-            color: var(--color-text-dark);
+                inset 3px 3px 7px rgba(0, 0, 0, 0.15), 
+                inset -3px -3px 7px var(--shadow-light);
+            padding: 1rem 1.25rem;
+            color: var(--text-color);
             text-transform: uppercase;
             text-align: center;
             font-weight: bold;
-            font-family: var(--font-family-game);
         }
         
-        .input-pixel::placeholder {
-            color: var(--color-frame-dark);
-            opacity: 0.6;
-        }
-        
-        /* --- GAME AREA: Clean Canvas with Pixel Elements --- */
+        /* --- GAME AREA LAYOUT --- */
         #game-area {
             position: relative;
             overflow: hidden;
-            background: var(--color-text-light); /* White/light screen */
-            border: 4px solid var(--color-frame-dark);
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1); 
+            background-color: #a7f3d0; 
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35);
             flex-grow: 1; 
-            border-radius: 0;
+            border-radius: 1.5rem;
             min-height: 200px; 
         }
         
-        /* --- GAME ITEM STYLING (Carbon Bubbles/Objects) --- */
+        /* --- ITEM ANIMATIONS (ไม่เปลี่ยนแปลง) --- */
         .game-item {
             position: absolute;
             width: 60px; 
             height: 60px;
             cursor: pointer;
             user-select: none;
-            border-radius: 0; 
-            background-color: var(--color-grass);
-            border: 3px solid var(--color-frame-dark);
-            box-shadow: 
-                var(--color-frame-dark) 3px 3px 0 0;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 4px rgba(255, 255, 255, 0.7);
             transition: transform 0.05s ease-out;
             z-index: 10; 
-            
+
             opacity: 0;
             transform: scale(0.5); 
             animation: item-spawn 0.3s ease-out forwards;
         }
 
         @keyframes item-spawn {
-            0% { opacity: 0; transform: scale(0.5); }
-            100% { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: scale(0.5) translateY(0); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
         
-        .game-item img {
-            /* No glow, just clear image on the pixel block */
-            filter: none;
-            padding: 5px;
-        }
-        
-        /* Score Pop-up Style & Animation: Coin/Star Effect */
+        /* Score Pop-up Style & Animation (ไม่เปลี่ยนแปลง) */
         .score-popup {
             pointer-events: none; 
             z-index: 20; 
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); 
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: transform, opacity, filter;
             font-weight: 900;
-            text-shadow: 2px 2px var(--color-frame-dark); /* Pixel text shadow */
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            will-change: transform, opacity;
-            color: var(--color-coin);
         }
 
         .score-popup.animate {
-            transform: translate(-50%, -80px) scale(1.3);
+            transform: translate(-50%, -130px) scale(1.5);
             opacity: 0;
+            filter: blur(5px); 
         }
 
-        /* --- LEADERBOARD & DISPLAY ACCENTS --- */
+        /* --- LEADERBOARD --- */
         #leaderboard-panel {
-            max-height: 35vh; 
+            max-height: 35vh; /* ลดความสูงลงเล็กน้อย */
             overflow-y: auto;
             margin-top: 1rem;
-            padding: 0.5rem; 
-            background-color: var(--color-dirt); /* Dirt block base */
-            border: 4px solid var(--color-frame-dark);
+            padding: 0.75rem; 
         }
         
-        /* Leaderboard Items - Look like individual blocks */
-        .leaderboard-item {
-            background-color: var(--color-panel-cream);
-            border: 2px solid var(--color-frame-dark);
-            box-shadow: var(--color-frame-dark) 2px 2px 0 0;
-            margin-bottom: 5px;
-            padding: 0.5rem 0.75rem;
-        }
-        
-        /* Highlight for current user (Green Leaf/Grass Block) */
-        .leaderboard-item.is-current-user {
-            background-color: var(--color-grass);
-            border: 3px solid var(--color-frame-dark);
-            box-shadow: var(--color-frame-dark) 3px 3px 0 0;
-            color: var(--color-text-dark);
-            font-weight: 700;
-        }
-        
-        /* Trophy Icon Styling */
-        .trophy-icon {
-            width: 1.5rem;
-            height: 1.5rem;
-            text-align: center;
-        }
-
-        /* Responsive media queries remains the same */
+        /* Responsive Text Size for smaller mobile screens */
         @media (max-width: 370px) {
-            #app h1 { font-size: 1.5rem !important; }
-            .btn-main { font-size: 1.1rem !important; padding: 0.8rem 1rem !important; }
+            #app h1 { font-size: 1.35rem !important; }
+            .fs-6 { font-size: 0.75rem !important; }
+            .btn-main { font-size: 0.9rem !important; }
             .game-item { width: 50px; height: 50px; }
         }
     </style>
 </head>
 <body>
-    <div class="cloud" style="top: 10%; left: 10%;"></div>
-    <div class="cloud" style="top: 20%; right: 15%;"></div>
-    <div class="cloud" style="top: 5%; right: 50%;"></div>
 
     <div id="app" class="d-flex flex-column vh-100 mx-auto">
         
         <div class="modal fade" id="messageBox" tabindex="-1" aria-labelledby="messageBoxLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered">
-            <div class="pixel-panel modal-content">
+            <div class="card-panel modal-content">
               <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="messageTitle" style="color: var(--color-brick);">แจ้งเตือนระบบ</h5>
+                <h5 class="modal-title text-success fw-bold" id="messageTitle"></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="modal-body pt-0" style="color: var(--color-frame-dark);">
+              <div class="modal-body pt-0 text-secondary">
                 <p id="messageBody"></p>
               </div>
               <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-main w-100 py-2" data-bs-dismiss="modal">ตกลง</button>
+                <button type="button" class="btn btn-main w-100 py-2" data-bs-dismiss="modal">ปิด</button>
               </div>
             </div>
           </div>
@@ -397,46 +289,46 @@
         
         <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-scrollable modal-lg">
-            <div class="pixel-panel modal-content">
+            <div class="card-panel modal-content">
               <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="infoModalLabel" style="color: var(--color-frame-dark);">📘 ข้อมูลภารกิจ (คู่มือ)</h5>
+                <h5 class="modal-title text-success fw-bold" id="infoModalLabel">💡 ข้อมูลการปลดปล่อยคาร์บอน</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                <h4 class="h5 mt-3 mb-2 fw-bold" style="color: var(--color-grass);">✅ ลดคาร์บอน (+10 แต้ม)</h4>
+                <h4 class="h5 mt-3 mb-2 text-success">✅ ภารกิจลดคาร์บอน (Good Items: +10 คะแนน)</h4>
                 <div id="goodInfoList" class="space-y-3"></div>
-                <h4 class="h5 mt-4 mb-2 fw-bold" style="color: var(--color-brick);">❌ ปล่อยคาร์บอน (-5 แต้ม)</h4>
+                <h4 class="h5 mt-4 mb-2 text-danger">❌ การปล่อยคาร์บอน (Bad Items: -5 คะแนน)</h4>
                 <div id="badInfoList" class="space-y-3"></div>
               </div>
               <div class="modal-footer border-top-0 pt-0">
-                <button type="button" class="btn btn-main w-100 py-3 fs-5" data-bs-dismiss="modal">เริ่มภารกิจ</button>
+                <button type="button" class="btn btn-main w-100 py-3 fs-5" data-bs-dismiss="modal">รับทราบและเริ่มภารกิจ</button>
               </div>
             </div>
           </div>
         </div>
         
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-shrink-0"> 
-            <h1 class="fw-bolder fs-1" style="color: var(--color-text-light); text-shadow: 3px 3px var(--color-frame-dark);">CARBON MISSION</h1>
-            <button id="info-button" class="btn btn-sm btn-secondary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#infoModal" style="background: var(--color-coin); color: var(--color-text-dark);">i / ข้อมูล</button>
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0 mt-2"> 
+            <h1 class="fs-4 fw-bolder text-success">🌲 CARBON MISSION 🌎</h1>
+            <button id="info-button" class="btn btn-sm btn-info text-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#infoModal">ข้อมูล</button>
         </div>
 
         
-        <div id="start-screen" class="p-4 pixel-panel mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
+        <div id="start-screen" class="p-4 start-panel-style mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
             
-            <h2 class="fw-black mb-3" style="font-size: 2rem; color: var(--color-frame-dark);">
-                โลกใบนี้ต้องการคุณ!
+            <h2 class="display-5 fw-black text-primary mb-3" style="font-family: 'Chakra Petch', sans-serif;">
+                แตะเพื่อ <span class="text-danger">ลดคาร์บอน!</span>
             </h2>
-            <p class="fs-5 fw-bold mb-2">
-                ระยะเวลา: <span class="fw-bolder" style="color: var(--color-brick);">20 วินาที</span> ⏱️
+            <p class="fs-5 text-dark fw-bold mb-2">
+                คุณมีเวลา <span class="text-primary fw-bolder">20 วินาที</span> ⏱️
             </p>
-            <p class="fs-6 mb-4" style="color: var(--color-frame-dark);">
-                แตะไอเท็มลดคาร์บอน (+10) / หลีกเลี่ยงควัน (-5)
+            <p class="fs-6 text-secondary mb-4">
+                รักษ์โลก (+10) | ปล่อยมลพิษ (-5)
             </p>
 
             <div class="w-100" style="max-width: 300px;">
                 <input type="text" id="employee-id" placeholder="รหัสพนักงาน (A-Z, 0-9)"
                             maxlength="10"
-                            class="form-control mb-4 input-pixel fs-5">
+                            class="form-control mb-4 input-recessed fs-5">
                 <button id="start-button"
                             class="btn w-100 py-3 fs-5 btn-secondary" disabled> 
                     กรุณากรอกรหัสพนักงาน
@@ -446,33 +338,33 @@
         
         <div id="game-container" class="d-none flex-grow-1 d-flex flex-column">
             
-            <div class="d-flex justify-content-between align-items-center p-3 pixel-panel mb-3 flex-shrink-0">
-                <div class="fw-bold fs-6">แต้ม: <span id="score-display" class="fs-4 fw-bolder" style="color: var(--color-brick);">0</span></div>
-                <div class="fw-bold fs-6">เวลา: <span id="timer-display" class="fs-4 fw-bolder" style="color: var(--color-frame-dark);">20</span>s</div>
-                <div id="current-user-id" class="fs-6 font-monospace text-truncate" style="color: var(--color-frame-dark);" title="รหัสพนักงาน">ID: </div>
+            <div class="d-flex justify-content-between align-items-center p-3 card-panel mb-3 flex-shrink-0">
+                <div class="fw-bold text-success fs-6">SCORE: <span id="score-display" class="fs-4 fw-bolder text-success">0</span></div>
+                <div class="fw-bold text-success fs-6">TIME: <span id="timer-display" class="fs-4 fw-bolder text-primary">20</span>s</div>
+                <div id="current-user-id" class="fs-6 text-muted text-truncate font-monospace" title="รหัสพนักงานของคุณ">ID: </div>
             </div>
             
             <div id="game-area" class="flex-grow-1 position-relative">
                 <p id="game-message" class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center fs-4 fw-bold text-danger bg-dark bg-opacity-10 rounded-3 d-none"></p>
-                </div>
+            </div>
         </div>
 
         
-        <div id="game-over-screen" class="d-none text-center p-3 pixel-panel mb-3 flex-shrink-0">
-            <h2 class="fs-3 fw-bolder" style="color: var(--color-grass);">ภารกิจสำเร็จ! (SAVE DATA)</h2>
-            <p class="fs-5" style="color: var(--color-frame-dark);">คะแนนรวม: <span id="final-score" class="d-block fw-black" style="font-size: 3rem; color: var(--color-brick); text-shadow: 3px 3px var(--color-frame-dark);">0</span></p>
-            <p id="ranking-status" class="fs-6 fw-semibold" style="color: var(--color-grass);"></p>
+        <div id="game-over-screen" class="d-none text-center p-3 card-panel mb-3 flex-shrink-0">
+            <h2 class="fs-3 fw-bolder text-success">🎉 ภารกิจสำเร็จ!</h2>
+            <p class="fs-5 text-secondary">คะแนนสุดท้าย: <span id="final-score" class="d-block fw-black display-4 text-danger my-2">0</span></p>
+            <p id="ranking-status" class="fs-6 fw-semibold text-success"></p>
             <button id="restart-button"
                         class="btn btn-main w-100 py-3 fs-5">
-                🔁 เริ่มภารกิจใหม่
+                🔁 เล่นอีกครั้ง
             </button>
         </div>
 
         
-        <div id="leaderboard-panel" class="pixel-panel flex-shrink-0" style="background-color: var(--color-panel-cream); padding: 1rem;">
-            <h2 class="fs-6 fw-bold text-center mb-2" style="color: var(--color-frame-dark); border-bottom: 2px dashed var(--color-frame-dark); padding-bottom: 5px;">🏆 กระดานคะแนนโลก</h2>
+        <div id="leaderboard-panel" class="card-panel flex-shrink-0">
+            <h2 class="fs-6 fw-bold text-center mb-2 text-success">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
             <div id="leaderboard-list">
-                <p class="text-center" style="color: var(--color-frame-dark);" id="loading-leaderboard">กำลังโหลดข้อมูล...</p>
+                <p class="text-center text-muted" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
             </div>
         </div>
     </div>
@@ -482,43 +374,44 @@
     <script>
         // --- Game Configuration (Constants) ---
         const GAME_DURATION = 20; 
+        const SPAWN_INTERVAL = 300; 
         const ITEM_SPEED = 2; 
         const ITEM_SIZE = 60; 
         const SCORE_REDUCTION = 10;
         const SCORE_EMISSION = -5;
-        const MAX_PLAYS_PER_DAY = 5; 
+        const MAX_PLAYS_PER_DAY = 5; // <--- ค่าจำกัดการเล่น
         
+        // Modal instances for Bootstrap 
         let messageModal;
         let infoModal;
 
-        // Emoji definitions
+        // Emoji definitions (ใช้ชุดเดิม)
         const ITEM_DEFINITIONS = [
-            // Good Items: Leaf/Clean Icons
-            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'เลือกทานอาหารมังสวิรัติ' },
-            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ใช้ระบบขนส่งสาธารณะ' },
-            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
-            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ใช้พลังงานสะอาด (โซลาร์เซลล์)' },
-            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ลดการใช้ถุงพลาสติก' },
-            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'นำขวดน้ำมาใช้ซ้ำ' },
-            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ซ่อมแซมอุปกรณ์ไฟฟ้าที่ชำรุด' },
-            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ปิดไฟเมื่อไม่ใช้งาน' },
-            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'แยกประเภทขยะก่อนทิ้ง' },
-            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ประหยัดการใช้น้ำ' },
-            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ซื้อสินค้ามือสอง' },
-            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'การเดิน/ปั่นจักรยานแทนรถ' },
-            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ใช้ผลิตภัณฑ์ที่เป็นมิตรต่อสิ่งแวดล้อม' },
-            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'งดเผาขยะ' },
-            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'การปลูกผักสวนครัว' },
-            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
-            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'var(--color-grass)', defaultDesc: 'ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
+            { imageSrc: 'https://i.postimg.cc/hGngkwQL/1.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'เลือกทานอาหารมังสวิรัติ' },
+            { imageSrc: 'https://i.postimg.cc/k41mtg1F/10.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ระบบขนส่งสาธารณะ' },
+            { imageSrc: 'https://i.postimg.cc/qqNdcHWH/11.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ปลูกต้นไม้เพิ่มพื้นที่สีเขียว' },
+            { imageSrc: 'https://i.postimg.cc/TwYxwD9y/12.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้พลังงานสะอาด (โซลาร์เซลล์)' },
+            { imageSrc: 'https://i.postimg.cc/ydQHS8Qd/13.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ลดการใช้ถุงพลาสติก' },
+            { imageSrc: 'https://i.postimg.cc/ZR7Sy576/14.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'นำขวดน้ำมาใช้ซ้ำ' },
+            { imageSrc: 'https://i.postimg.cc/0QWsJyWV/15.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ซ่อมแซมอุปกรณ์ไฟฟ้าที่ชำรุด' },
+            { imageSrc: 'https://i.postimg.cc/3RSTDxSb/16.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ปิดไฟเมื่อไม่ใช้งาน' },
+            { imageSrc: 'https://i.postimg.cc/D0SKQ3H5/17.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'แยกประเภทขยะก่อนทิ้ง' },
+            { imageSrc: 'https://i.postimg.cc/k5y9qcWv/2.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ประหยัดการใช้น้ำ' },
+            { imageSrc: 'https://i.postimg.cc/PqMhT41M/3.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ซื้อสินค้ามือสอง' },
+            { imageSrc: 'https://i.postimg.cc/9fBVCpyL/4.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'การเดิน/ปั่นจักรยานแทนรถ' },
+            { imageSrc: 'https://i.postimg.cc/0NCxPf7n/5.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ผลิตภัณฑ์ที่เป็นมิตรต่อสิ่งแวดล้อม' },
+            { imageSrc: 'https://i.postimg.cc/rp9cMJS6/6.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'งดเผาขยะ' },
+            { imageSrc: 'https://i.postimg.cc/g0KdmD35/7.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'การปลูกผักสวนครัว' },
+            { imageSrc: 'https://i.postimg.cc/fbvZDKxN/8.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'บริจาคเสื้อผ้า/ของใช้ที่ไม่ใช้แล้ว' },
+            { imageSrc: 'https://i.postimg.cc/vmvMbzWF/9.png', type: 'good', score: SCORE_REDUCTION, color: 'bg-success-subtle', defaultDesc: 'ใช้ผ้าเช็ดมือแทนกระดาษทิชชู่' },
 
-            // Bad Items: Smoke/Pollution Icons
-            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'var(--color-brick)', defaultDesc: 'เดินทางด้วยเครื่องบินบ่อย' },
-            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'var(--color-brick)', defaultDesc: 'ใช้รถยนต์ส่วนตัวคนเดียว' },
-            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'var(--color-brick)', defaultDesc: 'ทิ้งขยะไม่แยกประเภท' },
-            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'var(--color-brick)', defaultDesc: 'เปิดไฟทิ้งไว้ตลอดเวลา' },
-            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'var(--color-brick)', defaultDesc: 'สั่งอาหารแบบ Delivery บ่อยเกินไป' },
-            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'var(--color-brick)', defaultDesc: 'ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
+            { imageSrc: 'https://i.postimg.cc/qqWHjZdq/18.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เดินทางด้วยเครื่องบินบ่อย' },
+            { imageSrc: 'https://i.postimg.cc/sxbCw0RQ/19.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้รถยนต์ส่วนตัวคนเดียว' },
+            { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ทิ้งขยะไม่แยกประเภท' },
+            { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เปิดไฟทิ้งไว้ตลอดเวลา' },
+            { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'สั่งอาหารแบบ Delivery บ่อยเกินไป' },
+            // แก้ไขลิงก์ 23.png
+            { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
         ];
 
         // --- Global Game State ---
@@ -559,11 +452,10 @@
             infoButton: document.getElementById('info-button'),     
             goodInfoList: document.getElementById('goodInfoList'), 
             badInfoList: document.getElementById('badInfoList'),
-            // Removed dom.mainTapButton since it's now a falling game
         };
         
         // ***************************************************************
-        // --- Game Logic Functions (ปรับเปลี่ยนเพื่อให้ไอเท็มหล่นทั้งหมด) ---
+        // --- Game Logic Functions (มีการแก้ไขส่วนการเริ่มเกม) ---
         // ***************************************************************
         
         function showMessage(title, body) {
@@ -581,9 +473,10 @@
             dom.scoreDisplay.textContent = '0';
             dom.timerDisplay.textContent = GAME_DURATION;
             dom.gameMessage.classList.add('d-none');
-            dom.timerDisplay.style.color = 'var(--color-frame-dark)';
+            dom.timerDisplay.classList.remove('text-danger');
         }
         
+        // ฟังก์ชันใหม่: อัปเดตสถานะปุ่ม (นำ Logic จาก Event Listener เดิมมาใช้)
         function updateStartButtonState(id) {
             if (id.length > 0) {
                 dom.startButton.disabled = false;
@@ -598,21 +491,25 @@
             }
         }
         
+        // ฟังก์ชันใหม่: ตรวจสอบจำนวนการเล่นวันนี้และเริ่มเกม
         async function checkPlayLimitAndStartGame() {
             const employeeId = dom.employeeIdInput.value.toUpperCase().trim();
             if (!employeeId) {
-                showMessage("ACCESS DENIED", "กรุณากรอกรหัสพนักงานที่ถูกต้องเพื่อเริ่มภารกิจ");
+                showMessage("รหัสพนักงานไม่ถูกต้อง", "กรุณากรอกรหัสพนักงานก่อนเริ่มเกม");
+                // updateStartButtonState(employeeId); // ไม่จำเป็นต้องเรียกเพราะ input listener ทำไปแล้ว
                 return;
             }
             
+            // ปิดปุ่มชั่วคราวขณะรอผลจาก Firebase
             dom.startButton.disabled = true;
             dom.startButton.textContent = 'กำลังตรวจสอบสิทธิ์...';
 
+            // 1. คำนวณเวลาเที่ยงคืนของวันนี้ (00:00:00.000) - ใช้เวลาท้องถิ่น
             const today = new Date();
             today.setHours(0, 0, 0, 0); 
             
             if (!gameState.db || !gameState.appId) {
-                showMessage("SYSTEM FAILURE", "การเชื่อมต่อฐานข้อมูลล้มเหลว! กรุณาลองใหม่อีกครั้ง");
+                showMessage("ข้อผิดพลาดของระบบ", "ไม่สามารถเชื่อมต่อฐานข้อมูลได้! กรุณาลองใหม่ภายหลัง");
                 updateStartButtonState(employeeId); 
                 return;
             }
@@ -621,30 +518,36 @@
             const collectionRef = window.firestore.collection(gameState.db, collectionPath);
 
             try {
+                // 2. Query: ดึงข้อมูลที่รหัสพนักงานตรงกัน และ Timestamp อยู่ในวันปัจจุบัน (>= เที่ยงคืน)
                 const q = window.firestore.query(
                     collectionRef,
                     window.firestore.where("employeeId", "==", employeeId),
                     window.firestore.where("timestamp", ">=", today),
+                    // การเรียงลำดับใน Query นี้อาจเป็นตัวที่ทำให้ต้องสร้าง index
                     window.firestore.orderBy("employeeId"), 
                     window.firestore.orderBy("timestamp", "asc")
                 );
                 
                 const querySnapshot = await window.firestore.getDocs(q);
-                const playCount = querySnapshot.size;
+                const playCount = querySnapshot.size; // จำนวนครั้งที่เล่นไปแล้ววันนี้
 
+                // 3. ตรวจสอบลิมิต
                 if (playCount >= MAX_PLAYS_PER_DAY) {
                     showMessage(
-                        "ภารกิจวันนี้เต็มแล้ว", 
-                        `รหัสพนักงาน ${employeeId} ทำภารกิจไปแล้ว ${playCount} ครั้งในวันนี้ 😔\n\nสามารถเริ่มภารกิจใหม่ได้ในเวลา 00:00 น. ของวันพรุ่งนี้`
+                        "จำกัดการเล่น", 
+                        `รหัสพนักงาน ${employeeId} ได้เล่นไปแล้ว ${playCount} ครั้งในวันนี้ 😔\n\nสามารถเล่นใหม่ได้อีกครั้งในวันพรุ่งนี้ (หลัง 00:00 น. ตามเวลาท้องถิ่น)`
                     );
-                    dom.startButton.textContent = `จำกัด: ${MAX_PLAYS_PER_DAY} ภารกิจ/วัน`; 
+                    // แสดงสถานะจำกัดการเล่นบนปุ่ม
+                    dom.startButton.textContent = `จำกัดการเล่น ${MAX_PLAYS_PER_DAY} ครั้ง/วัน`; 
                     dom.startButton.classList.remove('btn-main');
                     dom.startButton.classList.add('btn-secondary');
                     
                 } else {
+                    // อนุญาตให้เล่นต่อ
                     dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
-                    updateStartButtonState(employeeId); 
+                    updateStartButtonState(employeeId); // เปิดปุ่มอีกครั้ง
                     
+                    // เริ่มเกมจริง
                     startGameInternal(employeeId);
                 }
 
@@ -652,22 +555,25 @@
                 console.error("Error checking play limit:", e);
                 
                 if (e.code === 'failed-precondition' && e.message.includes('requires an index')) {
-                    showMessage("⚠️ ข้อผิดพลาดทางเทคนิค", "เกิดข้อผิดพลาดในการตรวจสอบฐานข้อมูล (Index error). โปรดติดต่อผู้ดูแล.");
+                    showMessage("⚠️ ต้องสร้าง Index ใน Firebase", "การจำกัดจำนวนเล่นต้องใช้ Index พิเศษใน Firestore กรุณาคลิกที่ลิงก์ใน Console เพื่อสร้าง Index ก่อน!");
                 } else {
-                    showMessage("ข้อผิดพลาดฐานข้อมูล", "ไม่สามารถตรวจสอบจำนวนภารกิจได้ กรุณาลองใหม่.");
+                    showMessage("ข้อผิดพลาดของฐานข้อมูล", "ไม่สามารถตรวจสอบจำนวนการเล่นได้ กรุณาลองใหม่");
                 }
-                updateStartButtonState(employeeId);
+                updateStartButtonState(employeeId); // เปิดปุ่มอีกครั้งเมื่อมี Error
             }
         }
         
+        // เปลี่ยนชื่อ startGame เดิมเป็น startGameInternal
         function startGameInternal(employeeId) {
             gameState.employeeId = employeeId;
             
             resetGame();
             
+            // ซ่อน Start/Game Over 
             dom.startScreen.classList.add('d-none');
             dom.gameOverScreen.classList.add('d-none');
             
+            // แสดง Game Container
             dom.gameContainer.classList.remove('d-none'); 
             
             dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
@@ -677,21 +583,48 @@
         
         function startActualGame() {
             gameState.isRunning = true;
-            
-            // 💡 เปลี่ยนการเรียกใช้: เรียกใช้ spawnRandomItem เพื่อให้ไอเท็มทั้งหมดหล่นลงมา
-            // เรียกถี่ขึ้นเพื่อให้เกมมีไอเท็มจำนวนมาก
-            gameState.spawnIntervalId = setInterval(spawnRandomItem, 700); 
+            gameState.spawnIntervalId = setInterval(spawnItem, SPAWN_INTERVAL);
             gameState.timerIntervalId = setInterval(updateTimer, 1000);
 
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
-        
-        function spawnRandomItem() {
-            if (!gameState.isRunning) return;
+
+
+        function endGame() {
+            gameState.isRunning = false;
+            cancelAnimationFrame(gameState.animationFrameId);
+            clearInterval(gameState.spawnIntervalId);
+            clearInterval(gameState.timerIntervalId);
+
+            Object.values(gameState.items).forEach(item => item.element.remove()); 
+            gameState.items = {}; 
+
+            // ซ่อน Game Container และแสดง Game Over Screen
+            dom.gameContainer.classList.add('d-none');
+            dom.finalScore.textContent = gameState.score;
             
-            // 💡 สุ่มเลือกไอเท็มจาก ITEM_DEFINITIONS ทั้งหมด
+            dom.gameOverScreen.classList.remove('d-none');
+            
+            saveScore(gameState.employeeId, gameState.score, gameState.userId);
+        }
+
+        function updateTimer() {
+            gameState.timeLeft--;
+            dom.timerDisplay.textContent = gameState.timeLeft;
+
+            if (gameState.timeLeft <= 5) {
+                dom.timerDisplay.classList.add('text-danger');
+            } else {
+                dom.timerDisplay.classList.remove('text-danger');
+            }
+
+            if (gameState.timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function spawnItem() {
             const definition = ITEM_DEFINITIONS[Math.floor(Math.random() * ITEM_DEFINITIONS.length)];
-            
             const gameAreaWidth = dom.gameArea.clientWidth;
             const itemId = gameState.itemIdCounter++;
 
@@ -699,20 +632,16 @@
             itemElement.addEventListener('click', handleItemClick);
             itemElement.addEventListener('touchstart', (e) => {
                 e.preventDefault(); 
-                // We use event.target inside handleItemClick, so no need for e.touches[0] here.
-                handleItemClick(e);
+                handleItemClick(e.touches[0]);
             });
             
             itemElement.className = `game-item`; 
             itemElement.dataset.id = itemId; 
             itemElement.dataset.type = definition.type;
             
-            // ตั้งค่าสีพื้นหลังตามประเภท (เขียวสำหรับดี, แดง/ส้มสำหรับร้าย)
-            itemElement.style.backgroundColor = definition.color; 
-            
             const imgElement = document.createElement('img');
             imgElement.src = definition.imageSrc;
-            imgElement.className = "w-100 h-100 object-fit-contain p-1"; 
+            imgElement.className = "w-100 h-100 object-fit-contain p-2"; 
             
             itemElement.appendChild(imgElement);
 
@@ -729,44 +658,12 @@
                 element: itemElement,
                 y: -ITEM_SIZE, 
                 x: posX,
-                speed: ITEM_SPEED + Math.random() * 1.5 // สปีดสุ่มเพื่อเพิ่มความยาก
+                speed: ITEM_SPEED + Math.random() * 1.5 
             };
 
             gameState.items[itemId] = item;
         }
-
-        function endGame() {
-            gameState.isRunning = false;
-            cancelAnimationFrame(gameState.animationFrameId);
-            clearInterval(gameState.spawnIntervalId);
-            clearInterval(gameState.timerIntervalId);
-
-            Object.values(gameState.items).forEach(item => item.element.remove()); 
-            gameState.items = {}; 
-            
-            dom.gameContainer.classList.add('d-none');
-            dom.finalScore.textContent = gameState.score;
-            
-            dom.gameOverScreen.classList.remove('d-none');
-            
-            saveScore(gameState.employeeId, gameState.score, gameState.userId);
-        }
-
-        function updateTimer() {
-            gameState.timeLeft--;
-            dom.timerDisplay.textContent = gameState.timeLeft;
-
-            if (gameState.timeLeft <= 5) {
-                dom.timerDisplay.style.color = 'var(--color-brick)';
-            } else {
-                dom.timerDisplay.style.color = 'var(--color-frame-dark)';
-            }
-
-            if (gameState.timeLeft <= 0) {
-                endGame();
-            }
-        }
-
+        
         function handleItemClick(event) {
             if (!gameState.isRunning) return;
             
@@ -805,9 +702,9 @@
             popup.style.transform = 'translate(-50%, -50%)'; 
             
             if (score > 0) {
-                popup.style.color = 'var(--color-coin)';
+                popup.classList.add('text-success');
             } else {
-                popup.style.color = 'var(--color-brick)';
+                popup.classList.add('text-danger');
             }
 
             dom.gameArea.appendChild(popup);
@@ -818,7 +715,7 @@
 
             setTimeout(() => {
                 popup.remove();
-            }, 400); // Faster pop-up for pixel art
+            }, 600);
         }
 
         function gameLoop() {
@@ -837,12 +734,11 @@
                 item.y += item.speed;
                 item.element.style.top = `${item.y}px`;
 
-                // Check for items dropping below the screen (Penalty for missing Good Item)
                 if (item.y > gameAreaHeight) {
                     if (item.definition.type === 'good') {
-                        // ไม่มีการลงโทษสำหรับการพลาด Good Item ในเกมนี้ (แค่ไม่เก็บคะแนน)
-                    } else if (item.definition.type === 'bad') {
-                        // ไม่มีการลงโทษเมื่อ Bad Item หลุดออกไป
+                        gameState.score -= 5; 
+                        dom.scoreDisplay.textContent = gameState.score;
+                        showScoreChange(item.element.style.left, item.element.style.top, -5);
                     }
 
                     item.element.remove();
@@ -873,7 +769,7 @@
         
         async function saveScore(employeeId, score, userId) {
             if (!gameState.db || !gameState.appId) {
-                dom.rankingStatus.textContent = "⚠️ ไม่มีการเชื่อมต่อฐานข้อมูล! ไม่สามารถบันทึกคะแนนได้";
+                dom.rankingStatus.textContent = "⚠️ Firebase ไม่พร้อม Score ไม่ถูกบันทึก";
                 return;
             }
             
@@ -886,7 +782,7 @@
                     userId: userId,
                     timestamp: new Date()
                 }));
-                dom.rankingStatus.textContent = "✅ บันทึกคะแนนลงในฐานข้อมูลกลางแล้ว";
+                dom.rankingStatus.textContent = "คะแนนถูกบันทึกเรียบร้อยแล้ว!";
             } catch (e) {
                 dom.rankingStatus.textContent = "⚠️ บันทึกคะแนนล้มเหลว";
             }
@@ -894,7 +790,7 @@
         
         function setupLeaderboard(appId) {
             if (!gameState.db) {
-                dom.leaderboardList.innerHTML = `<p class="text-center" style="color: var(--color-brick);">ฐานข้อมูลออฟไลน์!</p>`;
+                dom.leaderboardList.innerHTML = `<p class="text-center text-danger">Firebase Database ไม่พร้อมใช้งาน!</p>`;
                 return;
             }
             
@@ -931,33 +827,24 @@
                 dom.leaderboardList.innerHTML = '';
                 
                 if (topScores.length === 0) {
-                     dom.leaderboardList.innerHTML = `<p class="text-center" style="color: var(--color-frame-dark);">ยังไม่มีข้อมูลคะแนน</p>`;
+                     dom.leaderboardList.innerHTML = `<p class="text-center text-muted p-2">ยังไม่มีใครทำคะแนนเลย! มาเป็นคนแรกกัน!</p>`;
                      return;
                 }
 
                 topScores.forEach((rank, index) => {
                     const rankItem = document.createElement('div');
                     const isCurrentUser = rank.employeeId === gameState.employeeId;
-                    rankItem.className = `leaderboard-item d-flex justify-content-between align-items-center small ${isCurrentUser ? 'is-current-user' : ''}`;
+                    rankItem.className = `d-flex justify-content-between align-items-center p-2 small ${index < 3 ? 'fs-5' : 'text-secondary'} ${isCurrentUser ? 'bg-success-subtle border border-success rounded my-1 fw-bold' : ''}`;
                     
                     const rankNumber = index + 1;
-                    let iconHtml = '';
-                    if (rankNumber === 1) {
-                        iconHtml = '<span class="trophy-icon" style="color: gold; text-shadow: 1px 1px var(--color-coin-dark);">🥇</span>';
-                    } else if (rankNumber === 2) {
-                        iconHtml = '<span class="trophy-icon" style="color: silver; text-shadow: 1px 1px gray;">🥈</span>';
-                    } else if (rankNumber === 3) {
-                        iconHtml = '<span class="trophy-icon" style="color: bronze; text-shadow: 1px 1px brown;">🥉</span>';
-                    } else {
-                        iconHtml = `<span class="trophy-icon" style="color: var(--color-frame-dark);">${rankNumber}.</span>`;
-                    }
+                    const trophyEmoji = rankNumber === 1 ? '🥇' : rankNumber === 2 ? '🥈' : rankNumber === 3 ? '🥉' : '';
                     
                     rankItem.innerHTML = `
-                        <div class="d-flex align-items-center">
-                            ${iconHtml}
-                            <span class="ms-2 fw-bold">${rank.employeeId}</span>
+                        <div class="font-monospace d-flex align-items-center">
+                            <span class="text-center" style="width: 1.5rem;">${trophyEmoji}</span>
+                            <span class="ms-2">${rank.employeeId}</span>
                         </div>
-                        <span class="fw-bolder fs-5" style="color: var(--color-brick);">${rank.score}</span>
+                        <span class="fw-bolder fs-5 ${index === 0 ? 'text-warning' : 'text-success'}">${rank.score}</span>
                     `;
                     dom.leaderboardList.appendChild(rankItem);
                 });
@@ -971,21 +858,19 @@
 
             ITEM_DEFINITIONS.forEach(item => {
                 const listItem = document.createElement('div');
-                listItem.className = 'd-flex align-items-start p-2 border-bottom';
-                listItem.style.borderColor = 'var(--color-frame-dark) !important';
+                listItem.className = 'd-flex align-items-start p-3 border-bottom border-secondary-subtle';
                 
                 const imgContainer = document.createElement('div');
-                imgContainer.className = `flex-shrink-0 me-3 d-flex justify-content-center align-items-center pixel-panel`;
+                imgContainer.className = `flex-shrink-0 me-3 rounded-circle shadow d-flex justify-content-center align-items-center ${item.color}`;
                 imgContainer.style.width = '3rem';
                 imgContainer.style.height = '3rem';
-                imgContainer.style.backgroundColor = item.color;
                 imgContainer.innerHTML = `<img src="${item.imageSrc}" class="w-100 h-100 object-fit-contain p-1">`;
                 
                 const textContainer = document.createElement('div');
                 textContainer.className = 'flex-grow-1';
                 textContainer.innerHTML = `
-                    <p class="fw-bold mb-0" style="color: var(--color-frame-dark);">${item.defaultDesc}</p>
-                    <p class="small mb-0 fw-bold" style="color: ${item.type === 'good' ? 'var(--color-grass)' : 'var(--color-brick)'};">SCORE: ${item.score > 0 ? '+' : ''}${item.score}</p>
+                    <p class="fw-bold mb-0 text-dark">${item.defaultDesc}</p>
+                    <p class="small mb-0 ${item.type === 'good' ? 'text-success' : 'text-danger'}">คะแนน: ${item.score > 0 ? '+' : ''}${item.score}</p>
                 `;
 
                 listItem.appendChild(imgContainer);
@@ -1019,30 +904,34 @@
 
         // --- Event Listeners and Initialization ---
         function setupEventListeners() {
+            // Initialize Bootstrap Modals
             messageModal = new bootstrap.Modal(document.getElementById('messageBox'));
             infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
             
+            // เปลี่ยนให้ปุ่ม Start เรียกใช้ฟังก์ชันตรวจสอบลิมิต
             dom.startButton.addEventListener('click', checkPlayLimitAndStartGame);
             
             dom.restartButton.addEventListener('click', () => {
+                // กลับไปหน้า Start 
                 dom.gameContainer.classList.add('d-none');
                 dom.gameOverScreen.classList.add('d-none');
                 
                 dom.startScreen.classList.remove('d-none');
+                // อัปเดตสถานะปุ่มเมื่อกลับมาหน้า Start
                 updateStartButtonState(dom.employeeIdInput.value.toUpperCase().trim());
             });
             
+            // Event listener for Input
             dom.employeeIdInput.addEventListener('input', (e) => {
+                // Force uppercase and allow only A-Z, 0-9
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
                 
                 const id = e.target.value.trim();
-                gameState.employeeId = id; 
+                gameState.employeeId = id; // Update employeeId immediately
                 
+                // เรียกใช้ฟังก์ชันใหม่ในการอัปเดตสถานะปุ่ม
                 updateStartButtonState(id);
             });
-            
-            // Initial button state check
-            updateStartButtonState(dom.employeeIdInput.value.toUpperCase().trim());
         }
         
         window.initApp = function(userId, appId) {
