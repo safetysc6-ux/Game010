@@ -102,9 +102,9 @@
             --bg-color: #ecfdf5; /* Light Mint/Green Base */
             --primary-color: #047857; /* Dark Emerald */
             --secondary-color: #67e8f9; /* Cyan */
-            --text-color: #065f46; /* <<< ปรับปรุง: Darker Green for better readability */
+            --text-color: #065f46; /* Darker Green for better readability */
             --shadow-light: #ffffff;
-            --shadow-dark: #d1e9db; /* <<< ปรับปรุง: Softer shadow for Neumorphism */
+            --shadow-dark: #d1e9db; /* Softer shadow for Neumorphism */
         }
 
         /* Base Setup */
@@ -144,7 +144,6 @@
         .card-panel {
             background-color: var(--bg-color); 
             border-radius: 1.5rem;
-            /* <<< ปรับปรุง: เพิ่มความลึกของเงา */
             box-shadow: 
                 10px 10px 20px var(--shadow-dark), 
                 -10px -10px 20px var(--shadow-light); 
@@ -189,7 +188,6 @@
             background-color: var(--bg-color);
             border: none;
             border-radius: 1rem;
-            /* <<< ปรับปรุง: เงา Input ให้นุ่มลง */
             box-shadow: 
                 inset 4px 4px 9px rgba(0, 0, 0, 0.1), 
                 inset -4px -4px 9px var(--shadow-light);
@@ -204,9 +202,7 @@
         #game-area {
             position: relative;
             overflow: hidden;
-            /* <<< ปรับปรุง: สีเข้มขึ้นเพื่อเน้นความลึก */
             background-color: #92e6b8; 
-            /* <<< ปรับปรุง: เพิ่ม Inset Shadow ให้ดูจมลง */
             box-shadow: 
                 inset 5px 5px 10px rgba(0, 0, 0, 0.25), 
                 inset -5px -5px 10px rgba(255, 255, 255, 0.6); 
@@ -223,7 +219,6 @@
             cursor: pointer;
             user-select: none;
             border-radius: 50%;
-            /* <<< ปรับปรุง: Background & Shadow */
             background-color: rgba(255, 255, 255, 0.85); 
             box-shadow: 
                 3px 3px 6px rgba(4, 120, 87, 0.5), 
@@ -233,7 +228,6 @@
 
             opacity: 0;
             transform: scale(0.5); 
-            /* <<< ปรับปรุง: เพิ่ม Animation ลอย */
             animation: item-spawn 0.3s ease-out forwards, item-float 5s infinite ease-in-out;
             will-change: transform, opacity;
         }
@@ -244,7 +238,7 @@
             to { opacity: 1; transform: scale(1); }
         }
         
-        /* <<< ใหม่: Keyframe for floating effect */
+        /* Keyframe for floating effect */
         @keyframes item-float {
             0% { transform: translateY(0) scale(1); }
             50% { transform: translateY(-5px) scale(1.02); }
@@ -255,7 +249,6 @@
         .score-popup {
             pointer-events: none; 
             z-index: 20; 
-            /* <<< ปรับปรุง: เพิ่ม Text Shadow ให้เด่นชัด */
             text-shadow: 
                 -1px -1px 0 #fff,  
                  1px -1px 0 #fff,
@@ -273,36 +266,81 @@
             filter: blur(5px); 
         }
 
-        /* --- LEADERBOARD ENHANCEMENT --- */
+        /* --- LEADERBOARD ENHANCEMENT (ส่วนที่ถูกปรับปรุง) --- */
         #leaderboard-panel {
             max-height: 35vh; 
             overflow-y: auto;
             margin-top: 1rem;
             padding: 0.75rem; 
+            position: relative; 
         }
 
-        /* <<< ใหม่: Style สำหรับ Top 3 */
+        /* NEW: Custom Scrollbar for a cleaner look on Webkit browsers (Chrome, Safari) */
+        #leaderboard-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #leaderboard-panel::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 10px;
+            border: 2px solid var(--bg-color);
+        }
+
+        #leaderboard-panel::-webkit-scrollbar-track {
+            background: var(--shadow-dark);
+            border-radius: 10px;
+        }
+
+        /* Top 3 Card Style */
         .leaderboard-top-rank {
-            /* Base style for top 3 */
             background: linear-gradient(90deg, #d1fae5 0%, #ecfdf5 100%);
             border: 3px solid var(--primary-color) !important;
             border-radius: 1rem !important;
-            box-shadow: 0 4px 8px rgba(4, 120, 87, 0.2);
-            padding: 0.75rem !important;
+            box-shadow: 0 6px 12px rgba(4, 120, 87, 0.3); /* เงาลึกขึ้น */
+            padding: 1rem !important; 
+            margin-bottom: 0.75rem !important; /* เว้นระยะมากขึ้น */
+        }
+        
+        /* Rank Number Badge Style */
+        .rank-badge {
+            display: inline-flex;
+            width: 2rem;
+            height: 2rem;
+            justify-content: center;
+            align-items: center;
+            font-weight: 900;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            background-color: #fff;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        /* Specific Top 3 badge colors */
+        .rank-badge.rank-1 { background-color: #ffc107; color: #856404; } /* ทอง */
+        .rank-badge.rank-2 { background-color: #e2e6ea; color: #495057; } /* เงิน */
+        .rank-badge.rank-3 { background-color: #fd7e14; color: #854911; } /* ทองแดง */
+
+        /* Style for other ranks */
+        .leaderboard-rank-item {
+            border-bottom: 1px solid #e9ecef; 
+            padding: 0.75rem 0;
+            transition: background-color 0.2s;
         }
 
-        /* <<< ใหม่: Style สำหรับผู้เล่นปัจจุบัน */
+        /* Style for the current user, overrides default if not in top 3 */
         .current-user-highlight {
-            /* Style for the current user, overrides default if not in top 3 */
-            background-color: #e0f7e9 !important; /* Slightly stronger highlight */
+            background-color: #e0f7e9 !important; 
             border-color: #10b981 !important;
             font-weight: bold;
+            border-radius: 0.5rem !important;
         }
         
         /* Ensure current user highlight is visible even if not in top 3 */
         .current-user-highlight:not(.leaderboard-top-rank) {
             border: 2px solid #10b981;
-            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin: 0.5rem 0; /* Add margin for separation */
         }
         
         /* Responsive Text Size for smaller mobile screens */
@@ -498,7 +536,6 @@
             { imageSrc: 'https://i.postimg.cc/1X8Z01bQ/20.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ทิ้งขยะไม่แยกประเภท' },
             { imageSrc: 'https://i.postimg.cc/Vv2PDHcB/21.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'เปิดไฟทิ้งไว้ตลอดเวลา' },
             { imageSrc: 'https://i.postimg.cc/4yjRBFTV/22.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'สั่งอาหารแบบ Delivery บ่อยเกินไป' },
-            // แก้ไขลิงก์ 23.png
             { imageSrc: 'https://i.postimg.cc/7hjrmQy3/23.png', type: 'bad', score: SCORE_EMISSION, color: 'bg-danger-subtle', defaultDesc: 'ใช้น้ำเปลือง/เปิดทิ้งไว้' }, 
         ];
 
@@ -876,6 +913,7 @@
             }
         }
         
+        // ******** ฟังก์ชัน setupLeaderboard ที่ถูกปรับปรุง *********
         function setupLeaderboard(appId) {
             if (!gameState.db) {
                 dom.leaderboardList.innerHTML = `<p class="text-center text-danger">Firebase Database ไม่พร้อมใช้งาน!</p>`;
@@ -909,7 +947,8 @@
 
                 const topScores = Object.values(aggregatedScores)
                     .sort((a, b) => b.score - a.score)
-                    .slice(0, 10);
+                    // แสดงผล Top 20 
+                    .slice(0, 20); 
                 
                 dom.loadingLeaderboard.classList.add('d-none');
                 dom.leaderboardList.innerHTML = '';
@@ -918,42 +957,66 @@
                      dom.leaderboardList.innerHTML = `<p class="text-center text-muted p-2">ยังไม่มีใครทำคะแนนเลย! มาเป็นคนแรกกัน!</p>`;
                      return;
                 }
-
+                
+                // ใช้ Unordered List สำหรับโครงสร้างที่ดีขึ้น
+                const ul = document.createElement('ul');
+                ul.className = 'list-unstyled'; 
+                
                 topScores.forEach((rank, index) => {
-                    const rankItem = document.createElement('div');
+                    const listItem = document.createElement('li');
                     const isCurrentUser = rank.employeeId === gameState.employeeId;
-                    
-                    let rankClass = `d-flex justify-content-between align-items-center p-2 small my-1`;
-                    
-                    // 1. Base style for Top 3
-                    if (index < 3) {
-                         rankClass += ' leaderboard-top-rank fs-5';
-                    } else {
-                         rankClass += ' text-secondary';
-                    }
-                    
-                    // 2. Override/Add style for Current User
-                    if (isCurrentUser) {
-                         rankClass += ' current-user-highlight';
-                    }
-                    
-                    rankItem.className = rankClass;
-                    
                     const rankNumber = index + 1;
-                    const trophyEmoji = rankNumber === 1 ? '🥇' : rankNumber === 2 ? '🥈' : rankNumber === 3 ? '🥉' : '';
                     
-                    rankItem.innerHTML = `
-                        <div class="font-monospace d-flex align-items-center">
-                            <span class="text-center" style="width: 1.5rem;">${trophyEmoji}</span>
-                            <span class="ms-2">${rank.employeeId}</span>
+                    let itemClass = `d-flex justify-content-between align-items-center font-monospace`;
+                    
+                    // Apply Top 3 style or general item style
+                    if (rankNumber <= 3) {
+                         itemClass += ' leaderboard-top-rank';
+                    } else {
+                         itemClass += ' leaderboard-rank-item';
+                    }
+                    
+                    // Apply Current User highlight
+                    if (isCurrentUser) {
+                         itemClass += ' current-user-highlight';
+                    }
+                    
+                    listItem.className = itemClass;
+                    
+                    let rankBadgeClass = 'rank-badge';
+                    let rankText = rankNumber;
+                    let scoreColor = 'text-success';
+                    
+                    if (rankNumber === 1) {
+                        rankBadgeClass += ' rank-1';
+                        rankText = '🥇';
+                        scoreColor = 'text-danger'; // คะแนนสูงสุดเน้นสีแดง
+                    } else if (rankNumber === 2) {
+                        rankBadgeClass += ' rank-2';
+                        rankText = '🥈';
+                    } else if (rankNumber === 3) {
+                        rankBadgeClass += ' rank-3';
+                        rankText = '🥉';
+                    } else {
+                        scoreColor = 'text-primary';
+                    }
+                    
+                    listItem.innerHTML = `
+                        <div class="d-flex align-items-center flex-grow-1 text-truncate">
+                            <span class="${rankBadgeClass}">
+                                ${rankText}
+                            </span>
+                            <span class="fs-6 fw-bold text-dark text-truncate">${rank.employeeId}</span>
                         </div>
-                        <span class="fw-bolder fs-5 ${index === 0 ? 'text-warning' : 'text-success'}">${rank.score}</span>
+                        <span class="fw-black fs-4 ${scoreColor}">${rank.score}</span>
                     `;
-                    dom.leaderboardList.appendChild(rankItem);
+                    ul.appendChild(listItem);
                 });
-
+                
+                dom.leaderboardList.appendChild(ul);
             });
         }
+        // ***************************************************************
         
         function populateInfoModal() {
             dom.goodInfoList.innerHTML = '';
