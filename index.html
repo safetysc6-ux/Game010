@@ -198,7 +198,7 @@
             font-weight: bold;
         }
         
-        /* --- GAME AREA LAYOUT --- */
+        /* --- GAME AREA LAYOUT (จะขยายใหญ่ขึ้นเมื่อ Leaderboard ถูกซ่อน) --- */
         #game-area {
             position: relative;
             overflow: hidden;
@@ -266,10 +266,9 @@
             filter: blur(5px); 
         }
 
-        /* --- LEADERBOARD ENHANCEMENT (ส่วนที่ถูกปรับปรุง) --- */
+        /* --- LEADERBOARD ENHANCEMENT --- */
         #leaderboard-panel {
-            /* จำกัดความสูงสูงสุด แต่ให้ยืดหยุ่นถ้าพื้นที่ข้างบนน้อย */
-            max-height: 35vh; 
+            /* ไม่จำกัดความสูง แต่ใช้พื้นที่ที่เหลือเมื่ออยู่หน้า Start */
             overflow-y: auto;
             margin-top: 1rem;
             padding: 0.75rem; 
@@ -544,7 +543,7 @@
             timerDisplay: document.getElementById('timer-display'),
             finalScore: document.getElementById('final-score'),
             gameMessage: document.getElementById('game-message'),
-            leaderboardPanel: document.getElementById('leaderboard-panel'), 
+            leaderboardPanel: document.getElementById('leaderboard-panel'), // Element นี้ถูกเพิ่มเข้ามา
             leaderboardList: document.getElementById('leaderboard-list'),
             loadingLeaderboard: document.getElementById('loading-leaderboard'),
             rankingStatus: document.getElementById('ranking-status'),
@@ -555,7 +554,7 @@
         };
         
         // ***************************************************************
-        // --- Game Logic Functions (มีการแก้ไขส่วนการเริ่มเกม) ---
+        // --- Game Logic Functions (แก้ไขการแสดง Leaderboard) ---
         // ***************************************************************
         
         function showMessage(title, body) {
@@ -576,7 +575,6 @@
             dom.timerDisplay.classList.remove('text-danger');
         }
         
-        // ฟังก์ชันใหม่: อัปเดตสถานะปุ่ม (นำ Logic จาก Event Listener เดิมมาใช้)
         function updateStartButtonState(id) {
             if (id.length > 0) {
                 dom.startButton.disabled = false;
@@ -591,20 +589,16 @@
             }
         }
         
-        // ฟังก์ชันใหม่: ตรวจสอบจำนวนการเล่นวันนี้และเริ่มเกม
         async function checkPlayLimitAndStartGame() {
             const employeeId = dom.employeeIdInput.value.toUpperCase().trim();
             if (!employeeId) {
                 showMessage("รหัสพนักงานไม่ถูกต้อง", "กรุณากรอกรหัสพนักงานก่อนเริ่มเกม");
-                // updateStartButtonState(employeeId); // ไม่จำเป็นต้องเรียกเพราะ input listener ทำไปแล้ว
                 return;
             }
             
-            // ปิดปุ่มชั่วคราวขณะรอผลจาก Firebase
             dom.startButton.disabled = true;
             dom.startButton.textContent = 'กำลังตรวจสอบสิทธิ์...';
 
-            // 1. คำนวณเวลาเที่ยงคืนของวันนี้ (00:00:00.000) - ใช้เวลาท้องถิ่น
             const today = new Date();
             today.setHours(0, 0, 0, 0); 
             
@@ -618,34 +612,29 @@
             const collectionRef = window.firestore.collection(gameState.db, collectionPath);
 
             try {
-                // 2. Query: ดึงข้อมูลที่รหัสพนักงานตรงกัน และ Timestamp อยู่ในวันปัจจุบัน (>= เที่ยงคืน)
                 const q = window.firestore.query(
                     collectionRef,
                     window.firestore.where("employeeId", "==", employeeId),
                     window.firestore.where("timestamp", ">=", today),
-                    // การเรียงลำดับใน Query นี้อาจเป็นตัวที่ทำให้ต้องสร้าง index
                     window.firestore.orderBy("employeeId"), 
                     window.firestore.orderBy("timestamp", "asc")
                 );
                 
                 const querySnapshot = await window.firestore.getDocs(q);
-                const playCount = querySnapshot.size; // จำนวนครั้งที่เล่นไปแล้ววันนี้
+                const playCount = querySnapshot.size; 
 
-                // 3. ตรวจสอบลิมิต
                 if (playCount >= MAX_PLAYS_PER_DAY) {
                     showMessage(
                         "จำกัดการเล่น", 
                         `รหัสพนักงาน ${employeeId} ได้เล่นไปแล้ว ${playCount} ครั้งในวันนี้ 😔\n\nสามารถเล่นใหม่ได้อีกครั้งในวันพรุ่งนี้ (หลัง 00:00 น. ตามเวลาท้องถิ่น)`
                     );
-                    // แสดงสถานะจำกัดการเล่นบนปุ่ม
                     dom.startButton.textContent = `จำกัดการเล่น ${MAX_PLAYS_PER_DAY} ครั้ง/วัน`; 
                     dom.startButton.classList.remove('btn-main');
                     dom.startButton.classList.add('btn-secondary');
                     
                 } else {
-                    // อนุญาตให้เล่นต่อ
                     dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
-                    updateStartButtonState(employeeId); // เปิดปุ่มอีกครั้ง
+                    updateStartButtonState(employeeId); 
                     
                     // เริ่มเกมจริง
                     startGameInternal(employeeId);
@@ -659,11 +648,10 @@
                 } else {
                     showMessage("ข้อผิดพลาดของฐานข้อมูล", "ไม่สามารถตรวจสอบจำนวนการเล่นได้ กรุณาลองใหม่");
                 }
-                updateStartButtonState(employeeId); // เปิดปุ่มอีกครั้งเมื่อมี Error
+                updateStartButtonState(employeeId); 
             }
         }
         
-        // เปลี่ยนชื่อ startGame เดิมเป็น startGameInternal
         function startGameInternal(employeeId) {
             gameState.employeeId = employeeId;
             
@@ -676,6 +664,9 @@
             // แสดง Game Container
             dom.gameContainer.classList.remove('d-none'); 
             
+            // ************ การแก้ไขตามคำขอ: ซ่อน Leaderboard เมื่อเริ่มเกม ************
+            dom.leaderboardPanel.classList.add('d-none'); 
+
             dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
             
             startActualGame();
@@ -704,6 +695,9 @@
             dom.finalScore.textContent = gameState.score;
             
             dom.gameOverScreen.classList.remove('d-none');
+            
+            // ************ การแก้ไขตามคำขอ: แสดง Leaderboard เมื่อจบเกม ************
+            dom.leaderboardPanel.classList.remove('d-none'); 
             
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
         }
@@ -849,7 +843,7 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- Firebase/Leaderboard Logic (มีการปรับปรุงการแสดงผล) ---
+        // --- Firebase/Leaderboard Logic ---
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -888,7 +882,6 @@
             }
         }
         
-        // ******** ฟังก์ชัน setupLeaderboard ที่ถูกปรับปรุง *********
         function setupLeaderboard(appId) {
             if (!gameState.db) {
                 dom.leaderboardList.innerHTML = `<p class="text-center text-danger">Firebase Database ไม่พร้อมใช้งาน!</p>`;
@@ -933,7 +926,6 @@
                      return;
                 }
                 
-                // ใช้ Unordered List สำหรับโครงสร้างที่ดีขึ้น
                 const ul = document.createElement('ul');
                 ul.className = 'list-unstyled'; 
                 
@@ -944,14 +936,12 @@
                     
                     let itemClass = `d-flex justify-content-between align-items-center font-monospace`;
                     
-                    // Apply Top 3 style or general item style
                     if (rankNumber <= 3) {
                          itemClass += ' leaderboard-top-rank';
                     } else {
                          itemClass += ' leaderboard-rank-item';
                     }
                     
-                    // Apply Current User highlight
                     if (isCurrentUser) {
                          itemClass += ' current-user-highlight';
                     }
@@ -965,7 +955,7 @@
                     if (rankNumber === 1) {
                         rankBadgeClass += ' rank-1';
                         rankText = '🥇';
-                        scoreColor = 'text-danger'; // คะแนนสูงสุดเน้นสีแดง
+                        scoreColor = 'text-danger'; 
                     } else if (rankNumber === 2) {
                         rankBadgeClass += ' rank-2';
                         rankText = '🥈';
@@ -991,7 +981,6 @@
                 dom.leaderboardList.appendChild(ul);
             });
         }
-        // ***************************************************************
         
         function populateInfoModal() {
             dom.goodInfoList.innerHTML = '';
@@ -1049,7 +1038,6 @@
             messageModal = new bootstrap.Modal(document.getElementById('messageBox'));
             infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
             
-            // เปลี่ยนให้ปุ่ม Start เรียกใช้ฟังก์ชันตรวจสอบลิมิต
             dom.startButton.addEventListener('click', checkPlayLimitAndStartGame);
             
             dom.restartButton.addEventListener('click', () => {
@@ -1058,19 +1046,20 @@
                 dom.gameOverScreen.classList.add('d-none');
                 
                 dom.startScreen.classList.remove('d-none');
-                // อัปเดตสถานะปุ่มเมื่อกลับมาหน้า Start
+                
+                // ************ การแก้ไขตามคำขอ: แสดง Leaderboard บนหน้า Start ************
+                dom.leaderboardPanel.classList.remove('d-none'); 
+                
                 updateStartButtonState(dom.employeeIdInput.value.toUpperCase().trim());
             });
             
             // Event listener for Input
             dom.employeeIdInput.addEventListener('input', (e) => {
-                // Force uppercase and allow only A-Z, 0-9
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
                 
                 const id = e.target.value.trim();
-                gameState.employeeId = id; // Update employeeId immediately
+                gameState.employeeId = id; 
                 
-                // เรียกใช้ฟังก์ชันใหม่ในการอัปเดตสถานะปุ่ม
                 updateStartButtonState(id);
             });
         }
