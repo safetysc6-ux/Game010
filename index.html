@@ -360,29 +360,62 @@
             <button id="info-button" class="btn btn-sm btn-info text-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#infoModal">ข้อมูล</button>
         </div>
 
-        
         <div id="start-screen" class="p-4 start-panel-style mb-3 flex-grow-1 d-flex flex-column justify-content-center align-items-center text-center">
-            
-            <h2 class="display-5 fw-black text-primary mb-3" style="font-family: 'Chakra Petch', sans-serif;">
-                กติกา <span class="text-danger">มินิเกม ลดคาร์บอน!</span>
+
+            <h2 class="display-6 fw-black text-primary mb-4" style="font-family: 'Chakra Petch', sans-serif;">
+                ภารกิจ <span class="text-danger">MINI GAME ลดคาร์บอน!</span> 
             </h2>
-            <p class="fs-5 text-dark fw-bold mb-2">
-                คุณมีเวลา <span class="text-primary fw-bolder">20 วินาที</span> ⏱️
-            </p>
-            <p class="fs-5 text-dark fw-bold mb-2">
-                เลือกแตะ Items ที่หล่นลงมา หากแตะ Good Items: +10 คะแนน Bad Items: -5 คะแนน หากแตะ Good Items ไม่ทัน -5 คะแนน
-            </p>
-            <p class="fs-6 text-secondary mb-4">
-                กรอกรหัสพนักงาน: ผู้เล่นต้องกรอกรหัสพนักงาน (xxxx) เพื่อบันทึกคะแนนรวมในระบบจัดอันดับ
-            </p>
-            <p class="fs-6 text-secondary mb-4">
-                จำกัดการเล่น: ผู้เล่นแต่ละคนสามารถเข้าร่วมภารกิจได้สูงสุด 5 ครั้งต่อวัน (จะรีเซ็ตสิทธิ์การเล่นทุกเที่ยงคืน)
-            </p>
-             <p class="fs-6 text-secondary mb-4">
-                เป้าหมาย: ทำคะแนนรวมให้ได้มากที่สุดภายในเวลาที่กำหนด เพื่อรับของรางวัลเมือจบกิจกรรม
-            </p>
+            
+            <div class="w-100 mb-4 px-3" style="max-width: 450px;">
+                
+                <div class="row g-2 text-start">
+                    <div class="col-6">
+                        <div class="card-panel p-3 bg-white text-dark h-100 shadow-sm">
+                            <p class="mb-1 fw-bold fs-6 text-muted">⏰ เวลาจำกัด</p>
+                            <p class="mb-0 fw-black display-5 text-primary">20<span class="fs-6">s</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-6">
+                        <div class="card-panel p-3 bg-white text-dark h-100 shadow-sm">
+                            <p class="mb-1 fw-bold fs-6 text-muted">🎯 เป้าหมาย</p>
+                            <p class="mb-0 fw-black fs-1 text-success">คะแนนสูงสุด</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-6">
+                        <div class="card-panel p-3 bg-white text-dark h-100 shadow-sm">
+                            <p class="mb-1 fw-bold fs-6 text-muted">✅ Good Items</p>
+                            <p class="mb-0 fw-black display-5 text-success">+10</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-6">
+                        <div class="card-panel p-3 bg-white text-dark h-100 shadow-sm">
+                            <p class="mb-1 fw-bold fs-6 text-muted">❌ Bad Items</p>
+                            <p class="mb-0 fw-black display-5 text-danger">-5</p>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <div class="w-100 text-center mb-4 px-3">
+                <p class="fs-6 text-dark fw-bold mb-2">
+                    *ไม่แตะ Good Items: <span class="text-danger fw-bolder">-5 คะแนน</span>
+                </p>
+                <div class="d-flex justify-content-center flex-wrap gap-3">
+                    <span class="badge bg-success text-wrap p-2 shadow-sm" style="max-width: 150px;">
+                        <span class="fw-bold">จำกัดเล่น:</span> 5 ครั้ง/วัน 
+                    </span>
+                    <span class="badge bg-primary text-wrap p-2 shadow-sm" style="max-width: 150px;">
+                        <span class="fw-bold">รีเซ็ตสิทธิ์:</span> ทุกเที่ยงคืน 
+                    </span>
+                </div>
+            </div>
+
             <div class="w-100" style="max-width: 300px;">
-                <input type="text" id="employee-id" placeholder="รหัสพนักงาน (xxxx)"
+                <input type="text" id="employee-id" placeholder="กรอกรหัสพนักงาน (A-Z, 0-9)"
                             maxlength="10"
                             class="form-control mb-4 input-recessed fs-5">
                 <button id="start-button"
@@ -391,7 +424,6 @@
                 </button>
             </div>
         </div>
-        
         <div id="game-container" class="d-none flex-grow-1 d-flex flex-column">
             
             <div class="d-flex justify-content-between align-items-center p-3 card-panel mb-3 flex-shrink-0">
@@ -1023,5 +1055,3 @@
     </script>
 </body>
 </html>
-
-
