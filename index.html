@@ -266,16 +266,17 @@
             filter: blur(5px); 
         }
 
-        /* --- LEADERBOARD ENHANCEMENT --- */
+        /* --- LEADERBOARD ENHANCEMENT (ทำให้เลื่อนได้) --- */
         #leaderboard-panel {
-            /* ไม่จำกัดความสูง แต่ใช้พื้นที่ที่เหลือเมื่ออยู่หน้า Start */
+            /* จำกัดความสูงสูงสุดเพื่อ ensure scrollability เมื่ออยู่หน้า Start */
+            max-height: 50vh; 
             overflow-y: auto;
             margin-top: 1rem;
             padding: 0.75rem; 
             position: relative; 
         }
 
-        /* NEW: Custom Scrollbar for a cleaner look on Webkit browsers (Chrome, Safari) */
+        /* Custom Scrollbar for a cleaner look on Webkit browsers (Chrome, Safari) */
         #leaderboard-panel::-webkit-scrollbar {
             width: 8px;
         }
@@ -296,9 +297,9 @@
             background: linear-gradient(90deg, #d1fae5 0%, #ecfdf5 100%);
             border: 3px solid var(--primary-color) !important;
             border-radius: 1rem !important;
-            box-shadow: 0 6px 12px rgba(4, 120, 87, 0.3); /* เงาลึกขึ้น */
+            box-shadow: 0 6px 12px rgba(4, 120, 87, 0.3); 
             padding: 1rem !important; 
-            margin-bottom: 0.75rem !important; /* เว้นระยะมากขึ้น */
+            margin-bottom: 0.75rem !important; 
         }
         
         /* Rank Number Badge Style */
@@ -463,6 +464,10 @@
         
         <div id="leaderboard-panel" class="card-panel flex-shrink-0">
             <h2 class="fs-6 fw-bold text-center mb-2 text-success">🏆 MISSION LEADERBOARD (คะแนนรวมทั้งหมด)</h2>
+            
+            <input type="text" id="leaderboard-search" placeholder="ค้นหารหัสพนักงาน (A-Z, 0-9)"
+                        maxlength="10"
+                        class="form-control mb-3 input-recessed fs-6" style="text-transform: uppercase; text-align: left; padding: 0.75rem 1rem;">
             <div id="leaderboard-list">
                 <p class="text-center text-muted" id="loading-leaderboard">กำลังโหลดอันดับ...</p>
             </div>
@@ -529,6 +534,9 @@
             userId: null,
             appId: null,
         };
+        
+        // Global storage for the full, aggregated leaderboard data
+        let aggregatedLeaderboardData = []; // NEW: เก็บข้อมูลคะแนนรวมทั้งหมด
 
         // --- DOM Elements ---
         const dom = {
@@ -543,7 +551,7 @@
             timerDisplay: document.getElementById('timer-display'),
             finalScore: document.getElementById('final-score'),
             gameMessage: document.getElementById('game-message'),
-            leaderboardPanel: document.getElementById('leaderboard-panel'), // Element นี้ถูกเพิ่มเข้ามา
+            leaderboardPanel: document.getElementById('leaderboard-panel'), 
             leaderboardList: document.getElementById('leaderboard-list'),
             loadingLeaderboard: document.getElementById('loading-leaderboard'),
             rankingStatus: document.getElementById('ranking-status'),
@@ -551,10 +559,11 @@
             infoButton: document.getElementById('info-button'),     
             goodInfoList: document.getElementById('goodInfoList'), 
             badInfoList: document.getElementById('badInfoList'),
+            leaderboardSearch: document.getElementById('leaderboard-search'), // NEW: ช่องค้นหา
         };
         
         // ***************************************************************
-        // --- Game Logic Functions (แก้ไขการแสดง Leaderboard) ---
+        // --- Game Logic Functions ---
         // ***************************************************************
         
         function showMessage(title, body) {
@@ -636,7 +645,6 @@
                     dom.startButton.textContent = '🚀 เริ่มภารกิจ (20 วินาที)';
                     updateStartButtonState(employeeId); 
                     
-                    // เริ่มเกมจริง
                     startGameInternal(employeeId);
                 }
 
@@ -657,14 +665,12 @@
             
             resetGame();
             
-            // ซ่อน Start/Game Over 
             dom.startScreen.classList.add('d-none');
             dom.gameOverScreen.classList.add('d-none');
             
-            // แสดง Game Container
             dom.gameContainer.classList.remove('d-none'); 
             
-            // ************ การแก้ไขตามคำขอ: ซ่อน Leaderboard เมื่อเริ่มเกม ************
+            // ซ่อน Leaderboard เมื่อเริ่มเกม
             dom.leaderboardPanel.classList.add('d-none'); 
 
             dom.currentUserId.textContent = `ID: ${gameState.employeeId}`;
@@ -690,17 +696,18 @@
             Object.values(gameState.items).forEach(item => item.element.remove()); 
             gameState.items = {}; 
 
-            // ซ่อน Game Container และแสดง Game Over Screen
             dom.gameContainer.classList.add('d-none');
             dom.finalScore.textContent = gameState.score;
             
             dom.gameOverScreen.classList.remove('d-none');
             
-            // ************ การแก้ไขตามคำขอ: แสดง Leaderboard เมื่อจบเกม ************
+            // แสดง Leaderboard เมื่อจบเกม
             dom.leaderboardPanel.classList.remove('d-none'); 
             
             saveScore(gameState.employeeId, gameState.score, gameState.userId);
         }
+
+        // ... (Functions updateTimer, spawnItem, handleItemClick, showScoreChange, gameLoop ไม่มีการเปลี่ยนแปลง) ...
 
         function updateTimer() {
             gameState.timeLeft--;
@@ -843,7 +850,7 @@
             gameState.animationFrameId = requestAnimationFrame(gameLoop);
         }
         
-        // --- Firebase/Leaderboard Logic ---
+        // --- Firebase/Leaderboard Logic (มีการปรับปรุงส่วนนี้มาก) ---
         async function fetchWithBackoff(func, retries = 5) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -882,6 +889,95 @@
             }
         }
         
+        /**
+         * ฟังก์ชันใหม่: กรองและแสดงผล Leaderboard
+         * @param {string} filterId - รหัสพนักงานที่ใช้ในการค้นหา (หากเป็นค่าว่างจะแสดง Top 20)
+         */
+        function renderLeaderboard(filterId = '') {
+            dom.leaderboardList.innerHTML = '';
+            
+            let scoresToDisplay = aggregatedLeaderboardData;
+            
+            // 1. การกรองข้อมูล
+            if (filterId) {
+                // กรองเฉพาะรหัสพนักงานที่มีส่วนหนึ่งส่วนใดตรงกับคำค้นหา
+                scoresToDisplay = aggregatedLeaderboardData.filter(rank => 
+                    rank.employeeId.includes(filterId)
+                );
+            } else {
+                 // ถ้าไม่มีการกรอง ให้แสดงแค่ Top 20 (เพื่อให้หน้านานไม่ยาวเกินไป)
+                 scoresToDisplay = scoresToDisplay.slice(0, 20); 
+            }
+            
+            if (scoresToDisplay.length === 0) {
+                 const message = filterId 
+                    ? `ไม่พบรหัสพนักงาน "${filterId}" ในอันดับคะแนนรวม`
+                    : `ยังไม่มีใครทำคะแนนเลย! มาเป็นคนแรกกัน!`;
+                 dom.leaderboardList.innerHTML = `<p class="text-center text-muted p-2">${message}</p>`;
+                 return;
+            }
+            
+            // 2. การสร้างรายการแสดงผล
+            const ul = document.createElement('ul');
+            ul.className = 'list-unstyled'; 
+            
+            scoresToDisplay.forEach((rank) => {
+                // ค้นหาอันดับที่แท้จริงจากรายการเต็ม (aggregatedLeaderboardData)
+                const fullRankIndex = aggregatedLeaderboardData.findIndex(item => item.employeeId === rank.employeeId);
+                const rankNumber = fullRankIndex !== -1 ? fullRankIndex + 1 : 'N/A';
+
+                const listItem = document.createElement('li');
+                const isCurrentUser = rank.employeeId === gameState.employeeId;
+                
+                let itemClass = `d-flex justify-content-between align-items-center font-monospace`;
+                
+                if (rankNumber <= 3 && rankNumber !== 'N/A') {
+                     itemClass += ' leaderboard-top-rank';
+                } else {
+                     itemClass += ' leaderboard-rank-item';
+                }
+                
+                if (isCurrentUser) {
+                     itemClass += ' current-user-highlight';
+                }
+                
+                listItem.className = itemClass;
+                
+                let rankBadgeClass = 'rank-badge';
+                let rankText = rankNumber;
+                let scoreColor = 'text-success';
+                
+                if (rankNumber === 1) {
+                    rankBadgeClass += ' rank-1';
+                    rankText = '🥇';
+                    scoreColor = 'text-danger'; 
+                } else if (rankNumber === 2) {
+                    rankBadgeClass += ' rank-2';
+                    rankText = '🥈';
+                } else if (rankNumber === 3) {
+                    rankBadgeClass += ' rank-3';
+                    rankText = '🥉';
+                } else {
+                    scoreColor = 'text-primary';
+                    rankText = rankNumber; // ใช้เลขอันดับจริง
+                }
+                
+                listItem.innerHTML = `
+                    <div class="d-flex align-items-center flex-grow-1 text-truncate">
+                        <span class="${rankBadgeClass}">
+                            ${rankText}
+                        </span>
+                        <span class="fs-6 fw-bold text-dark text-truncate">${rank.employeeId}</span>
+                    </div>
+                    <span class="fw-black fs-4 ${scoreColor}">${rank.score}</span>
+                `;
+                ul.appendChild(listItem);
+            });
+            
+            dom.leaderboardList.appendChild(ul);
+        }
+
+        // ฟังก์ชันหลักในการตั้งค่า Listener สำหรับ Leaderboard
         function setupLeaderboard(appId) {
             if (!gameState.db) {
                 dom.leaderboardList.innerHTML = `<p class="text-center text-danger">Firebase Database ไม่พร้อมใช้งาน!</p>`;
@@ -895,6 +991,7 @@
                 window.firestore.orderBy("timestamp", "desc") 
             );
 
+            // ใช้ onSnapshot เพื่อฟังการเปลี่ยนแปลงข้อมูลแบบ Realtime
             window.firestore.onSnapshot(rankingsQuery, (snapshot) => {
                 const leaderboard = snapshot.docs.map(doc => ({
                     id: doc.id,
@@ -913,75 +1010,20 @@
                     return acc;
                 }, {});
 
-                const topScores = Object.values(aggregatedScores)
-                    .sort((a, b) => b.score - a.score)
-                    // แสดงผล Top 20 
-                    .slice(0, 20); 
+                // เก็บข้อมูลทั้งหมดที่ถูกเรียงลำดับตามคะแนนไว้ในตัวแปร global
+                aggregatedLeaderboardData = Object.values(aggregatedScores)
+                    .sort((a, b) => b.score - a.score);
                 
                 dom.loadingLeaderboard.classList.add('d-none');
-                dom.leaderboardList.innerHTML = '';
                 
-                if (topScores.length === 0) {
-                     dom.leaderboardList.innerHTML = `<p class="text-center text-muted p-2">ยังไม่มีใครทำคะแนนเลย! มาเป็นคนแรกกัน!</p>`;
-                     return;
-                }
-                
-                const ul = document.createElement('ul');
-                ul.className = 'list-unstyled'; 
-                
-                topScores.forEach((rank, index) => {
-                    const listItem = document.createElement('li');
-                    const isCurrentUser = rank.employeeId === gameState.employeeId;
-                    const rankNumber = index + 1;
-                    
-                    let itemClass = `d-flex justify-content-between align-items-center font-monospace`;
-                    
-                    if (rankNumber <= 3) {
-                         itemClass += ' leaderboard-top-rank';
-                    } else {
-                         itemClass += ' leaderboard-rank-item';
-                    }
-                    
-                    if (isCurrentUser) {
-                         itemClass += ' current-user-highlight';
-                    }
-                    
-                    listItem.className = itemClass;
-                    
-                    let rankBadgeClass = 'rank-badge';
-                    let rankText = rankNumber;
-                    let scoreColor = 'text-success';
-                    
-                    if (rankNumber === 1) {
-                        rankBadgeClass += ' rank-1';
-                        rankText = '🥇';
-                        scoreColor = 'text-danger'; 
-                    } else if (rankNumber === 2) {
-                        rankBadgeClass += ' rank-2';
-                        rankText = '🥈';
-                    } else if (rankNumber === 3) {
-                        rankBadgeClass += ' rank-3';
-                        rankText = '🥉';
-                    } else {
-                        scoreColor = 'text-primary';
-                    }
-                    
-                    listItem.innerHTML = `
-                        <div class="d-flex align-items-center flex-grow-1 text-truncate">
-                            <span class="${rankBadgeClass}">
-                                ${rankText}
-                            </span>
-                            <span class="fs-6 fw-bold text-dark text-truncate">${rank.employeeId}</span>
-                        </div>
-                        <span class="fw-black fs-4 ${scoreColor}">${rank.score}</span>
-                    `;
-                    ul.appendChild(listItem);
-                });
-                
-                dom.leaderboardList.appendChild(ul);
+                // แสดงผลลัพธ์ด้วยการกรองตามค่าในช่องค้นหาปัจจุบัน
+                const currentFilter = dom.leaderboardSearch ? dom.leaderboardSearch.value.toUpperCase().trim() : '';
+                renderLeaderboard(currentFilter);
             });
         }
         
+        // ... (Functions populateInfoModal, preloadImages ไม่มีการเปลี่ยนแปลง) ...
+
         function populateInfoModal() {
             dom.goodInfoList.innerHTML = '';
             dom.badInfoList.innerHTML = '';
@@ -1031,7 +1073,7 @@
                 });
             });
         }
-
+        
         // --- Event Listeners and Initialization ---
         function setupEventListeners() {
             // Initialize Bootstrap Modals
@@ -1041,19 +1083,18 @@
             dom.startButton.addEventListener('click', checkPlayLimitAndStartGame);
             
             dom.restartButton.addEventListener('click', () => {
-                // กลับไปหน้า Start 
                 dom.gameContainer.classList.add('d-none');
                 dom.gameOverScreen.classList.add('d-none');
                 
                 dom.startScreen.classList.remove('d-none');
                 
-                // ************ การแก้ไขตามคำขอ: แสดง Leaderboard บนหน้า Start ************
+                // แสดง Leaderboard บนหน้า Start
                 dom.leaderboardPanel.classList.remove('d-none'); 
                 
                 updateStartButtonState(dom.employeeIdInput.value.toUpperCase().trim());
             });
             
-            // Event listener for Input
+            // Event listener for Employee ID Input (หน้าแรก)
             dom.employeeIdInput.addEventListener('input', (e) => {
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
                 
@@ -1061,6 +1102,15 @@
                 gameState.employeeId = id; 
                 
                 updateStartButtonState(id);
+            });
+            
+            // NEW: Event listener for Leaderboard Search Input
+            dom.leaderboardSearch.addEventListener('input', (e) => {
+                // กรองให้เหลือ A-Z, 0-9 และบังคับเป็นตัวพิมพ์ใหญ่
+                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+                const filterId = e.target.value.trim();
+                // Re-render the list with the filter
+                renderLeaderboard(filterId);
             });
         }
         
