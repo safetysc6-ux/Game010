@@ -401,42 +401,42 @@
 
         <div id="start-screen" class="p-4 start-panel-style mb-3 d-flex flex-column align-items-center text-center">
 
-            <h2 class="display-6 fw-black text-primary mb-3" style="font-family: 'Chakra Petch', sans-serif; font-size: 1.8rem !important;">
-                <span class="text-danger">ภารกิจพิชิตคาร์บอน</span> 
-            </h2>
-            
-            <div class="w-100 mb-2 px-1">
-                <div class="fw-bold" style="text-align: left; width: 100%;">
-    <div>⏰ เวลา: 20 วินาที</div>
-    <div>✅ Good: +10</div>
-    <div>❌ Bad: -5</div>
-    <div>🚫 พลาด Good: -5</div>
-</div>
-
-            </div>
-
-            
-            <div class="w-100 mb-2 px-1">
-                <div class="d-flex justify-content-center flex-wrap gap-3">
-                <div style="text-align: left; width: 100%;">
-    <div>🎲 จำกัดการเล่น: 3 ครั้ง/วัน</div>
-    <div>🎲 รีเซ็ตสิทธิ์: หลังเที่ยงคืน</div>
+    <h2 class="display-6 fw-black text-primary mb-3" style="font-family: 'Chakra Petch', sans-serif; font-size: 1.8rem !important;">
+        <span class="text-danger">ภารกิจพิชิตคาร์บอน</span> 
+    </h2>
     
-</div>
-
-                </div>
-            </div>
-
-            <div class="w-100" style="max-width: 300px;">
-                <input type="text" id="employee-id" placeholder="กรอกรหัสพนักงาน"
-                            maxlength="10"
-                            class="form-control mb-3 input-recessed fs-5">
-                <button id="start-button"
-                            class="btn w-100 py-3 fs-5 btn-secondary" disabled> 
-                    กรุณากรอกรหัสพนักงาน
-                </button>
+    <div class="row w-100 mb-4 gx-3">
+        <div class="col-12 col-md-6 mb-3 mb-md-0">
+            <div class="p-3 start-panel-style border border-success" style="box-shadow: none; text-align: left;">
+                <h4 class="h6 fw-bold text-success mb-2">🚨 กติกาและคะแนน</h4>
+                <div>⏰ **เวลา**: 20 วินาที</div>
+                <div>✅ **Good**: +10 (ต้องคลิก)</div>
+                <div>❌ **Bad**: -5 (ต้องคลิก)</div>
+                <div>🚫 **พลาด Good**: -5 (หล่นถึงพื้น)</div>
+                <div>🚫 **พลาด Bad**: 0 (หล่นถึงพื้น)</div>
             </div>
         </div>
+
+        <div class="col-12 col-md-6">
+            <div class="p-3 start-panel-style border border-primary" style="box-shadow: none;">
+                <h4 class="h6 fw-bold text-primary mb-2">🎮 สิทธิ์การเล่น</h4>
+                <div class="fw-bold" style="text-align: center;">
+                    <div>🎲 จำกัดการเล่น: **3 ครั้ง/วัน**</div>
+                    <div>🎲 รีเซ็ตสิทธิ์: หลังเที่ยงคืน</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="w-100" style="max-width: 300px;">
+        <input type="text" id="employee-id" placeholder="กรอกรหัสพนักงาน"
+                maxlength="10"
+                class="form-control mb-3 input-recessed fs-5">
+        <button id="start-button"
+                class="btn w-100 py-3 fs-5 btn-secondary" disabled> 
+            กรุณากรอกรหัสพนักงาน
+        </button>
+    </div>
+</div>
         <div id="game-container" class="d-none flex-grow-1 d-flex flex-column">
             
             <div class="d-flex justify-content-between align-items-center p-3 card-panel mb-3 flex-shrink-0">
@@ -1132,3 +1132,4 @@
     </script>
 </body>
 </html>
+
