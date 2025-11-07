@@ -351,6 +351,27 @@
             .btn-main { font-size: 0.9rem !important; }
             .game-item { width: 50px; height: 50px; }
         }
+       
+.btn-info-blue {
+    background-color: var(--secondary-color); /* ใช้สีน้ำเงินจากตัวแปร (หรือ #011a81) */
+    color: white !important; /* ตัวหนังสือสีขาว */
+    font-weight: bold;
+    border: none;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.btn-info-blue:hover {
+    background-color: #012baf; /* สีน้ำเงินเข้มขึ้นเมื่อ Hover */
+    color: white !important;
+}
+
+/* ทำให้ปุ่มข้อมูลใหญ่ขึ้นและมีมิติ */
+.btn-info-large {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+}
     </style>
 </head>
 <body>
@@ -394,11 +415,21 @@
           </div>
         </div>
         
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0 mt-2"> 
-            <h1 class="fs-4 fw-bolder text-success">Carbon Fighter“ภารกิจพิชิตคาร์บอน</h1>
-            <button id="info-button" class="btn btn-sm btn-info text-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#infoModal">ข้อมูล</button>
-        </div>
-
+        <div class="d-flex flex-column flex-shrink-0 mt-2"> 
+    
+    <div class="d-flex justify-content-start align-items-center mb-2">
+        <h1 class="fs-4 fw-bolder text-success">Carbon Fighter “ภารกิจพิชิตคาร์บอน”</h1>
+    </div>
+    
+    <div class="d-flex justify-content-end align-items-center mb-3"> 
+        <button id="info-button" 
+                class="btn btn-info-blue btn-info-large shadow-sm" 
+                data-bs-toggle="modal" 
+                data-bs-target="#infoModal">
+            คลิกข้อมูลก่อนเริ่ม
+        </button>
+    </div>
+</div>
         <div id="start-screen" class="p-3 start-panel-style mb-3 d-flex flex-column align-items-center text-center">
     
     <div class="row w-100 mb-3 gx-2">
@@ -1129,6 +1160,7 @@
     </script>
 </body>
 </html>
+
 
 
 
